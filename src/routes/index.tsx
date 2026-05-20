@@ -23,7 +23,7 @@ function Landing() {
             <div className="h-7 w-7 bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-display text-xs">R</span>
             </div>
-            <span className="font-display text-sm tracking-wider">RUGBY · PERF</span>
+            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
           </div>
           <div className="flex gap-2">
             <Link to="/login"><Button variant="ghost" size="sm">Entrar</Button></Link>
@@ -46,7 +46,7 @@ function Landing() {
         </div>
       </section>
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Rugby Performance
+        © {new Date().getFullYear()} El Toro Rugby Performance
       </footer>
     </div>
   );

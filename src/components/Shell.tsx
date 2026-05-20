@@ -16,7 +16,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
             <div className="h-7 w-7 bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-display text-xs">R</span>
             </div>
-            <span className="font-display text-sm tracking-wider">RUGBY · PERF</span>
+            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
           </Link>
           <nav className="flex items-center gap-1">
             {role === "atleta" && (

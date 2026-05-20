@@ -97,8 +97,8 @@ function CoachDash() {
     const base = window.location.origin;
     const link = reminderForm === "rpe" ? `${base}/atleta/rpe` : `${base}/atleta/wellness`;
     const msg = reminderForm === "rpe"
-      ? `🏉 RUGBY · Recordatorio\n\nNo te olvides de cargar tu RPE de la sesión de hoy.\n\nEnlace directo: ${link}\n\n¡Gracias!`
-      : `🏉 RUGBY · Recordatorio\n\nBuen día. Completá tu cuestionario de bienestar matutino.\n\nEnlace directo: ${link}\n\n¡Gracias!`;
+      ? `🏉 EL TORO RUGBY · Recordatorio\n\nNo te olvides de cargar tu RPE de la sesión de hoy.\n\nEnlace directo: ${link}\n\n¡Gracias!`
+      : `🏉 EL TORO RUGBY · Recordatorio\n\nBuen día. Completá tu cuestionario de bienestar matutino.\n\nEnlace directo: ${link}\n\n¡Gracias!`;
     setReminderMsg(msg);
     setReminderOpen(true);
   }
