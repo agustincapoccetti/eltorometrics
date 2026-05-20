@@ -28,8 +28,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Rugby Performance" },
-      { name: "description", content: "Monitoreo de rendimiento para el club de rugby." },
+      { title: "El Toro Rugby Performance" },
+      { name: "description", content: "El Toro Rugby Performance · Monitoreo de RPE, bienestar y carga para el club." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
