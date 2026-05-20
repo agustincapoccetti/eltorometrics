@@ -37,7 +37,7 @@ function LoginPage() {
             <div className="h-7 w-7 bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-display text-xs">R</span>
             </div>
-            <span className="font-display text-sm tracking-wider">RUGBY · PERF</span>
+            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
           </div>
         </Link>
         <h1 className="text-3xl mb-6">Iniciar sesión</h1>

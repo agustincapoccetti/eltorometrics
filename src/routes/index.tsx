@@ -23,7 +23,7 @@ function Landing() {
             <div className="h-7 w-7 bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-display text-xs">R</span>
             </div>
-            <span className="font-display text-sm tracking-wider">RUGBY · PERF</span>
+            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
           </div>
           <div className="flex gap-2">
             <Link to="/login"><Button variant="ghost" size="sm">Entrar</Button></Link>
@@ -37,7 +37,7 @@ function Landing() {
             Rendimiento.<br />Recuperación.<br />Resultados.
           </h1>
           <p className="mt-6 text-base text-muted-foreground max-w-xl mx-auto">
-            Monitoreo semanal de RPE y bienestar para el club de rugby. Datos claros para atletas y preparadores físicos.
+            Plataforma oficial de El Toro Rugby: monitoreo semanal de RPE, bienestar y carga de entrenamiento. Datos claros para atletas y preparadores físicos.
           </p>
           <div className="mt-10 flex justify-center gap-3">
             <Link to="/registro"><Button size="lg">Crear cuenta</Button></Link>
@@ -46,7 +46,7 @@ function Landing() {
         </div>
       </section>
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Rugby Performance
+        © {new Date().getFullYear()} El Toro Rugby Performance
       </footer>
     </div>
   );
