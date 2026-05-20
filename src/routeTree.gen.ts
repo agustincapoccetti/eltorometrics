@@ -12,6 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CoachIndexRouteImport } from './routes/coach.index'
+import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
+import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
+import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
+import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
+import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
@@ -28,35 +34,117 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachIndexRoute = CoachIndexRouteImport.update({
+  id: '/coach/',
+  path: '/coach/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaIndexRoute = AtletaIndexRouteImport.update({
+  id: '/atleta/',
+  path: '/atleta/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
+  id: '/atleta/wellness',
+  path: '/atleta/wellness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaRpeRoute = AtletaRpeRouteImport.update({
+  id: '/atleta/rpe',
+  path: '/atleta/rpe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaPerfilRoute = AtletaPerfilRouteImport.update({
+  id: '/atleta/perfil',
+  path: '/atleta/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
+  id: '/coach/atleta/$id',
+  path: '/coach/atleta/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/rpe': typeof AtletaRpeRoute
+  '/atleta/wellness': typeof AtletaWellnessRoute
+  '/atleta/': typeof AtletaIndexRoute
+  '/coach/': typeof CoachIndexRoute
+  '/coach/atleta/$id': typeof CoachAtletaIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/rpe': typeof AtletaRpeRoute
+  '/atleta/wellness': typeof AtletaWellnessRoute
+  '/atleta': typeof AtletaIndexRoute
+  '/coach': typeof CoachIndexRoute
+  '/coach/atleta/$id': typeof CoachAtletaIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/rpe': typeof AtletaRpeRoute
+  '/atleta/wellness': typeof AtletaWellnessRoute
+  '/atleta/': typeof AtletaIndexRoute
+  '/coach/': typeof CoachIndexRoute
+  '/coach/atleta/$id': typeof CoachAtletaIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/registro'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/registro'
+    | '/atleta/perfil'
+    | '/atleta/rpe'
+    | '/atleta/wellness'
+    | '/atleta/'
+    | '/coach/'
+    | '/coach/atleta/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/registro'
-  id: '__root__' | '/' | '/login' | '/registro'
+  to:
+    | '/'
+    | '/login'
+    | '/registro'
+    | '/atleta/perfil'
+    | '/atleta/rpe'
+    | '/atleta/wellness'
+    | '/atleta'
+    | '/coach'
+    | '/coach/atleta/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/registro'
+    | '/atleta/perfil'
+    | '/atleta/rpe'
+    | '/atleta/wellness'
+    | '/atleta/'
+    | '/coach/'
+    | '/coach/atleta/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RegistroRoute: typeof RegistroRoute
+  AtletaPerfilRoute: typeof AtletaPerfilRoute
+  AtletaRpeRoute: typeof AtletaRpeRoute
+  AtletaWellnessRoute: typeof AtletaWellnessRoute
+  AtletaIndexRoute: typeof AtletaIndexRoute
+  CoachIndexRoute: typeof CoachIndexRoute
+  CoachAtletaIdRoute: typeof CoachAtletaIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +170,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach/': {
+      id: '/coach/'
+      path: '/coach'
+      fullPath: '/coach/'
+      preLoaderRoute: typeof CoachIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/': {
+      id: '/atleta/'
+      path: '/atleta'
+      fullPath: '/atleta/'
+      preLoaderRoute: typeof AtletaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/wellness': {
+      id: '/atleta/wellness'
+      path: '/atleta/wellness'
+      fullPath: '/atleta/wellness'
+      preLoaderRoute: typeof AtletaWellnessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/rpe': {
+      id: '/atleta/rpe'
+      path: '/atleta/rpe'
+      fullPath: '/atleta/rpe'
+      preLoaderRoute: typeof AtletaRpeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/perfil': {
+      id: '/atleta/perfil'
+      path: '/atleta/perfil'
+      fullPath: '/atleta/perfil'
+      preLoaderRoute: typeof AtletaPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/atleta/$id': {
+      id: '/coach/atleta/$id'
+      path: '/coach/atleta/$id'
+      fullPath: '/coach/atleta/$id'
+      preLoaderRoute: typeof CoachAtletaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +219,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RegistroRoute: RegistroRoute,
+  AtletaPerfilRoute: AtletaPerfilRoute,
+  AtletaRpeRoute: AtletaRpeRoute,
+  AtletaWellnessRoute: AtletaWellnessRoute,
+  AtletaIndexRoute: AtletaIndexRoute,
+  CoachIndexRoute: CoachIndexRoute,
+  CoachAtletaIdRoute: CoachAtletaIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
