@@ -76,7 +76,7 @@ function CoachDash() {
 
       // 2) Profiles separately (RLS: coach can view all)
       const { data: profiles, error: profErr } = await supabase
-        .from("profiles").select("id, full_name, position").in("id", ids);
+        .from("profiles").select("id, full_name, last_name, photo_url, position").in("id", ids);
       if (profErr) { toast.error(profErr.message); setLoading(false); return; }
 
       // 3) Counts and load over last 28d
