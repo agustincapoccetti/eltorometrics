@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/")({ component: Landing });
 
@@ -19,12 +20,7 @@ function Landing() {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="border-b border-border">
         <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display text-xs">R</span>
-            </div>
-            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
-          </div>
+          <Logo />
           <div className="flex gap-2">
             <Link to="/login"><Button variant="ghost" size="sm">Entrar</Button></Link>
             <Link to="/registro"><Button size="sm">Registro</Button></Link>
@@ -33,11 +29,12 @@ function Landing() {
       </header>
       <section className="flex-1 flex items-center">
         <div className="mx-auto max-w-3xl px-4 py-20 text-center">
+          <Logo size={140} withText={false} className="mb-8" />
           <h1 className="text-6xl md:text-8xl leading-none">
             Rendimiento.<br />Recuperación.<br />Resultados.
           </h1>
           <p className="mt-6 text-base text-muted-foreground max-w-xl mx-auto">
-            Plataforma oficial de El Toro Rugby: monitoreo semanal de RPE, bienestar y carga de entrenamiento. Datos claros para atletas y preparadores físicos.
+            Plataforma oficial de El Toro Rugby Club Calvià: monitoreo de RPE, bienestar, carga de entrenamiento y recuperación. Datos claros para atletas y preparadores físicos.
           </p>
           <div className="mt-10 flex justify-center gap-3">
             <Link to="/registro"><Button size="lg">Crear cuenta</Button></Link>
@@ -46,7 +43,7 @@ function Landing() {
         </div>
       </section>
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} El Toro Rugby Performance
+        © {new Date().getFullYear()} El Toro Rugby Performance · Calvià
       </footer>
     </div>
   );
