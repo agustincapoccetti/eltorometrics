@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
+import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
 import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
@@ -46,6 +47,11 @@ const CoachIndexRoute = CoachIndexRouteImport.update({
 const AtletaIndexRoute = AtletaIndexRouteImport.update({
   id: '/atleta/',
   path: '/atleta/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
+  id: '/coach/recuperacion',
+  path: '/coach/recuperacion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachCalendarioRoute = CoachCalendarioRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
+  '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
+  '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta': typeof AtletaIndexRoute
   '/coach': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
+  '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/atleta/rpe'
     | '/atleta/wellness'
     | '/coach/calendario'
+    | '/coach/recuperacion'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/atleta/rpe'
     | '/atleta/wellness'
     | '/coach/calendario'
+    | '/coach/recuperacion'
     | '/atleta'
     | '/coach'
     | '/coach/atleta/$id'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/atleta/rpe'
     | '/atleta/wellness'
     | '/coach/calendario'
+    | '/coach/recuperacion'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   AtletaRpeRoute: typeof AtletaRpeRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
   CoachCalendarioRoute: typeof CoachCalendarioRoute
+  CoachRecuperacionRoute: typeof CoachRecuperacionRoute
   AtletaIndexRoute: typeof AtletaIndexRoute
   CoachIndexRoute: typeof CoachIndexRoute
   CoachAtletaIdRoute: typeof CoachAtletaIdRoute
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/atleta'
       fullPath: '/atleta/'
       preLoaderRoute: typeof AtletaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/recuperacion': {
+      id: '/coach/recuperacion'
+      path: '/coach/recuperacion'
+      fullPath: '/coach/recuperacion'
+      preLoaderRoute: typeof CoachRecuperacionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/calendario': {
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaRpeRoute: AtletaRpeRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
   CoachCalendarioRoute: CoachCalendarioRoute,
+  CoachRecuperacionRoute: CoachRecuperacionRoute,
   AtletaIndexRoute: AtletaIndexRoute,
   CoachIndexRoute: CoachIndexRoute,
   CoachAtletaIdRoute: CoachAtletaIdRoute,
