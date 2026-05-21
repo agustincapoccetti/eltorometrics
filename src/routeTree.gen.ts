@@ -18,6 +18,7 @@ import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
 import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
+import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 
 const RegistroRoute = RegistroRouteImport.update({
@@ -65,6 +66,11 @@ const AtletaOnboardingRoute = AtletaOnboardingRouteImport.update({
   path: '/atleta/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaCalendarioRoute = AtletaCalendarioRouteImport.update({
+  id: '/atleta/calendario',
+  path: '/atleta/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
   id: '/coach/atleta/$id',
   path: '/coach/atleta/$id',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/calendario'
     | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/rpe'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/calendario'
     | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/rpe'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/calendario'
     | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/rpe'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RegistroRoute: typeof RegistroRoute
+  AtletaCalendarioRoute: typeof AtletaCalendarioRoute
   AtletaOnboardingRoute: typeof AtletaOnboardingRoute
   AtletaPerfilRoute: typeof AtletaPerfilRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/calendario': {
+      id: '/atleta/calendario'
+      path: '/atleta/calendario'
+      fullPath: '/atleta/calendario'
+      preLoaderRoute: typeof AtletaCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coach/atleta/$id': {
       id: '/coach/atleta/$id'
       path: '/coach/atleta/$id'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RegistroRoute: RegistroRoute,
+  AtletaCalendarioRoute: AtletaCalendarioRoute,
   AtletaOnboardingRoute: AtletaOnboardingRoute,
   AtletaPerfilRoute: AtletaPerfilRoute,
   AtletaRpeRoute: AtletaRpeRoute,
@@ -250,3 +271,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
