@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Activity, Heart, CheckCircle2, Circle } from "lucide-react";
+import { Activity, Heart, CheckCircle2, Circle, Sparkles, Calendar as CalendarIcon } from "lucide-react";
 
 export const Route = createFileRoute("/atleta/")({ component: () => <Protected requireRole="atleta"><AthleteHome /></Protected> });
 
@@ -62,13 +62,20 @@ function AthleteHome() {
 
   return (
     <Shell>
-      <div className="mb-8">
-        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Hola</p>
-        <h1 className="text-4xl">{profile?.full_name || "Atleta"}</h1>
-        {profile?.position && <p className="mt-1 text-sm text-muted-foreground">{profile.position}{bmi && ` · IMC ${bmi}`}</p>}
+      <div className="mb-8 flex items-center gap-4">
+        {profile?.photo_url && (
+          <div className="w-16 h-16 border border-border bg-secondary overflow-hidden flex-shrink-0">
+            <img src={profile.photo_url} alt={profile.full_name} className="w-full h-full object-cover" />
+          </div>
+        )}
+        <div>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Hola</p>
+          <h1 className="text-4xl">{profile?.full_name || "Atleta"}{profile?.last_name ? ` ${profile.last_name}` : ""}</h1>
+          {profile?.position && <p className="mt-1 text-sm text-muted-foreground">{profile.position}{bmi && ` · IMC ${bmi}`}</p>}
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 mb-8">
+      <div className="grid md:grid-cols-2 gap-4 mb-4">
         <FormCard
           to="/atleta/wellness"
           icon={<Heart className="h-5 w-5" />}
@@ -86,6 +93,27 @@ function AthleteHome() {
           done={weekRpe > 0}
           doneLabel={`${weekRpe} sesión(es) esta semana`}
           pendingLabel="Sin registros esta semana"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <FormCard
+          to="/atleta/recuperacion"
+          icon={<Sparkles className="h-5 w-5" />}
+          title="Recuperación"
+          subtitle="Tildeá lo que cumpliste hoy"
+          done={false}
+          doneLabel=""
+          pendingLabel="Sumá puntos a tu score"
+        />
+        <FormCard
+          to="/atleta/calendario"
+          icon={<CalendarIcon className="h-5 w-5" />}
+          title="Calendario"
+          subtitle="Entrenamientos y partidos"
+          done={false}
+          doneLabel=""
+          pendingLabel="Ver agenda del equipo"
         />
       </div>
 

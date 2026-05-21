@@ -14,36 +14,192 @@ export type Database = {
   }
   public: {
     Tables: {
+      calendar_events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number | null
+          event_date: string
+          event_time: string | null
+          id: string
+          name: string
+          type: Database["public"]["Enums"]["event_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number | null
+          event_date: string
+          event_time?: string | null
+          id?: string
+          name: string
+          type?: Database["public"]["Enums"]["event_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number | null
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          name?: string
+          type?: Database["public"]["Enums"]["event_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          age: number | null
           created_at: string
           full_name: string
           height: number | null
           id: string
+          last_name: string | null
           last_weight_update: string | null
+          onboarded: boolean
+          photo_url: string | null
           position: string | null
           updated_at: string
           weight: number | null
         }
         Insert: {
+          age?: number | null
           created_at?: string
           full_name: string
           height?: number | null
           id: string
+          last_name?: string | null
           last_weight_update?: string | null
+          onboarded?: boolean
+          photo_url?: string | null
           position?: string | null
           updated_at?: string
           weight?: number | null
         }
         Update: {
+          age?: number | null
           created_at?: string
           full_name?: string
           height?: number | null
           id?: string
+          last_name?: string | null
           last_weight_update?: string | null
+          onboarded?: boolean
+          photo_url?: string | null
           position?: string | null
           updated_at?: string
           weight?: number | null
+        }
+        Relationships: []
+      }
+      recovery_entries: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          max_score: number
+          notes: string | null
+          total_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_date: string
+          id?: string
+          max_score?: number
+          notes?: string | null
+          total_score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          max_score?: number
+          notes?: string | null
+          total_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recovery_entry_items: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          points: number
+          strategy_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          points?: number
+          strategy_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          points?: number
+          strategy_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recovery_entry_items_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "recovery_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recovery_entry_items_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "recovery_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recovery_strategies: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          points: number
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          points?: number
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          points?: number
+          sort_order?: number
         }
         Relationships: []
       }
@@ -170,6 +326,7 @@ export type Database = {
     }
     Enums: {
       app_role: "atleta" | "coach"
+      event_type: "training" | "match"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -298,6 +455,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["atleta", "coach"],
+      event_type: ["training", "match"],
     },
   },
 } as const

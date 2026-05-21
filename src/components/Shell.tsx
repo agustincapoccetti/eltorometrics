@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { Logo } from "@/components/Logo";
 import type { ReactNode } from "react";
 
 export function Shell({ children, title }: { children: ReactNode; title?: string }) {
@@ -12,21 +13,22 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background sticky top-0 z-10">
         <div className="mx-auto max-w-5xl flex items-center justify-between px-4 py-3">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-7 w-7 bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display text-xs">R</span>
-            </div>
-            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
-          </Link>
-          <nav className="flex items-center gap-1">
+          <Link to="/"><Logo /></Link>
+          <nav className="flex items-center gap-1 flex-wrap">
             {role === "atleta" && (
               <>
-                <Link to="/atleta" className="px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:bg-accent">Hoy</Link>
-                <Link to="/atleta/perfil" className="px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:bg-accent">Perfil</Link>
+                <NavLink to="/atleta">Hoy</NavLink>
+                <NavLink to="/atleta/calendario">Calendario</NavLink>
+                <NavLink to="/atleta/recuperacion">Recuperación</NavLink>
+                <NavLink to="/atleta/perfil">Perfil</NavLink>
               </>
             )}
             {role === "coach" && (
-              <Link to="/coach" className="px-3 py-1.5 text-xs font-medium uppercase tracking-wider hover:bg-accent">Panel</Link>
+              <>
+                <NavLink to="/coach">Panel</NavLink>
+                <NavLink to="/coach/calendario">Calendario</NavLink>
+                <NavLink to="/coach/recuperacion">Recuperación</NavLink>
+              </>
             )}
             {user && (
               <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate({ to: "/login" }); }}>
@@ -41,5 +43,13 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
         {children}
       </main>
     </div>
+  );
+}
+
+function NavLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <Link to={to} className="px-2.5 py-1.5 text-xs font-medium uppercase tracking-wider hover:bg-accent">
+      {children}
+    </Link>
   );
 }

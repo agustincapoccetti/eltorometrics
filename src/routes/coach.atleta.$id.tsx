@@ -16,6 +16,7 @@ function AthleteDetail() {
   const [rpe, setRpe] = useState<any[]>([]);
   const [wellness, setWellness] = useState<any[]>([]);
   const [weights, setWeights] = useState<any[]>([]);
+  const [recovery, setRecovery] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -24,13 +25,16 @@ function AthleteDetail() {
       const { data: r } = await supabase.from("rpe_entries").select("*").eq("user_id", id).order("session_date");
       setRpe((r ?? []).map((x) => ({ date: x.session_date, value: x.rpe_score })));
       const { data: w } = await supabase.from("wellness_entries").select("*").eq("user_id", id).order("entry_date");
-      setWellness((w ?? []).map((x) => ({ date: x.entry_date, sleep: x.sleep, stress: x.stress, fatigue: x.fatigue, mood: x.mood })));
+      setWellness((w ?? []).map((x) => ({ date: x.entry_date, sleep: x.sleep, stress: x.stress, fatigue: x.fatigue, mood: x.mood, has_pain: x.has_pain, pain_description: x.pain_description })));
       const { data: wh } = await supabase.from("weight_history").select("*").eq("user_id", id).order("recorded_at");
       setWeights((wh ?? []).map((x) => ({ date: new Date(x.recorded_at).toLocaleDateString("es"), weight: Number(x.weight) })));
+      const { data: rec } = await supabase.from("recovery_entries").select("entry_date, total_score, max_score").eq("user_id", id).order("entry_date");
+      setRecovery((rec ?? []).map((x) => ({ date: x.entry_date, pct: x.max_score ? Math.round((x.total_score / x.max_score) * 100) : 0 })));
     })();
   }, [id]);
 
   const bmi = profile?.weight && profile?.height ? (profile.weight / Math.pow(profile.height / 100, 2)).toFixed(1) : null;
+  const fullName = profile ? `${profile.full_name}${profile.last_name ? " " + profile.last_name : ""}` : "";
 
   return (
     <Shell>
@@ -39,21 +43,27 @@ function AthleteDetail() {
       </Link>
       {profile && (
         <>
-          <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Atleta</p>
-            <h1 className="text-4xl mt-1">{profile.full_name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {profile.position ?? "—"} · {profile.weight ?? "—"} kg · {profile.height ?? "—"} cm{bmi && ` · IMC ${bmi}`}
-            </p>
+          <div className="mb-8 flex items-start gap-4">
+            <div className="w-24 h-24 border border-border bg-secondary overflow-hidden flex-shrink-0">
+              {profile.photo_url ? <img src={profile.photo_url} alt={fullName} className="w-full h-full object-cover" /> : null}
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">Atleta</p>
+              <h1 className="text-4xl mt-1">{fullName}</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                {profile.position ?? "—"}{profile.age ? ` · ${profile.age} años` : ""} · {profile.weight ?? "—"} kg · {profile.height ?? "—"} cm{bmi && ` · IMC ${bmi}`}
+              </p>
+            </div>
           </div>
 
           <Chart title="RPE" data={rpe} keys={[{ key: "value", name: "RPE" }]} domain={[0, 10]} />
-          <Chart title="Bienestar" data={wellness} keys={[
+          <Chart title="Bienestar (1 mejor · 5 peor)" data={wellness} keys={[
             { key: "sleep", name: "Sueño", stroke: "#000" },
             { key: "stress", name: "Estrés", stroke: "#555" },
             { key: "fatigue", name: "Fatiga", stroke: "#888" },
             { key: "mood", name: "Ánimo", stroke: "#bbb" },
           ]} domain={[1, 5]} />
+          <Chart title="Recuperación (%)" data={recovery} keys={[{ key: "pct", name: "Score %" }]} domain={[0, 100]} />
           {weights.length > 1 && <Chart title="Peso" data={weights} keys={[{ key: "weight", name: "kg" }]} />}
 
           <SectionList title="Últimas molestias" items={

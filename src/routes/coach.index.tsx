@@ -25,14 +25,16 @@ function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
 interface Row {
   id: string;
   full_name: string;
+  last_name: string | null;
+  photo_url: string | null;
   position: string | null;
   wellnessThisWeek: number;
   rpeThisWeek: number;
-  weeklyLoad: number;        // sum RPE last 7d
-  chronicLoad: number;       // avg weekly load over last 28d
-  acwr: number | null;       // acute:chronic workload ratio
-  fatigueAccum: number;      // sum of fatigue last 7d (scale 1-5)
-  avgFatigue: number | null; // avg fatigue last 7d
+  weeklyLoad: number;
+  chronicLoad: number;
+  acwr: number | null;
+  fatigueAccum: number;
+  avgFatigue: number | null;
 }
 
 function loadStatus(acwr: number | null): { label: string; cls: string } {
@@ -74,7 +76,7 @@ function CoachDash() {
 
       // 2) Profiles separately (RLS: coach can view all)
       const { data: profiles, error: profErr } = await supabase
-        .from("profiles").select("id, full_name, position").in("id", ids);
+        .from("profiles").select("id, full_name, last_name, photo_url, position").in("id", ids);
       if (profErr) { toast.error(profErr.message); setLoading(false); return; }
 
       // 3) Counts and load over last 28d
@@ -108,6 +110,8 @@ function CoachDash() {
         return {
           id: p.id,
           full_name: p.full_name,
+          last_name: p.last_name,
+          photo_url: p.photo_url,
           position: p.position,
           wellnessThisWeek: wWeek[p.id] ?? 0,
           rpeThisWeek: rWeek[p.id] ?? 0,
@@ -205,7 +209,8 @@ function CoachDash() {
         </div>
         {loading ? <p className="text-sm text-muted-foreground">Cargando...</p> : (
           <div className="border border-border overflow-x-auto">
-            <div className="grid grid-cols-[1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border text-xs uppercase tracking-wider font-medium bg-secondary min-w-[720px]">
+            <div className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border text-xs uppercase tracking-wider font-medium bg-secondary min-w-[760px]">
+              <div></div>
               <div>Atleta</div>
               <div className="text-center">Bienestar</div>
               <div className="text-center">RPE</div>
@@ -218,9 +223,12 @@ function CoachDash() {
             {rows.map((r) => {
               const st = loadStatus(r.acwr);
               return (
-                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[720px]">
+                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[760px]">
+                  <div className="w-9 h-9 border border-border bg-secondary overflow-hidden">
+                    {r.photo_url ? <img src={r.photo_url} alt={r.full_name} className="w-full h-full object-cover" /> : null}
+                  </div>
                   <div>
-                    <p className="font-medium text-sm">{r.full_name}</p>
+                    <p className="font-medium text-sm">{r.full_name}{r.last_name ? ` ${r.last_name}` : ""}</p>
                     {r.position && <p className="text-xs text-muted-foreground">{r.position}</p>}
                   </div>
                   <div className="flex items-center justify-center gap-1 text-xs">

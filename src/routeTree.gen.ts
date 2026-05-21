@@ -14,9 +14,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
+import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
+import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
+import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
+import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
+import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 
 const RegistroRoute = RegistroRouteImport.update({
@@ -44,6 +49,16 @@ const AtletaIndexRoute = AtletaIndexRouteImport.update({
   path: '/atleta/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
+  id: '/coach/recuperacion',
+  path: '/coach/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachCalendarioRoute = CoachCalendarioRouteImport.update({
+  id: '/coach/calendario',
+  path: '/coach/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
   id: '/atleta/wellness',
   path: '/atleta/wellness',
@@ -54,9 +69,24 @@ const AtletaRpeRoute = AtletaRpeRouteImport.update({
   path: '/atleta/rpe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaRecuperacionRoute = AtletaRecuperacionRouteImport.update({
+  id: '/atleta/recuperacion',
+  path: '/atleta/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletaPerfilRoute = AtletaPerfilRouteImport.update({
   id: '/atleta/perfil',
   path: '/atleta/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaOnboardingRoute = AtletaOnboardingRouteImport.update({
+  id: '/atleta/onboarding',
+  path: '/atleta/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaCalendarioRoute = AtletaCalendarioRouteImport.update({
+  id: '/atleta/calendario',
+  path: '/atleta/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
@@ -69,9 +99,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/calendario': typeof AtletaCalendarioRoute
+  '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/calendario': typeof CoachCalendarioRoute
+  '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -80,9 +115,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/calendario': typeof AtletaCalendarioRoute
+  '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/calendario': typeof CoachCalendarioRoute
+  '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta': typeof AtletaIndexRoute
   '/coach': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -92,9 +132,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/calendario': typeof AtletaCalendarioRoute
+  '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/calendario': typeof CoachCalendarioRoute
+  '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -105,9 +150,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/calendario'
+    | '/atleta/onboarding'
     | '/atleta/perfil'
+    | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/calendario'
+    | '/coach/recuperacion'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -116,9 +166,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/calendario'
+    | '/atleta/onboarding'
     | '/atleta/perfil'
+    | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/calendario'
+    | '/coach/recuperacion'
     | '/atleta'
     | '/coach'
     | '/coach/atleta/$id'
@@ -127,9 +182,14 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/calendario'
+    | '/atleta/onboarding'
     | '/atleta/perfil'
+    | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/calendario'
+    | '/coach/recuperacion'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -139,9 +199,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RegistroRoute: typeof RegistroRoute
+  AtletaCalendarioRoute: typeof AtletaCalendarioRoute
+  AtletaOnboardingRoute: typeof AtletaOnboardingRoute
   AtletaPerfilRoute: typeof AtletaPerfilRoute
+  AtletaRecuperacionRoute: typeof AtletaRecuperacionRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
+  CoachCalendarioRoute: typeof CoachCalendarioRoute
+  CoachRecuperacionRoute: typeof CoachRecuperacionRoute
   AtletaIndexRoute: typeof AtletaIndexRoute
   CoachIndexRoute: typeof CoachIndexRoute
   CoachAtletaIdRoute: typeof CoachAtletaIdRoute
@@ -184,6 +249,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach/recuperacion': {
+      id: '/coach/recuperacion'
+      path: '/coach/recuperacion'
+      fullPath: '/coach/recuperacion'
+      preLoaderRoute: typeof CoachRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/calendario': {
+      id: '/coach/calendario'
+      path: '/coach/calendario'
+      fullPath: '/coach/calendario'
+      preLoaderRoute: typeof CoachCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atleta/wellness': {
       id: '/atleta/wellness'
       path: '/atleta/wellness'
@@ -198,11 +277,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaRpeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/recuperacion': {
+      id: '/atleta/recuperacion'
+      path: '/atleta/recuperacion'
+      fullPath: '/atleta/recuperacion'
+      preLoaderRoute: typeof AtletaRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atleta/perfil': {
       id: '/atleta/perfil'
       path: '/atleta/perfil'
       fullPath: '/atleta/perfil'
       preLoaderRoute: typeof AtletaPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/onboarding': {
+      id: '/atleta/onboarding'
+      path: '/atleta/onboarding'
+      fullPath: '/atleta/onboarding'
+      preLoaderRoute: typeof AtletaOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/calendario': {
+      id: '/atleta/calendario'
+      path: '/atleta/calendario'
+      fullPath: '/atleta/calendario'
+      preLoaderRoute: typeof AtletaCalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/atleta/$id': {
@@ -219,9 +319,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RegistroRoute: RegistroRoute,
+  AtletaCalendarioRoute: AtletaCalendarioRoute,
+  AtletaOnboardingRoute: AtletaOnboardingRoute,
   AtletaPerfilRoute: AtletaPerfilRoute,
+  AtletaRecuperacionRoute: AtletaRecuperacionRoute,
   AtletaRpeRoute: AtletaRpeRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
+  CoachCalendarioRoute: CoachCalendarioRoute,
+  CoachRecuperacionRoute: CoachRecuperacionRoute,
   AtletaIndexRoute: AtletaIndexRoute,
   CoachIndexRoute: CoachIndexRoute,
   CoachAtletaIdRoute: CoachAtletaIdRoute,

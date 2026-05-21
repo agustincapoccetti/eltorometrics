@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
@@ -33,12 +34,8 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-sm">
         <Link to="/" className="block mb-8 text-center">
-          <div className="inline-flex items-center gap-2">
-            <div className="h-7 w-7 bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display text-xs">R</span>
-            </div>
-            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
-          </div>
+          <Logo size={80} withText={false} />
+          <p className="font-display text-sm tracking-wider mt-2">EL TORO RUGBY · CALVIÀ</p>
         </Link>
         <h1 className="text-3xl mb-6">Iniciar sesión</h1>
         <form onSubmit={handleSubmit} className="space-y-4">

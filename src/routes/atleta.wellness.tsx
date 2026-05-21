@@ -13,10 +13,10 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/atleta/wellness")({ component: () => <Protected requireRole="atleta"><WellnessForm /></Protected> });
 
 const Q = [
-  { key: "sleep", label: "Calidad del sueño", min: "Muy mala", max: "Excelente" },
-  { key: "stress", label: "Nivel de estrés", min: "Muy alto", max: "Muy bajo" },
-  { key: "fatigue", label: "Fatiga muscular", min: "Muy fatigado", max: "Fresco" },
-  { key: "mood", label: "Ánimo", min: "Muy malo", max: "Excelente" },
+  { key: "sleep", label: "Calidad del sueño", min: "Excelente", max: "Muy mala" },
+  { key: "stress", label: "Nivel de estrés", min: "Muy bajo", max: "Muy alto" },
+  { key: "fatigue", label: "Fatiga muscular", min: "Fresco", max: "Muy fatigado" },
+  { key: "mood", label: "Ánimo", min: "Excelente", max: "Muy malo" },
 ] as const;
 
 function WellnessForm() {
@@ -46,7 +46,7 @@ function WellnessForm() {
 
   return (
     <Shell title="Bienestar">
-      <p className="text-sm text-muted-foreground mb-6">Cuestionario matutino · escala 1 a 5</p>
+      <p className="text-sm text-muted-foreground mb-6">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
 
       <div className="space-y-6">
         {Q.map((q) => (

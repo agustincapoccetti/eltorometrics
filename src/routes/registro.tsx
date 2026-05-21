@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/registro")({ component: RegistroPage });
 
@@ -50,12 +51,8 @@ function RegistroPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-background">
       <div className="w-full max-w-md">
         <Link to="/" className="block mb-8 text-center">
-          <div className="inline-flex items-center gap-2">
-            <div className="h-7 w-7 bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display text-xs">R</span>
-            </div>
-            <span className="font-display text-sm tracking-wider">EL TORO · RUGBY</span>
-          </div>
+          <Logo size={64} withText={false} />
+          <p className="font-display text-sm tracking-wider mt-2">EL TORO RUGBY · CALVIÀ</p>
         </Link>
         <h1 className="text-3xl mb-6">Registro</h1>
 
