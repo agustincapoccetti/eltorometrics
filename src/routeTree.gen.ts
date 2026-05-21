@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
+import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
@@ -44,6 +45,11 @@ const CoachIndexRoute = CoachIndexRouteImport.update({
 const AtletaIndexRoute = AtletaIndexRouteImport.update({
   id: '/atleta/',
   path: '/atleta/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachCalendarioRoute = CoachCalendarioRouteImport.update({
+  id: '/coach/calendario',
+  path: '/coach/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/calendario': typeof CoachCalendarioRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/calendario': typeof CoachCalendarioRoute
   '/atleta': typeof AtletaIndexRoute
   '/coach': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/calendario': typeof CoachCalendarioRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/atleta/perfil'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/calendario'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/atleta/perfil'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/calendario'
     | '/atleta'
     | '/coach'
     | '/coach/atleta/$id'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/atleta/perfil'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/calendario'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   AtletaPerfilRoute: typeof AtletaPerfilRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
+  CoachCalendarioRoute: typeof CoachCalendarioRoute
   AtletaIndexRoute: typeof AtletaIndexRoute
   CoachIndexRoute: typeof CoachIndexRoute
   CoachAtletaIdRoute: typeof CoachAtletaIdRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/atleta'
       fullPath: '/atleta/'
       preLoaderRoute: typeof AtletaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/calendario': {
+      id: '/coach/calendario'
+      path: '/coach/calendario'
+      fullPath: '/coach/calendario'
+      preLoaderRoute: typeof CoachCalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atleta/wellness': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaPerfilRoute: AtletaPerfilRoute,
   AtletaRpeRoute: AtletaRpeRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
+  CoachCalendarioRoute: CoachCalendarioRoute,
   AtletaIndexRoute: AtletaIndexRoute,
   CoachIndexRoute: CoachIndexRoute,
   CoachAtletaIdRoute: CoachAtletaIdRoute,
