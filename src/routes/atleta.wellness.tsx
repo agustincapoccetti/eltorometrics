@@ -46,7 +46,7 @@ function WellnessForm() {
 
   return (
     <Shell title="Bienestar">
-      <p className="text-sm text-muted-foreground mb-6">Cuestionario matutino · escala 1 a 5</p>
+      <p className="text-sm text-muted-foreground mb-6">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
 
       <div className="space-y-6">
         {Q.map((q) => (
