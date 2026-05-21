@@ -17,6 +17,7 @@ import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
+import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 
 const RegistroRoute = RegistroRouteImport.update({
@@ -59,6 +60,11 @@ const AtletaPerfilRoute = AtletaPerfilRouteImport.update({
   path: '/atleta/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaOnboardingRoute = AtletaOnboardingRouteImport.update({
+  id: '/atleta/onboarding',
+  path: '/atleta/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
   id: '/coach/atleta/$id',
   path: '/coach/atleta/$id',
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/registro': typeof RegistroRoute
+  '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/rpe'
     | '/atleta/wellness'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/rpe'
     | '/atleta/wellness'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/registro'
+    | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/rpe'
     | '/atleta/wellness'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RegistroRoute: typeof RegistroRoute
+  AtletaOnboardingRoute: typeof AtletaOnboardingRoute
   AtletaPerfilRoute: typeof AtletaPerfilRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaPerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/onboarding': {
+      id: '/atleta/onboarding'
+      path: '/atleta/onboarding'
+      fullPath: '/atleta/onboarding'
+      preLoaderRoute: typeof AtletaOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coach/atleta/$id': {
       id: '/coach/atleta/$id'
       path: '/coach/atleta/$id'
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RegistroRoute: RegistroRoute,
+  AtletaOnboardingRoute: AtletaOnboardingRoute,
   AtletaPerfilRoute: AtletaPerfilRoute,
   AtletaRpeRoute: AtletaRpeRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
@@ -229,3 +250,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
