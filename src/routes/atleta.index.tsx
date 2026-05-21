@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Activity, Heart, CheckCircle2, Circle } from "lucide-react";
+import { Activity, Heart, CheckCircle2, Circle, Sparkles, Calendar as CalendarIcon } from "lucide-react";
 
 export const Route = createFileRoute("/atleta/")({ component: () => <Protected requireRole="atleta"><AthleteHome /></Protected> });
 
