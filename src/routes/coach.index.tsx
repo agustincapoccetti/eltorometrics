@@ -25,14 +25,16 @@ function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
 interface Row {
   id: string;
   full_name: string;
+  last_name: string | null;
+  photo_url: string | null;
   position: string | null;
   wellnessThisWeek: number;
   rpeThisWeek: number;
-  weeklyLoad: number;        // sum RPE last 7d
-  chronicLoad: number;       // avg weekly load over last 28d
-  acwr: number | null;       // acute:chronic workload ratio
-  fatigueAccum: number;      // sum of fatigue last 7d (scale 1-5)
-  avgFatigue: number | null; // avg fatigue last 7d
+  weeklyLoad: number;
+  chronicLoad: number;
+  acwr: number | null;
+  fatigueAccum: number;
+  avgFatigue: number | null;
 }
 
 function loadStatus(acwr: number | null): { label: string; cls: string } {
