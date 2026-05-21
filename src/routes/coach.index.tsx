@@ -223,9 +223,12 @@ function CoachDash() {
             {rows.map((r) => {
               const st = loadStatus(r.acwr);
               return (
-                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[720px]">
+                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[760px]">
+                  <div className="w-9 h-9 border border-border bg-secondary overflow-hidden">
+                    {r.photo_url ? <img src={r.photo_url} alt={r.full_name} className="w-full h-full object-cover" /> : null}
+                  </div>
                   <div>
-                    <p className="font-medium text-sm">{r.full_name}</p>
+                    <p className="font-medium text-sm">{r.full_name}{r.last_name ? ` ${r.last_name}` : ""}</p>
                     {r.position && <p className="text-xs text-muted-foreground">{r.position}</p>}
                   </div>
                   <div className="flex items-center justify-center gap-1 text-xs">
