@@ -209,7 +209,8 @@ function CoachDash() {
         </div>
         {loading ? <p className="text-sm text-muted-foreground">Cargando...</p> : (
           <div className="border border-border overflow-x-auto">
-            <div className="grid grid-cols-[1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border text-xs uppercase tracking-wider font-medium bg-secondary min-w-[720px]">
+            <div className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border text-xs uppercase tracking-wider font-medium bg-secondary min-w-[760px]">
+              <div></div>
               <div>Atleta</div>
               <div className="text-center">Bienestar</div>
               <div className="text-center">RPE</div>
