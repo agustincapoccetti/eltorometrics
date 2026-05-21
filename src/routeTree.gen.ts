@@ -17,6 +17,7 @@ import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
 import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
+import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
 import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
 import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
@@ -62,6 +63,11 @@ const AtletaRpeRoute = AtletaRpeRouteImport.update({
   path: '/atleta/rpe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaRecuperacionRoute = AtletaRecuperacionRouteImport.update({
+  id: '/atleta/recuperacion',
+  path: '/atleta/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletaPerfilRoute = AtletaPerfilRouteImport.update({
   id: '/atleta/perfil',
   path: '/atleta/perfil',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
+  '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/atleta/calendario'
     | '/atleta/onboarding'
     | '/atleta/perfil'
+    | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
     | '/coach/calendario'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/atleta/calendario'
     | '/atleta/onboarding'
     | '/atleta/perfil'
+    | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
     | '/coach/calendario'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/atleta/calendario'
     | '/atleta/onboarding'
     | '/atleta/perfil'
+    | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
     | '/coach/calendario'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   AtletaCalendarioRoute: typeof AtletaCalendarioRoute
   AtletaOnboardingRoute: typeof AtletaOnboardingRoute
   AtletaPerfilRoute: typeof AtletaPerfilRoute
+  AtletaRecuperacionRoute: typeof AtletaRecuperacionRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
   CoachCalendarioRoute: typeof CoachCalendarioRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaRpeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/recuperacion': {
+      id: '/atleta/recuperacion'
+      path: '/atleta/recuperacion'
+      fullPath: '/atleta/recuperacion'
+      preLoaderRoute: typeof AtletaRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atleta/perfil': {
       id: '/atleta/perfil'
       path: '/atleta/perfil'
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaCalendarioRoute: AtletaCalendarioRoute,
   AtletaOnboardingRoute: AtletaOnboardingRoute,
   AtletaPerfilRoute: AtletaPerfilRoute,
+  AtletaRecuperacionRoute: AtletaRecuperacionRoute,
   AtletaRpeRoute: AtletaRpeRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
   CoachCalendarioRoute: CoachCalendarioRoute,
