@@ -110,6 +110,8 @@ function CoachDash() {
         return {
           id: p.id,
           full_name: p.full_name,
+          last_name: p.last_name,
+          photo_url: p.photo_url,
           position: p.position,
           wellnessThisWeek: wWeek[p.id] ?? 0,
           rpeThisWeek: rWeek[p.id] ?? 0,
