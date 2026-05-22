@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { rpeColor, wellnessColor } from "@/lib/score-colors";
+import { exportPdf } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/coach/atleta/$id")({
   component: () => <Protected requireRole="coach"><AthleteDetail /></Protected>,
