@@ -42,17 +42,10 @@ interface Row {
   avgFatigue: number | null;
 }
 
-function loadStatus(acwr: number | null): { label: string; cls: string } {
-  if (acwr == null) return { label: "—", cls: "text-muted-foreground" };
-  if (acwr < 0.8) return { label: "Baja", cls: "text-muted-foreground" };
-  if (acwr <= 1.3) return { label: "Óptima", cls: "text-foreground" };
-  if (acwr <= 1.5) return { label: "Alta", cls: "text-foreground font-semibold" };
-  return { label: "Riesgo", cls: "text-foreground font-bold underline" };
-}
-
 function CoachDash() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<Period>("week");
 
   const [exportType, setExportType] = useState<"rpe" | "wellness">("rpe");
   const [exportAthlete, setExportAthlete] = useState<string>("all");
@@ -64,11 +57,13 @@ function CoachDash() {
   const [reminderMsg, setReminderMsg] = useState("");
 
   const chartRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
-      const weekStart = isoDate(startOfWeek());
-      const acuteStart = isoDate(daysAgo(7));
+      setLoading(true);
+      const acuteDays = PERIOD_DAYS[period];
+      const periodStart = isoDate(daysAgo(acuteDays - 1));
       const chronicStart = isoDate(daysAgo(28));
 
       // 1) Athletes via user_roles
