@@ -20,30 +20,54 @@ function AthleteDetail() {
   const [wellness, setWellness] = useState<any[]>([]);
   const [weights, setWeights] = useState<any[]>([]);
   const [recovery, setRecovery] = useState<any[]>([]);
+  const [physio, setPhysio] = useState<any[]>([]);
+
+  const rpeChartRef = useRef<HTMLDivElement>(null);
+  const wellChartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
       const { data: p } = await supabase.from("profiles").select("*").eq("id", id).single();
       setProfile(p);
       const { data: r } = await supabase.from("rpe_entries").select("*").eq("user_id", id).order("session_date");
-      setRpe((r ?? []).map((x) => ({ date: x.session_date, value: x.rpe_score })));
+      setRpe((r ?? []).map((x) => ({ date: x.session_date, value: x.rpe_score, label: x.session_label })));
       const { data: w } = await supabase.from("wellness_entries").select("*").eq("user_id", id).order("entry_date");
       setWellness((w ?? []).map((x) => ({ date: x.entry_date, sleep: x.sleep, stress: x.stress, fatigue: x.fatigue, mood: x.mood, has_pain: x.has_pain, pain_description: x.pain_description })));
       const { data: wh } = await supabase.from("weight_history").select("*").eq("user_id", id).order("recorded_at");
       setWeights((wh ?? []).map((x) => ({ date: new Date(x.recorded_at).toLocaleDateString("es"), weight: Number(x.weight) })));
       const { data: rec } = await supabase.from("recovery_entries").select("entry_date, total_score, max_score").eq("user_id", id).order("entry_date");
       setRecovery((rec ?? []).map((x) => ({ date: x.entry_date, pct: x.max_score ? Math.round((x.total_score / x.max_score) * 100) : 0 })));
+      const { data: ph } = await supabase.from("physio_appointments").select("*").eq("user_id", id).order("appointment_date", { ascending: false });
+      setPhysio(ph ?? []);
     })();
   }, [id]);
 
   const bmi = profile?.weight && profile?.height ? (profile.weight / Math.pow(profile.height / 100, 2)).toFixed(1) : null;
   const fullName = profile ? `${profile.full_name}${profile.last_name ? " " + profile.last_name : ""}` : "";
 
+  async function downloadPdf() {
+    await exportPdf({
+      title: `Informe · ${fullName}`,
+      subtitle: `${profile?.position ?? "—"} · ${profile?.weight ?? "—"} kg · ${profile?.height ?? "—"} cm${bmi ? ` · IMC ${bmi}` : ""}`,
+      chartEls: [rpeChartRef.current, wellChartRef.current].filter(Boolean) as HTMLElement[],
+      tables: [
+        { title: "Últimos RPE", head: ["Fecha", "Sesión", "RPE"], rows: rpe.slice(-30).reverse().map((r: any) => [r.date, r.label ?? "—", r.value]) },
+        { title: "Últimos Bienestar", head: ["Fecha", "Sueño", "Estrés", "Fatiga", "Ánimo", "Dolor"], rows: wellness.slice(-30).reverse().map((w: any) => [w.date, w.sleep, w.stress, w.fatigue, w.mood, w.has_pain ? (w.pain_description ?? "Sí") : "—"]) },
+        { title: "Recuperación %", head: ["Fecha", "Score %"], rows: recovery.slice(-30).reverse().map((r: any) => [r.date, r.pct]) },
+        { title: "Citas con fisio", head: ["Fecha", "Estado", "Motivos", "Notas"], rows: physio.map((a) => [a.appointment_date, a.status, (a.reasons ?? []).join(" · "), a.notes ?? ""]) },
+      ],
+      filename: `atleta_${fullName.replace(/\s+/g, "_")}.pdf`,
+    });
+  }
+
   return (
     <Shell>
-      <Link to="/coach" className="inline-flex items-center gap-1 text-xs uppercase tracking-wider mb-4 hover:underline">
-        <ArrowLeft className="h-3 w-3" /> Volver
-      </Link>
+      <div className="flex items-center justify-between mb-4">
+        <Link to="/coach" className="inline-flex items-center gap-1 text-xs uppercase tracking-wider hover:underline">
+          <ArrowLeft className="h-3 w-3" /> Volver
+        </Link>
+        {profile && <Button size="sm" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-1" />PDF</Button>}
+      </div>
       {profile && (
         <>
           <div className="mb-8 flex items-start gap-4">
@@ -59,13 +83,23 @@ function AthleteDetail() {
             </div>
           </div>
 
-          <Chart title="RPE" data={rpe} keys={[{ key: "value", name: "RPE" }]} domain={[0, 10]} />
-          <Chart title="Bienestar (1 mejor · 5 peor)" data={wellness} keys={[
-            { key: "sleep", name: "Sueño", stroke: "#000" },
-            { key: "stress", name: "Estrés", stroke: "#555" },
-            { key: "fatigue", name: "Fatiga", stroke: "#888" },
-            { key: "mood", name: "Ánimo", stroke: "#bbb" },
-          ]} domain={[1, 5]} />
+          <div ref={rpeChartRef} className="bg-background">
+            <Chart title="RPE" data={rpe} keys={[{ key: "value", name: "RPE" }]} domain={[0, 10]} />
+          </div>
+
+          <ScoreList title="Últimos RPE" items={rpe.slice(-12).reverse()} kind="rpe" />
+
+          <div ref={wellChartRef} className="bg-background">
+            <Chart title="Bienestar (1 mejor · 5 peor)" data={wellness} keys={[
+              { key: "sleep", name: "Sueño", stroke: "#000" },
+              { key: "stress", name: "Estrés", stroke: "#555" },
+              { key: "fatigue", name: "Fatiga", stroke: "#888" },
+              { key: "mood", name: "Ánimo", stroke: "#bbb" },
+            ]} domain={[1, 5]} />
+          </div>
+
+          <ScoreList title="Últimos Bienestar" items={wellness.slice(-12).reverse()} kind="wellness" />
+
           <Chart title="Recuperación (%)" data={recovery} keys={[{ key: "pct", name: "Score %" }]} domain={[0, 100]} />
           {weights.length > 1 && <Chart title="Peso" data={weights} keys={[{ key: "weight", name: "kg" }]} />}
 
@@ -73,9 +107,65 @@ function AthleteDetail() {
             wellness.filter((w: any) => w.has_pain).slice(-5).reverse()
               .map((w: any) => ({ date: w.date, text: w.pain_description ?? "—" }))
           } />
+
+          {physio.length > 0 && (
+            <div className="border border-border p-6 mt-4">
+              <h3 className="text-lg mb-4">Citas con fisio ({physio.length})</h3>
+              <div className="space-y-2">
+                {physio.slice(0, 8).map((a) => (
+                  <div key={a.id} className="border-l-2 border-primary pl-3">
+                    <p className="text-xs uppercase tracking-wider font-display">{a.appointment_date} · {a.status}</p>
+                    <p className="text-sm">{(a.reasons ?? []).join(" · ")}</p>
+                    {a.notes && <p className="text-xs italic text-muted-foreground">{a.notes}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </Shell>
+  );
+}
+
+function ScoreList({ title, items, kind }: { title: string; items: any[]; kind: "rpe" | "wellness" }) {
+  if (!items.length) return null;
+  return (
+    <div className="border border-border p-6 mb-4">
+      <h3 className="text-lg mb-3">{title}</h3>
+      <div className="space-y-1.5">
+        {items.map((it: any, idx: number) => {
+          if (kind === "rpe") {
+            const c = rpeColor(it.value);
+            return (
+              <div key={idx} className="flex items-center gap-3">
+                <span className="text-xs font-display uppercase tracking-wider w-20 text-muted-foreground">{it.date}</span>
+                <span className={`inline-flex items-center justify-center w-10 h-7 text-sm font-medium ${c.bg} ${c.text}`}>{it.value}</span>
+                <span className="text-xs">{c.label}{it.label ? ` · ${it.label}` : ""}</span>
+              </div>
+            );
+          }
+          const avg = +(((it.sleep + it.stress + it.fatigue + it.mood) / 4)).toFixed(1);
+          return (
+            <div key={idx} className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-display uppercase tracking-wider w-20 text-muted-foreground">{it.date}</span>
+              {(["sleep", "stress", "fatigue", "mood"] as const).map((k) => {
+                const c = wellnessColor(it[k]);
+                const label = { sleep: "Sue", stress: "Est", fatigue: "Fat", mood: "Áni" }[k];
+                return (
+                  <span key={k} className={`inline-flex flex-col items-center px-2 py-0.5 ${c.bg} ${c.text}`}>
+                    <span className="text-[9px] uppercase tracking-wider leading-none">{label}</span>
+                    <span className="text-sm font-medium leading-tight">{it[k]}</span>
+                  </span>
+                );
+              })}
+              <span className="text-xs text-muted-foreground ml-1">μ {avg}</span>
+              {it.has_pain && <span className="text-[10px] uppercase tracking-wider bg-red-600 text-white px-1.5 py-0.5">Dolor</span>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
