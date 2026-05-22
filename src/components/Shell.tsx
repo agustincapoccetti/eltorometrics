@@ -20,6 +20,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
                 <NavLink to="/atleta">Hoy</NavLink>
                 <NavLink to="/atleta/calendario">Calendario</NavLink>
                 <NavLink to="/atleta/recuperacion">Recuperación</NavLink>
+                <NavLink to="/atleta/fisio">Fisio</NavLink>
                 <NavLink to="/atleta/perfil">Perfil</NavLink>
               </>
             )}
@@ -28,6 +29,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
                 <NavLink to="/coach">Panel</NavLink>
                 <NavLink to="/coach/calendario">Calendario</NavLink>
                 <NavLink to="/coach/recuperacion">Recuperación</NavLink>
+                <NavLink to="/coach/fisio">Fisio</NavLink>
               </>
             )}
             {user && (
