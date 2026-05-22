@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      physio_appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          reasons: string[]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reasons?: string[]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reasons?: string[]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
