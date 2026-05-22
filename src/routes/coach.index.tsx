@@ -200,6 +200,32 @@ function CoachDash() {
   function openWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(reminderMsg)}`, "_blank"); }
   async function copyReminder() { await navigator.clipboard.writeText(reminderMsg); toast.success("Copiado"); }
 
+  async function exportPanelPdf() {
+    const periodLabel = period === "day" ? "Día" : period === "week" ? "Semana" : "Mes";
+    await exportPdf({
+      title: `Panel del preparador · ${periodLabel}`,
+      subtitle: `${rows.length} atletas · período: últimos ${PERIOD_DAYS[period]} día(s)`,
+      chartEls: [tableRef.current, chartRef.current].filter(Boolean) as HTMLElement[],
+      tables: [
+        {
+          title: "Resumen por atleta",
+          head: ["Atleta", "Puesto", "Bienestar", "RPE", "Carga UA", "ACWR", "Fatiga μ"],
+          rows: rows.map((r) => [
+            `${r.full_name}${r.last_name ? " " + r.last_name : ""}`,
+            r.position ?? "—", r.wellnessThisWeek, r.rpeThisWeek, r.weeklyLoad,
+            r.acwr ?? "—", r.avgFatigue ?? "—",
+          ]),
+        },
+        {
+          title: "Promedio por puesto",
+          head: ["Puesto", "Carga semanal", "Carga crónica", "Fatiga 7d"],
+          rows: byPosition.map((p) => [p.position, p.cargaSemanal, p.cargaCronica, p.fatiga]),
+        },
+      ],
+      filename: `panel_${period}_${isoDate(new Date())}.pdf`,
+    });
+  }
+
   return (
     <Shell title="Panel del preparador">
       <div className="mb-8">
