@@ -10,11 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Download, MessageCircle, CheckCircle2, Circle, ChevronRight, Image as ImageIcon, AlertTriangle, Activity } from "lucide-react";
+import { Download, MessageCircle, CheckCircle2, Circle, ChevronRight, Image as ImageIcon, AlertTriangle, Activity, FileDown } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { toPng } from "html-to-image";
+import { acwrColor, fatigueColor } from "@/lib/score-colors";
+import { exportPdf } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/coach/")({ component: () => <Protected requireRole="coach"><CoachDash /></Protected> });
+
+type Period = "day" | "week" | "month";
+const PERIOD_DAYS: Record<Period, number> = { day: 1, week: 7, month: 30 };
 
 function startOfWeek(d = new Date()) {
   const x = new Date(d); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x;
