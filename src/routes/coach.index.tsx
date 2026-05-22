@@ -10,11 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Download, MessageCircle, CheckCircle2, Circle, ChevronRight, Image as ImageIcon, AlertTriangle, Activity } from "lucide-react";
+import { Download, MessageCircle, CheckCircle2, Circle, ChevronRight, Image as ImageIcon, AlertTriangle, Activity, FileDown } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { toPng } from "html-to-image";
+import { acwrColor, fatigueColor } from "@/lib/score-colors";
+import { exportPdf } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/coach/")({ component: () => <Protected requireRole="coach"><CoachDash /></Protected> });
+
+type Period = "day" | "week" | "month";
+const PERIOD_DAYS: Record<Period, number> = { day: 1, week: 7, month: 30 };
 
 function startOfWeek(d = new Date()) {
   const x = new Date(d); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0, 0, 0, 0); return x;
@@ -37,17 +42,10 @@ interface Row {
   avgFatigue: number | null;
 }
 
-function loadStatus(acwr: number | null): { label: string; cls: string } {
-  if (acwr == null) return { label: "—", cls: "text-muted-foreground" };
-  if (acwr < 0.8) return { label: "Baja", cls: "text-muted-foreground" };
-  if (acwr <= 1.3) return { label: "Óptima", cls: "text-foreground" };
-  if (acwr <= 1.5) return { label: "Alta", cls: "text-foreground font-semibold" };
-  return { label: "Riesgo", cls: "text-foreground font-bold underline" };
-}
-
 function CoachDash() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<Period>("week");
 
   const [exportType, setExportType] = useState<"rpe" | "wellness">("rpe");
   const [exportAthlete, setExportAthlete] = useState<string>("all");
@@ -59,11 +57,13 @@ function CoachDash() {
   const [reminderMsg, setReminderMsg] = useState("");
 
   const chartRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
-      const weekStart = isoDate(startOfWeek());
-      const acuteStart = isoDate(daysAgo(7));
+      setLoading(true);
+      const acuteDays = PERIOD_DAYS[period];
+      const periodStart = isoDate(daysAgo(acuteDays - 1));
       const chronicStart = isoDate(daysAgo(28));
 
       // 1) Athletes via user_roles
@@ -92,12 +92,12 @@ function CoachDash() {
       const fatigueAcute: Record<string, number[]> = {};
 
       wellness?.forEach((w) => {
-        if (w.entry_date >= weekStart) wWeek[w.user_id] = (wWeek[w.user_id] ?? 0) + 1;
-        if (w.entry_date >= acuteStart) (fatigueAcute[w.user_id] ??= []).push(w.fatigue);
+        if (w.entry_date >= periodStart) wWeek[w.user_id] = (wWeek[w.user_id] ?? 0) + 1;
+        if (w.entry_date >= periodStart) (fatigueAcute[w.user_id] ??= []).push(w.fatigue);
       });
       rpe?.forEach((r) => {
-        if (r.session_date >= weekStart) rWeek[r.user_id] = (rWeek[r.user_id] ?? 0) + 1;
-        if (r.session_date >= acuteStart) acuteLoad[r.user_id] = (acuteLoad[r.user_id] ?? 0) + r.rpe_score;
+        if (r.session_date >= periodStart) rWeek[r.user_id] = (rWeek[r.user_id] ?? 0) + 1;
+        if (r.session_date >= periodStart) acuteLoad[r.user_id] = (acuteLoad[r.user_id] ?? 0) + r.rpe_score;
         chronicSum[r.user_id] = (chronicSum[r.user_id] ?? 0) + r.rpe_score;
       });
 
@@ -126,7 +126,7 @@ function CoachDash() {
       setRows(rs);
       setLoading(false);
     })();
-  }, []);
+  }, [period]);
 
   // Aggregate by position
   const byPosition = useMemo(() => {
@@ -200,28 +200,68 @@ function CoachDash() {
   function openWhatsApp() { window.open(`https://wa.me/?text=${encodeURIComponent(reminderMsg)}`, "_blank"); }
   async function copyReminder() { await navigator.clipboard.writeText(reminderMsg); toast.success("Copiado"); }
 
+  async function exportPanelPdf() {
+    const periodLabel = period === "day" ? "Día" : period === "week" ? "Semana" : "Mes";
+    await exportPdf({
+      title: `Panel del preparador · ${periodLabel}`,
+      subtitle: `${rows.length} atletas · período: últimos ${PERIOD_DAYS[period]} día(s)`,
+      chartEls: [tableRef.current, chartRef.current].filter(Boolean) as HTMLElement[],
+      tables: [
+        {
+          title: "Resumen por atleta",
+          head: ["Atleta", "Puesto", "Bienestar", "RPE", "Carga UA", "ACWR", "Fatiga μ"],
+          rows: rows.map((r) => [
+            `${r.full_name}${r.last_name ? " " + r.last_name : ""}`,
+            r.position ?? "—", r.wellnessThisWeek, r.rpeThisWeek, r.weeklyLoad,
+            r.acwr ?? "—", r.avgFatigue ?? "—",
+          ]),
+        },
+        {
+          title: "Promedio por puesto",
+          head: ["Puesto", "Carga semanal", "Carga crónica", "Fatiga 7d"],
+          rows: byPosition.map((p) => [p.position, p.cargaSemanal, p.cargaCronica, p.fatiga]),
+        },
+      ],
+      filename: `panel_${period}_${isoDate(new Date())}.pdf`,
+    });
+  }
+
   return (
     <Shell title="Panel del preparador">
       <div className="mb-8">
-        <div className="flex items-baseline justify-between mb-4">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Esta semana · Carga y fatiga</p>
-          <p className="text-xs text-muted-foreground">{rows.length} atletas</p>
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">Carga y fatiga</p>
+            <p className="text-xs text-muted-foreground">{rows.length} atletas</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex border border-border">
+              {(["day", "week", "month"] as Period[]).map((p) => (
+                <button key={p} onClick={() => setPeriod(p)}
+                  className={`px-3 py-1.5 text-xs uppercase tracking-wider border-r border-border last:border-r-0 ${period === p ? "bg-primary text-primary-foreground" : "hover:bg-accent"}`}>
+                  {p === "day" ? "Día" : p === "week" ? "Semana" : "Mes"}
+                </button>
+              ))}
+            </div>
+            <Button size="sm" variant="outline" onClick={() => exportPanelPdf()}><FileDown className="h-4 w-4 mr-1" />PDF</Button>
+          </div>
         </div>
         {loading ? <p className="text-sm text-muted-foreground">Cargando...</p> : (
-          <div className="border border-border overflow-x-auto">
+          <div ref={tableRef} className="border border-border overflow-x-auto bg-background">
             <div className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border text-xs uppercase tracking-wider font-medium bg-secondary min-w-[760px]">
               <div></div>
               <div>Atleta</div>
               <div className="text-center">Bienestar</div>
               <div className="text-center">RPE</div>
-              <div className="text-center">Carga sem.</div>
+              <div className="text-center">Carga</div>
               <div className="text-center">ACWR</div>
-              <div className="text-center">Fatiga 7d</div>
+              <div className="text-center">Fatiga μ</div>
               <div></div>
             </div>
             {rows.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin atletas todavía.</p>}
             {rows.map((r) => {
-              const st = loadStatus(r.acwr);
+              const ac = acwrColor(r.acwr);
+              const fc = fatigueColor(r.avgFatigue);
               return (
                 <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[760px]">
                   <div className="w-9 h-9 border border-border bg-secondary overflow-hidden">
@@ -233,18 +273,19 @@ function CoachDash() {
                   </div>
                   <div className="flex items-center justify-center gap-1 text-xs">
                     {r.wellnessThisWeek > 0 ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
-                    <span>{r.wellnessThisWeek}/7</span>
+                    <span>{r.wellnessThisWeek}</span>
                   </div>
                   <div className="flex items-center justify-center gap-1 text-xs">
                     {r.rpeThisWeek > 0 ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
                     <span>{r.rpeThisWeek}</span>
                   </div>
                   <div className="text-center text-sm font-medium">{r.weeklyLoad}<span className="text-xs text-muted-foreground"> UA</span></div>
-                  <div className={`text-center text-sm ${st.cls}`}>{r.acwr ?? "—"}<span className="block text-[10px] uppercase tracking-wider">{st.label}</span></div>
-                  <div className="text-center text-sm flex items-center justify-center gap-1">
+                  <div className="text-center">
+                    <span className={`inline-block px-2 py-0.5 text-xs font-medium ${ac.bg} ${ac.text}`}>{r.acwr ?? "—"} · {ac.label}</span>
+                  </div>
+                  <div className="text-center flex items-center justify-center gap-1">
                     {r.avgFatigue != null && r.avgFatigue >= 4 && <AlertTriangle className="h-3 w-3" />}
-                    {r.fatigueAccum || "—"}
-                    {r.avgFatigue != null && <span className="text-[10px] text-muted-foreground">(μ{r.avgFatigue})</span>}
+                    <span className={`inline-block px-2 py-0.5 text-xs ${fc}`}>{r.avgFatigue ?? "—"}</span>
                   </div>
                   <div className="flex justify-end"><ChevronRight className="h-4 w-4 text-muted-foreground" /></div>
                 </Link>
@@ -253,7 +294,7 @@ function CoachDash() {
           </div>
         )}
         <p className="mt-2 text-[11px] text-muted-foreground">
-          UA = unidades de carga (suma RPE). ACWR = aguda 7d ÷ crónica 28d. Óptimo 0.8–1.3. &gt;1.5 indica riesgo de sobrecarga.
+          UA = unidades de carga (suma RPE en el período). ACWR = aguda ÷ crónica 28d. Óptimo 0.8–1.3. &gt;1.5 indica riesgo de sobrecarga.
         </p>
       </div>
 
