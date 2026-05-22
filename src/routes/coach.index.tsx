@@ -92,12 +92,12 @@ function CoachDash() {
       const fatigueAcute: Record<string, number[]> = {};
 
       wellness?.forEach((w) => {
-        if (w.entry_date >= weekStart) wWeek[w.user_id] = (wWeek[w.user_id] ?? 0) + 1;
-        if (w.entry_date >= acuteStart) (fatigueAcute[w.user_id] ??= []).push(w.fatigue);
+        if (w.entry_date >= periodStart) wWeek[w.user_id] = (wWeek[w.user_id] ?? 0) + 1;
+        if (w.entry_date >= periodStart) (fatigueAcute[w.user_id] ??= []).push(w.fatigue);
       });
       rpe?.forEach((r) => {
-        if (r.session_date >= weekStart) rWeek[r.user_id] = (rWeek[r.user_id] ?? 0) + 1;
-        if (r.session_date >= acuteStart) acuteLoad[r.user_id] = (acuteLoad[r.user_id] ?? 0) + r.rpe_score;
+        if (r.session_date >= periodStart) rWeek[r.user_id] = (rWeek[r.user_id] ?? 0) + 1;
+        if (r.session_date >= periodStart) acuteLoad[r.user_id] = (acuteLoad[r.user_id] ?? 0) + r.rpe_score;
         chronicSum[r.user_id] = (chronicSum[r.user_id] ?? 0) + r.rpe_score;
       });
 
@@ -126,7 +126,7 @@ function CoachDash() {
       setRows(rs);
       setLoading(false);
     })();
-  }, []);
+  }, [period]);
 
   // Aggregate by position
   const byPosition = useMemo(() => {
