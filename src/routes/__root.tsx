@@ -38,6 +38,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e5a3076b-b8b8-47b4-9011-c05565f13e90/id-preview-209742dd--a385f13f-d806-4f75-abaf-cdd13fc37c41.lovable.app-1779394889180.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
+      { name: "theme-color", content: "#000000" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "El Toro" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
