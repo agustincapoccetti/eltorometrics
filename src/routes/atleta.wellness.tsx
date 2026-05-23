@@ -69,7 +69,16 @@ function WellnessForm() {
 
   return (
     <Shell title="Bienestar">
-      <p className="text-sm text-muted-foreground mb-6">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
+      <p className="text-sm text-muted-foreground mb-4">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
+
+      <div className="border border-border p-4 mb-6 flex items-end gap-3">
+        <div className="flex-1">
+          <Label htmlFor="wd">Fecha</Label>
+          <Input id="wd" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        <Button variant="outline" size="sm" onClick={removeEntry}>Eliminar registro</Button>
+      </div>
+
 
       <div className="space-y-6">
         {Q.map((q) => (
