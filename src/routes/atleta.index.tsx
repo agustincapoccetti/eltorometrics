@@ -24,6 +24,8 @@ function AthleteHome() {
   const [weekRpe, setWeekRpe] = useState(0);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
+  const [trainingToday, setTrainingToday] = useState<any | null>(null);
+  const [hasRpeToday, setHasRpeToday] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -44,6 +46,11 @@ function AthleteHome() {
       const weekStart = startOfWeek().toISOString().slice(0, 10);
       const { count } = await supabase.from("rpe_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("session_date", weekStart);
       setWeekRpe(count ?? 0);
+
+      const { data: ev } = await supabase.from("calendar_events").select("*").eq("event_date", today).eq("type","training").maybeSingle();
+      setTrainingToday(ev ?? null);
+      const { count: rc } = await supabase.from("rpe_entries").select("id",{count:"exact",head:true}).eq("user_id", user.id).eq("session_date", today);
+      setHasRpeToday((rc ?? 0) > 0);
     })();
   }, [user]);
 
