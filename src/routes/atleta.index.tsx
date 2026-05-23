@@ -82,6 +82,13 @@ function AthleteHome() {
         </div>
       </div>
 
+      {trainingToday && !hasRpeToday && (
+        <Link to="/atleta/rpe" className="block border-2 border-primary bg-primary text-primary-foreground p-4 mb-4 hover:opacity-90 transition">
+          <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Aviso</p>
+          <p className="font-medium">Hoy hay entrenamiento ({trainingToday.name}). Cargá tu RPE cuando termines →</p>
+        </Link>
+      )}
+
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <FormCard
           to="/atleta/wellness"
