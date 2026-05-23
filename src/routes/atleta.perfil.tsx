@@ -23,7 +23,7 @@ function Perfil() {
     const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).single();
     setProfile(p);
     const { data: h } = await supabase.from("weight_history").select("*").eq("user_id", user.id).order("recorded_at", { ascending: true });
-    setHistory((h ?? []).map((x) => ({ date: new Date(x.recorded_at).toLocaleDateString("es"), weight: Number(x.weight) })));
+    setHistory((h ?? []).map((x) => ({ id: x.id, date: new Date(x.recorded_at).toLocaleDateString("es"), weight: Number(x.weight) })));
   }
 
   useEffect(() => { load(); }, [user]);
@@ -72,18 +72,33 @@ function Perfil() {
             </div>
           </div>
 
-          {history.length > 1 && (
+          {history.length > 0 && (
             <div className="border border-border p-6">
               <h3 className="text-lg mb-4">Evolución del peso</h3>
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={history}>
-                  <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" stroke="#000" fontSize={11} />
-                  <YAxis stroke="#000" fontSize={11} domain={["dataMin - 2", "dataMax + 2"]} />
-                  <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
-                  <Line type="monotone" dataKey="weight" stroke="#000" strokeWidth={2} dot={{ r: 3, fill: "#000" }} />
-                </LineChart>
-              </ResponsiveContainer>
+              {history.length > 1 && (
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={history}>
+                    <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
+                    <XAxis dataKey="date" stroke="#000" fontSize={11} />
+                    <YAxis stroke="#000" fontSize={11} domain={["dataMin - 2", "dataMax + 2"]} />
+                    <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
+                    <Line type="monotone" dataKey="weight" stroke="#000" strokeWidth={2} dot={{ r: 3, fill: "#000" }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+              <div className="mt-4 space-y-1">
+                {[...history].reverse().slice(0,10).map((h: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between text-sm border-b border-border py-1.5 last:border-0">
+                    <span>{h.date}</span>
+                    <span className="font-display">{h.weight} kg</span>
+                    <Button variant="ghost" size="sm" onClick={async () => {
+                      if (!confirm("¿Eliminar este registro?")) return;
+                      await supabase.from("weight_history").delete().eq("id", h.id);
+                      load();
+                    }}>×</Button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </>

@@ -5,9 +5,12 @@ import { LogOut } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import type { ReactNode } from "react";
 
+const ADMIN_EMAIL = "agustincapoccetti@hotmail.com";
+
 export function Shell({ children, title }: { children: ReactNode; title?: string }) {
   const { role, signOut, user } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL;
 
   return (
     <div className="min-h-screen bg-background">
@@ -18,6 +21,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
             {role === "atleta" && (
               <>
                 <NavLink to="/atleta">Hoy</NavLink>
+                <NavLink to="/atleta/gym">Gym</NavLink>
                 <NavLink to="/atleta/calendario">Calendario</NavLink>
                 <NavLink to="/atleta/recuperacion">Recuperación</NavLink>
                 <NavLink to="/atleta/fisio">Fisio</NavLink>
@@ -27,9 +31,11 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
             {role === "coach" && (
               <>
                 <NavLink to="/coach">Panel</NavLink>
+                <NavLink to="/coach/gym">Gym</NavLink>
                 <NavLink to="/coach/calendario">Calendario</NavLink>
                 <NavLink to="/coach/recuperacion">Recuperación</NavLink>
                 <NavLink to="/coach/fisio">Fisio</NavLink>
+                {isAdmin && <NavLink to="/coach/invitaciones">Invitaciones</NavLink>}
               </>
             )}
             {user && (

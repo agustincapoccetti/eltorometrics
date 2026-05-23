@@ -15,6 +15,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
 import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
+import { Route as CoachInvitacionesRouteImport } from './routes/coach.invitaciones'
+import { Route as CoachGymRouteImport } from './routes/coach.gym'
 import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
 import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
@@ -22,6 +24,7 @@ import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
 import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
 import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
+import { Route as AtletaGymRouteImport } from './routes/atleta.gym'
 import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
 import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
@@ -54,6 +57,16 @@ const AtletaIndexRoute = AtletaIndexRouteImport.update({
 const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
   id: '/coach/recuperacion',
   path: '/coach/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachInvitacionesRoute = CoachInvitacionesRouteImport.update({
+  id: '/coach/invitaciones',
+  path: '/coach/invitaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachGymRoute = CoachGymRouteImport.update({
+  id: '/coach/gym',
+  path: '/coach/gym',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachFisioRoute = CoachFisioRouteImport.update({
@@ -91,6 +104,11 @@ const AtletaOnboardingRoute = AtletaOnboardingRouteImport.update({
   path: '/atleta/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaGymRoute = AtletaGymRouteImport.update({
+  id: '/atleta/gym',
+  path: '/atleta/gym',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletaFisioRoute = AtletaFisioRouteImport.update({
   id: '/atleta/fisio',
   path: '/atleta/fisio',
@@ -113,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/registro': typeof RegistroRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
+  '/atleta/gym': typeof AtletaGymRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
@@ -120,6 +139,8 @@ export interface FileRoutesByFullPath {
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/fisio': typeof CoachFisioRoute
+  '/coach/gym': typeof CoachGymRoute
+  '/coach/invitaciones': typeof CoachInvitacionesRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
@@ -131,6 +152,7 @@ export interface FileRoutesByTo {
   '/registro': typeof RegistroRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
+  '/atleta/gym': typeof AtletaGymRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
@@ -138,6 +160,8 @@ export interface FileRoutesByTo {
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/fisio': typeof CoachFisioRoute
+  '/coach/gym': typeof CoachGymRoute
+  '/coach/invitaciones': typeof CoachInvitacionesRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta': typeof AtletaIndexRoute
   '/coach': typeof CoachIndexRoute
@@ -150,6 +174,7 @@ export interface FileRoutesById {
   '/registro': typeof RegistroRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
+  '/atleta/gym': typeof AtletaGymRoute
   '/atleta/onboarding': typeof AtletaOnboardingRoute
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
@@ -157,6 +182,8 @@ export interface FileRoutesById {
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/fisio': typeof CoachFisioRoute
+  '/coach/gym': typeof CoachGymRoute
+  '/coach/invitaciones': typeof CoachInvitacionesRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
@@ -170,6 +197,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/atleta/calendario'
     | '/atleta/fisio'
+    | '/atleta/gym'
     | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/recuperacion'
@@ -177,6 +205,8 @@ export interface FileRouteTypes {
     | '/atleta/wellness'
     | '/coach/calendario'
     | '/coach/fisio'
+    | '/coach/gym'
+    | '/coach/invitaciones'
     | '/coach/recuperacion'
     | '/atleta/'
     | '/coach/'
@@ -188,6 +218,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/atleta/calendario'
     | '/atleta/fisio'
+    | '/atleta/gym'
     | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/recuperacion'
@@ -195,6 +226,8 @@ export interface FileRouteTypes {
     | '/atleta/wellness'
     | '/coach/calendario'
     | '/coach/fisio'
+    | '/coach/gym'
+    | '/coach/invitaciones'
     | '/coach/recuperacion'
     | '/atleta'
     | '/coach'
@@ -206,6 +239,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/atleta/calendario'
     | '/atleta/fisio'
+    | '/atleta/gym'
     | '/atleta/onboarding'
     | '/atleta/perfil'
     | '/atleta/recuperacion'
@@ -213,6 +247,8 @@ export interface FileRouteTypes {
     | '/atleta/wellness'
     | '/coach/calendario'
     | '/coach/fisio'
+    | '/coach/gym'
+    | '/coach/invitaciones'
     | '/coach/recuperacion'
     | '/atleta/'
     | '/coach/'
@@ -225,6 +261,7 @@ export interface RootRouteChildren {
   RegistroRoute: typeof RegistroRoute
   AtletaCalendarioRoute: typeof AtletaCalendarioRoute
   AtletaFisioRoute: typeof AtletaFisioRoute
+  AtletaGymRoute: typeof AtletaGymRoute
   AtletaOnboardingRoute: typeof AtletaOnboardingRoute
   AtletaPerfilRoute: typeof AtletaPerfilRoute
   AtletaRecuperacionRoute: typeof AtletaRecuperacionRoute
@@ -232,6 +269,8 @@ export interface RootRouteChildren {
   AtletaWellnessRoute: typeof AtletaWellnessRoute
   CoachCalendarioRoute: typeof CoachCalendarioRoute
   CoachFisioRoute: typeof CoachFisioRoute
+  CoachGymRoute: typeof CoachGymRoute
+  CoachInvitacionesRoute: typeof CoachInvitacionesRoute
   CoachRecuperacionRoute: typeof CoachRecuperacionRoute
   AtletaIndexRoute: typeof AtletaIndexRoute
   CoachIndexRoute: typeof CoachIndexRoute
@@ -280,6 +319,20 @@ declare module '@tanstack/react-router' {
       path: '/coach/recuperacion'
       fullPath: '/coach/recuperacion'
       preLoaderRoute: typeof CoachRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/invitaciones': {
+      id: '/coach/invitaciones'
+      path: '/coach/invitaciones'
+      fullPath: '/coach/invitaciones'
+      preLoaderRoute: typeof CoachInvitacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/gym': {
+      id: '/coach/gym'
+      path: '/coach/gym'
+      fullPath: '/coach/gym'
+      preLoaderRoute: typeof CoachGymRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/fisio': {
@@ -331,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/gym': {
+      id: '/atleta/gym'
+      path: '/atleta/gym'
+      fullPath: '/atleta/gym'
+      preLoaderRoute: typeof AtletaGymRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atleta/fisio': {
       id: '/atleta/fisio'
       path: '/atleta/fisio'
@@ -361,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegistroRoute: RegistroRoute,
   AtletaCalendarioRoute: AtletaCalendarioRoute,
   AtletaFisioRoute: AtletaFisioRoute,
+  AtletaGymRoute: AtletaGymRoute,
   AtletaOnboardingRoute: AtletaOnboardingRoute,
   AtletaPerfilRoute: AtletaPerfilRoute,
   AtletaRecuperacionRoute: AtletaRecuperacionRoute,
@@ -368,6 +429,8 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaWellnessRoute: AtletaWellnessRoute,
   CoachCalendarioRoute: CoachCalendarioRoute,
   CoachFisioRoute: CoachFisioRoute,
+  CoachGymRoute: CoachGymRoute,
+  CoachInvitacionesRoute: CoachInvitacionesRoute,
   CoachRecuperacionRoute: CoachRecuperacionRoute,
   AtletaIndexRoute: AtletaIndexRoute,
   CoachIndexRoute: CoachIndexRoute,
@@ -376,13 +439,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

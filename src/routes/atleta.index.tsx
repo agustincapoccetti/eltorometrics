@@ -24,6 +24,8 @@ function AthleteHome() {
   const [weekRpe, setWeekRpe] = useState(0);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
+  const [trainingToday, setTrainingToday] = useState<any | null>(null);
+  const [hasRpeToday, setHasRpeToday] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -44,6 +46,11 @@ function AthleteHome() {
       const weekStart = startOfWeek().toISOString().slice(0, 10);
       const { count } = await supabase.from("rpe_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("session_date", weekStart);
       setWeekRpe(count ?? 0);
+
+      const { data: ev } = await supabase.from("calendar_events").select("*").eq("event_date", today).eq("type","training").maybeSingle();
+      setTrainingToday(ev ?? null);
+      const { count: rc } = await supabase.from("rpe_entries").select("id",{count:"exact",head:true}).eq("user_id", user.id).eq("session_date", today);
+      setHasRpeToday((rc ?? 0) > 0);
     })();
   }, [user]);
 
@@ -74,6 +81,13 @@ function AthleteHome() {
           {profile?.position && <p className="mt-1 text-sm text-muted-foreground">{profile.position}{bmi && ` · IMC ${bmi}`}</p>}
         </div>
       </div>
+
+      {trainingToday && !hasRpeToday && (
+        <Link to="/atleta/rpe" className="block border-2 border-primary bg-primary text-primary-foreground p-4 mb-4 hover:opacity-90 transition">
+          <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Aviso</p>
+          <p className="font-medium">Hoy hay entrenamiento ({trainingToday.name}). Cargá tu RPE cuando termines →</p>
+        </Link>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         <FormCard

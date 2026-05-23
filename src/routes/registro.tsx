@@ -69,6 +69,9 @@ function RegistroPage() {
                 <span className="font-display text-xs">PREPARADOR FÍSICO</span>
               </label>
             </RadioGroup>
+            {role === "coach" && (
+              <p className="text-xs text-muted-foreground mt-2">Solo emails previamente invitados por el admin pueden registrarse como coach.</p>
+            )}
           </div>
 
           <div>

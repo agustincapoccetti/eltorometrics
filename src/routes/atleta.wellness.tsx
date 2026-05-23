@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Shell } from "@/components/Shell";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
@@ -26,27 +27,58 @@ function WellnessForm() {
   const [hasPain, setHasPain] = useState(false);
   const [pain, setPain] = useState("");
   const [saving, setSaving] = useState(false);
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+  // Load entry for selected date so the form can edit it
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("wellness_entries").select("*").eq("user_id", user.id).eq("entry_date", date).maybeSingle();
+      if (data) {
+        setV({ sleep: data.sleep, stress: data.stress, fatigue: data.fatigue, mood: data.mood });
+        setHasPain(data.has_pain); setPain(data.pain_description ?? "");
+      } else {
+        setV({ sleep: 0, stress: 0, fatigue: 0, mood: 0 }); setHasPain(false); setPain("");
+      }
+    })();
+  }, [user, date]);
 
   async function submit() {
     if (Q.some((q) => !v[q.key])) { toast.error("Completá todas las preguntas"); return; }
     if (hasPain && !pain.trim()) { toast.error("Describí la molestia"); return; }
     setSaving(true);
-    const today = new Date().toISOString().slice(0, 10);
     const { error } = await supabase.from("wellness_entries").upsert({
       user_id: user!.id,
-      entry_date: today,
+      entry_date: date,
       sleep: v.sleep, stress: v.stress, fatigue: v.fatigue, mood: v.mood,
       has_pain: hasPain, pain_description: hasPain ? pain : null,
     }, { onConflict: "user_id,entry_date" });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Bienestar registrado");
+    toast.success("Bienestar guardado");
     navigate({ to: "/atleta" });
+  }
+
+  async function removeEntry() {
+    if (!confirm("¿Eliminar el registro de este día?")) return;
+    const { error } = await supabase.from("wellness_entries").delete().eq("user_id", user!.id).eq("entry_date", date);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Eliminado");
+    setV({ sleep: 0, stress: 0, fatigue: 0, mood: 0 }); setHasPain(false); setPain("");
   }
 
   return (
     <Shell title="Bienestar">
-      <p className="text-sm text-muted-foreground mb-6">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
+      <p className="text-sm text-muted-foreground mb-4">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
+
+      <div className="border border-border p-4 mb-6 flex items-end gap-3">
+        <div className="flex-1">
+          <Label htmlFor="wd">Fecha</Label>
+          <Input id="wd" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        </div>
+        <Button variant="outline" size="sm" onClick={removeEntry}>Eliminar registro</Button>
+      </div>
+
 
       <div className="space-y-6">
         {Q.map((q) => (
