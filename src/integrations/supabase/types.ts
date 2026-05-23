@@ -53,6 +53,122 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          used: boolean
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          used?: boolean
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          used?: boolean
+          used_at?: string | null
+        }
+        Relationships: []
+      }
+      gym_observations: {
+        Row: {
+          created_at: string
+          done: boolean
+          exercise: string
+          id: string
+          notes: string | null
+          reps: number | null
+          routine_id: string
+          updated_at: string
+          user_id: string
+          week: number | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          done?: boolean
+          exercise: string
+          id?: string
+          notes?: string | null
+          reps?: number | null
+          routine_id: string
+          updated_at?: string
+          user_id: string
+          week?: number | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          exercise?: string
+          id?: string
+          notes?: string | null
+          reps?: number | null
+          routine_id?: string
+          updated_at?: string
+          user_id?: string
+          week?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_observations_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "gym_routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_routines: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          month: number
+          notes: string | null
+          pdf_path: string
+          position: string | null
+          title: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          month: number
+          notes?: string | null
+          pdf_path: string
+          position?: string | null
+          title: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          month?: number
+          notes?: string | null
+          pdf_path?: string
+          position?: string | null
+          title?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       physio_appointments: {
         Row: {
           appointment_date: string
@@ -359,6 +475,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _uid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "atleta" | "coach"
