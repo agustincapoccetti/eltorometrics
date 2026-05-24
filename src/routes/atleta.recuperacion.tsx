@@ -10,7 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Lock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { WeekStrip } from "@/components/WeekStrip";
+import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/recuperacion")({
   component: () => <Protected requireRole="atleta"><Recuperacion /></Protected>,
@@ -23,30 +26,33 @@ function Recuperacion() {
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState("");
   const [history, setHistory] = useState<any[]>([]);
+  const [entries, setEntries] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
   const [entryId, setEntryId] = useState<string | null>(null);
 
-  async function loadHistory() {
+  async function loadEntries() {
     if (!user) return;
-    const { data } = await supabase.from("recovery_entries").select("entry_date, total_score, max_score").eq("user_id", user.id).order("entry_date", { ascending: true });
-    setHistory((data ?? []).map((d) => ({ date: d.entry_date, score: d.total_score, max: d.max_score, pct: d.max_score ? Math.round((d.total_score / d.max_score) * 100) : 0 })));
+    const prev = new Date(); prev.setDate(prev.getDate() - 14);
+    const { data } = await supabase.from("recovery_entries").select("*").eq("user_id", user.id).gte("entry_date", isoDate(prev)).order("entry_date", { ascending: true });
+    setEntries(data ?? []);
+    const { data: hist } = await supabase.from("recovery_entries").select("entry_date, total_score, max_score").eq("user_id", user.id).order("entry_date", { ascending: true });
+    setHistory((hist ?? []).map((d) => ({ date: d.entry_date, pct: d.max_score ? Math.round((d.total_score / d.max_score) * 100) : 0 })));
   }
 
   useEffect(() => {
     (async () => {
       const { data: s } = await supabase.from("recovery_strategies").select("*").eq("active", true).order("sort_order");
       setStrategies(s ?? []);
-      loadHistory();
+      loadEntries();
     })();
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
+    const e = entries.find((x) => x.entry_date === date);
     (async () => {
-      const { data: e } = await supabase.from("recovery_entries").select("*").eq("user_id", user.id).eq("entry_date", date).maybeSingle();
       if (e) {
-        setEntryId(e.id);
-        setNotes(e.notes ?? "");
+        setEntryId(e.id); setNotes(e.notes ?? "");
         const { data: items } = await supabase.from("recovery_entry_items").select("strategy_id").eq("entry_id", e.id);
         const c: Record<string, boolean> = {};
         (items ?? []).forEach((i) => { c[i.strategy_id] = true; });
@@ -55,7 +61,17 @@ function Recuperacion() {
         setEntryId(null); setChecked({}); setNotes("");
       }
     })();
-  }, [user, date]);
+  }, [user, date, entries]);
+
+  const completed = useMemo(() => new Set(entries.map((e) => e.entry_date)), [entries]);
+  const prev = (() => { const d = new Date(); d.setDate(d.getDate() - 7); return d; })();
+  const prevCompleted = useMemo(() => {
+    const start = isoDate(startOfWeek(prev));
+    const end = (() => { const e = new Date(startOfWeek(prev)); e.setDate(e.getDate() + 6); return isoDate(e); })();
+    return new Set(entries.filter((e) => e.entry_date >= start && e.entry_date <= end).map((e) => e.entry_date));
+  }, [entries]);
+
+  const editable = isCurrentWeek(date);
 
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
@@ -63,6 +79,7 @@ function Recuperacion() {
 
   async function save() {
     if (!user) return;
+    if (!editable) { toast.error("Solo podés editar la semana actual"); return; }
     setSaving(true);
     let id = entryId;
     if (!id) {
@@ -86,18 +103,21 @@ function Recuperacion() {
     setEntryId(id);
     setSaving(false);
     toast.success("Recuperación guardada");
-    loadHistory();
+    loadEntries();
   }
 
   return (
     <Shell title="Recuperación">
-      <p className="text-sm text-muted-foreground mb-6">Marcá las estrategias que cumpliste hoy. Cada una suma puntos a tu score.</p>
+      <p className="text-sm text-muted-foreground mb-4">Marcá las estrategias que cumpliste hoy. Cada una suma puntos a tu score.</p>
+
+      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} />
 
       <div className="border border-border p-6 mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
             <Label htmlFor="d" className="text-xs uppercase tracking-wider">Fecha</Label>
             <Input id="d" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1 w-44" />
+            {!editable && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Lock className="h-3 w-3" />Solo lectura</p>}
           </div>
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Score</p>
@@ -108,8 +128,9 @@ function Recuperacion() {
 
         <div className="space-y-2">
           {strategies.map((s) => (
-            <label key={s.id} className={`flex items-start gap-3 p-3 border cursor-pointer transition ${checked[s.id] ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
-              <Checkbox checked={!!checked[s.id]} onCheckedChange={(v) => setChecked({ ...checked, [s.id]: !!v })} className="mt-0.5" />
+            <label key={s.id} className={`flex items-start gap-3 p-3 border transition ${!editable ? "opacity-60 cursor-not-allowed" : "cursor-pointer"} ${checked[s.id] ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
+              <span className="text-2xl leading-none w-8 text-center flex-shrink-0" aria-hidden>{s.icon ?? "✅"}</span>
+              <Checkbox checked={!!checked[s.id]} disabled={!editable} onCheckedChange={(v) => setChecked({ ...checked, [s.id]: !!v })} className="mt-1" />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <p className="font-medium text-sm">{s.name}</p>
@@ -123,10 +144,10 @@ function Recuperacion() {
 
         <div className="mt-4">
           <Label htmlFor="n">Notas (opcional)</Label>
-          <Textarea id="n" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+          <Textarea id="n" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} disabled={!editable} />
         </div>
 
-        <Button onClick={save} disabled={saving} className="w-full mt-4" size="lg">{saving ? "Guardando..." : entryId ? "Actualizar" : "Guardar"}</Button>
+        <Button onClick={save} disabled={saving || !editable} className="w-full mt-4" size="lg">{saving ? "Guardando..." : entryId ? "Actualizar" : "Guardar"}</Button>
       </div>
 
       {history.length > 1 && (
