@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Shell } from "@/components/Shell";
 import { Protected } from "@/lib/protected";
@@ -10,6 +10,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Lock } from "lucide-react";
+import { WeekStrip } from "@/components/WeekStrip";
+import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/wellness")({ component: () => <Protected requireRole="atleta"><WellnessForm /></Protected> });
 
@@ -28,57 +31,77 @@ function WellnessForm() {
   const [pain, setPain] = useState("");
   const [saving, setSaving] = useState(false);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [entries, setEntries] = useState<any[]>([]);
 
-  // Load entry for selected date so the form can edit it
-  useEffect(() => {
+  async function loadEntries() {
     if (!user) return;
-    (async () => {
-      const { data } = await supabase.from("wellness_entries").select("*").eq("user_id", user.id).eq("entry_date", date).maybeSingle();
-      if (data) {
-        setV({ sleep: data.sleep, stress: data.stress, fatigue: data.fatigue, mood: data.mood });
-        setHasPain(data.has_pain); setPain(data.pain_description ?? "");
-      } else {
-        setV({ sleep: 0, stress: 0, fatigue: 0, mood: 0 }); setHasPain(false); setPain("");
-      }
-    })();
-  }, [user, date]);
+    const start = new Date(); start.setDate(start.getDate() - 14);
+    const { data } = await supabase.from("wellness_entries").select("*").eq("user_id", user.id).gte("entry_date", isoDate(start));
+    setEntries(data ?? []);
+  }
+  useEffect(() => { loadEntries(); }, [user]);
+
+  useEffect(() => {
+    const data = entries.find((e) => e.entry_date === date);
+    if (data) {
+      setV({ sleep: data.sleep, stress: data.stress, fatigue: data.fatigue, mood: data.mood });
+      setHasPain(data.has_pain); setPain(data.pain_description ?? "");
+    } else {
+      setV({ sleep: 0, stress: 0, fatigue: 0, mood: 0 }); setHasPain(false); setPain("");
+    }
+  }, [date, entries]);
+
+  const completed = useMemo(() => new Set(entries.map((e) => e.entry_date)), [entries]);
+  const prev = (() => { const d = new Date(); d.setDate(d.getDate() - 7); return d; })();
+  const prevCompleted = useMemo(() => {
+    const start = isoDate(startOfWeek(prev));
+    const end = (() => { const e = new Date(startOfWeek(prev)); e.setDate(e.getDate() + 6); return isoDate(e); })();
+    return new Set(entries.filter((e) => e.entry_date >= start && e.entry_date <= end).map((e) => e.entry_date));
+  }, [entries]);
+
+  const editable = isCurrentWeek(date);
 
   async function submit() {
+    if (!editable) { toast.error("Solo podés editar la semana actual"); return; }
     if (Q.some((q) => !v[q.key])) { toast.error("Completá todas las preguntas"); return; }
     if (hasPain && !pain.trim()) { toast.error("Describí la molestia"); return; }
     setSaving(true);
     const { error } = await supabase.from("wellness_entries").upsert({
-      user_id: user!.id,
-      entry_date: date,
+      user_id: user!.id, entry_date: date,
       sleep: v.sleep, stress: v.stress, fatigue: v.fatigue, mood: v.mood,
       has_pain: hasPain, pain_description: hasPain ? pain : null,
     }, { onConflict: "user_id,entry_date" });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Bienestar guardado");
+    loadEntries();
     navigate({ to: "/atleta" });
   }
 
   async function removeEntry() {
+    if (!editable) { toast.error("Solo podés borrar la semana actual"); return; }
     if (!confirm("¿Eliminar el registro de este día?")) return;
     const { error } = await supabase.from("wellness_entries").delete().eq("user_id", user!.id).eq("entry_date", date);
     if (error) { toast.error(error.message); return; }
     toast.success("Eliminado");
     setV({ sleep: 0, stress: 0, fatigue: 0, mood: 0 }); setHasPain(false); setPain("");
+    loadEntries();
   }
 
   return (
     <Shell title="Bienestar">
       <p className="text-sm text-muted-foreground mb-4">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
 
-      <div className="border border-border p-4 mb-6 flex items-end gap-3">
-        <div className="flex-1">
+      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} />
+
+      <div className="border border-border p-4 mb-6 flex items-end gap-3 flex-wrap">
+        <div className="flex-1 min-w-[180px]">
           <Label htmlFor="wd">Fecha</Label>
           <Input id="wd" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
-        <Button variant="outline" size="sm" onClick={removeEntry}>Eliminar registro</Button>
+        {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo semana actual</span>}
+        <Button variant="outline" size="sm" disabled={!editable} onClick={removeEntry}>Eliminar registro</Button>
       </div>
-
 
       <div className="space-y-6">
         {Q.map((q) => (
@@ -88,10 +111,9 @@ function WellnessForm() {
             <div className="grid grid-cols-5 gap-2">
               {[1,2,3,4,5].map((n) => (
                 <button
-                  key={n}
-                  type="button"
+                  key={n} type="button" disabled={!editable}
                   onClick={() => setV({ ...v, [q.key]: n })}
-                  className={`aspect-square flex items-center justify-center border text-xl font-display transition ${
+                  className={`aspect-square flex items-center justify-center border text-xl font-display transition disabled:opacity-50 disabled:cursor-not-allowed ${
                     v[q.key] === n ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"
                   }`}
                 >{n}</button>
@@ -106,18 +128,18 @@ function WellnessForm() {
               <h3 className="text-lg">Dolor / lesión</h3>
               <p className="text-xs uppercase tracking-wider text-muted-foreground">¿Tenés alguna molestia?</p>
             </div>
-            <Switch checked={hasPain} onCheckedChange={setHasPain} />
+            <Switch checked={hasPain} onCheckedChange={setHasPain} disabled={!editable} />
           </div>
           {hasPain && (
             <div>
               <Label htmlFor="pain">Ubicación y descripción</Label>
-              <Textarea id="pain" value={pain} onChange={(e) => setPain(e.target.value)} placeholder="Ej: Rodilla derecha, dolor al correr" />
+              <Textarea id="pain" value={pain} onChange={(e) => setPain(e.target.value)} placeholder="Ej: Rodilla derecha, dolor al correr" disabled={!editable} />
             </div>
           )}
         </div>
       </div>
 
-      <Button onClick={submit} disabled={saving} className="w-full mt-6" size="lg">{saving ? "..." : "Enviar"}</Button>
+      <Button onClick={submit} disabled={saving || !editable} className="w-full mt-6" size="lg">{saving ? "..." : "Enviar"}</Button>
     </Shell>
   );
 }

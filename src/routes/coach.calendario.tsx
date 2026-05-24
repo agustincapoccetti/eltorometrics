@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { notifyAllAthletes } from "@/lib/notifications";
 
 export const Route = createFileRoute("/coach/calendario")({
   component: () => <Protected requireRole="coach"><CoachCalendar /></Protected>,
@@ -68,6 +69,11 @@ function CoachCalendar() {
     } else {
       const { error } = await supabase.from("calendar_events").insert({ ...payload, created_by: user!.id });
       if (error) { toast.error(error.message); return; }
+      await notifyAllAthletes({
+        title: form.type === "match" ? "Nuevo partido en agenda" : "Nuevo entrenamiento",
+        body: `${form.name} · ${selectedDate}${form.event_time ? ` ${form.event_time}` : ""}`,
+        link: "/atleta/calendario", kind: "info", created_by: user!.id,
+      });
     }
     toast.success("Guardado");
     setSelectedDate(null); setEditing(null);

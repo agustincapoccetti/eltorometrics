@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2, FileText, Upload } from "lucide-react";
+import { notifyAllAthletes } from "@/lib/notifications";
 
 const POSITIONS = ["Todos","Pilar","Hooker","Segunda Línea","Ala","Octavo","Medio Scrum","Apertura","Centro","Wing","Fullback"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -53,6 +54,11 @@ function Page() {
     setUploading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Rutina publicada");
+    await notifyAllAthletes({
+      title: "Nueva rutina de gimnasio",
+      body: `${title.trim()} · ${MONTHS[parseInt(month) - 1]} ${year}${position !== "Todos" ? ` · ${position}` : ""}`,
+      link: "/atleta/gym", kind: "gym", created_by: user!.id,
+    });
     setTitle(""); setNotes(""); setFile(null);
     load();
   }

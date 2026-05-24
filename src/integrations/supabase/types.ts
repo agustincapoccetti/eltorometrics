@@ -169,11 +169,49 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          link: string | null
+          read: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          link?: string | null
+          read?: boolean
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          link?: string | null
+          read?: boolean
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       physio_appointments: {
         Row: {
           appointment_date: string
           appointment_time: string | null
+          appointment_type: string
           created_at: string
+          created_by: string | null
           id: string
           notes: string | null
           reasons: string[]
@@ -184,7 +222,9 @@ export type Database = {
         Insert: {
           appointment_date: string
           appointment_time?: string | null
+          appointment_type?: string
           created_at?: string
+          created_by?: string | null
           id?: string
           notes?: string | null
           reasons?: string[]
@@ -195,7 +235,9 @@ export type Database = {
         Update: {
           appointment_date?: string
           appointment_time?: string | null
+          appointment_type?: string
           created_at?: string
+          created_by?: string | null
           id?: string
           notes?: string | null
           reasons?: string[]
@@ -330,6 +372,7 @@ export type Database = {
           active: boolean
           created_at: string
           description: string | null
+          icon: string | null
           id: string
           name: string
           points: number
@@ -339,6 +382,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name: string
           points?: number
@@ -348,6 +392,7 @@ export type Database = {
           active?: boolean
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name?: string
           points?: number
