@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Download, MessageCircle, CheckCircle2, Circle, ChevronRight, Image as ImageIcon, AlertTriangle, Activity, FileDown } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Cell } from "recharts";
 import { toPng } from "html-to-image";
 import { acwrColor, fatigueColor } from "@/lib/score-colors";
 import { exportPdf } from "@/lib/pdf-export";
@@ -316,12 +316,24 @@ function CoachDash() {
                 <YAxis stroke="#000" fontSize={11} />
                 <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar dataKey="cargaSemanal" name="Carga semanal (UA)" fill="#000" />
-                <Bar dataKey="cargaCronica" name="Carga crónica (UA)" fill="#777" />
-                <Bar dataKey="fatiga" name="Fatiga acum. 7d" fill="#bbb" />
+                <Bar dataKey="cargaSemanal" name="Carga semanal (UA)">
+                  {byPosition.map((p, i) => <Cell key={i} fill={loadColor(p.cargaSemanal)} />)}
+                </Bar>
+                <Bar dataKey="cargaCronica" name="Carga crónica (UA)">
+                  {byPosition.map((p, i) => <Cell key={i} fill={loadColor(p.cargaCronica)} fillOpacity={0.55} />)}
+                </Bar>
+                <Bar dataKey="fatiga" name="Fatiga μ (1–5)">
+                  {byPosition.map((p, i) => <Cell key={i} fill={fatigueBarColor(p.fatiga)} />)}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}
+          <div className="flex flex-wrap gap-3 mt-3 text-[10px] uppercase tracking-wider">
+            <LegendDot color="#10b981" label="Bajo / seguro" />
+            <LegendDot color="#f59e0b" label="Moderado" />
+            <LegendDot color="#f97316" label="Alto" />
+            <LegendDot color="#dc2626" label="Riesgo / peligro" />
+          </div>
         </div>
       </div>
 
