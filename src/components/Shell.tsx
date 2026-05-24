@@ -3,6 +3,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { NotificationBell } from "@/components/NotificationBell";
 import type { ReactNode } from "react";
 
 const ADMIN_EMAIL = "agustincapoccetti@hotmail.com";
@@ -38,6 +39,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
                 {isAdmin && <NavLink to="/coach/invitaciones">Invitaciones</NavLink>}
               </>
             )}
+            {user && <NotificationBell />}
             {user && (
               <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate({ to: "/login" }); }}>
                 <LogOut className="h-4 w-4" />
