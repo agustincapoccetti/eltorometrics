@@ -405,3 +405,22 @@ function CoachDash() {
     </Shell>
   );
 }
+
+function loadColor(v: number): string {
+  if (v < 200) return "#10b981";
+  if (v < 500) return "#f59e0b";
+  if (v < 800) return "#f97316";
+  return "#dc2626";
+}
+function fatigueBarColor(v: number): string {
+  if (v <= 2) return "#10b981";
+  if (v <= 3) return "#f59e0b";
+  if (v <= 4) return "#f97316";
+  return "#dc2626";
+}
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1"><span className="w-3 h-3 inline-block" style={{ background: color }} />{label}</span>
+  );
+}
+
