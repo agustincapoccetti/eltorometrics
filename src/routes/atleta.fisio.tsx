@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { APPOINTMENT_TYPES, typeLabel, typeIcon } from "@/lib/appointment-types";
 
 export const Route = createFileRoute("/atleta/fisio")({
   component: () => <Protected requireRole="atleta"><AthletePhysio /></Protected>,
