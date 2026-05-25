@@ -38,6 +38,7 @@ function CoachPhysio() {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const reasonsRef = useRef<HTMLDivElement>(null);
   const athletesRef = useRef<HTMLDivElement>(null);
 
