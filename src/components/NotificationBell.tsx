@@ -5,7 +5,8 @@ import { useAuth } from "@/lib/auth-context";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { tryShowPush, requestPushPermission } from "@/lib/notifications";
+import { tryShowPush, requestPushPermission, getPushPermission, ensureServiceWorker } from "@/lib/notifications";
+import { toast } from "sonner";
 
 interface Notif {
   id: string; title: string; body: string | null; link: string | null;
