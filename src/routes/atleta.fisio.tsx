@@ -221,13 +221,14 @@ function Section({ title, items, onEdit, onDelete }: any) {
       <div className="border border-border">
         {items.map((a: any) => (
           <div key={a.id} className="flex items-start gap-3 p-3 border-b border-border last:border-b-0">
-            <CalendarIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span className="text-xl mt-0.5 flex-shrink-0" aria-hidden>{typeIcon(a.appointment_type)}</span>
             <button onClick={() => onEdit(a)} className="flex-1 text-left">
               <p className="text-sm font-medium">
                 {new Date(a.appointment_date + "T12:00").toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short" })}
                 {a.appointment_time && ` · ${a.appointment_time.slice(0, 5)}`}
                 <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">{a.status === "attended" ? "Asistida" : a.status === "cancelled" ? "Cancelada" : "Programada"}</span>
               </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{typeLabel(a.appointment_type)}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{(a.reasons ?? []).join(" · ") || "—"}</p>
               {a.notes && <p className="text-xs mt-1 italic">{a.notes}</p>}
             </button>
