@@ -199,7 +199,7 @@ function CoachPhysio() {
 
   return (
     <Shell title="Fisioterapia">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <p className="text-sm text-muted-foreground">Asigná citas, viendo el orden por día y por horario.</p>
         <div className="flex gap-2">
           <Button onClick={() => openNew()}><Plus className="h-4 w-4 mr-2" />Nueva cita</Button>
@@ -207,10 +207,20 @@ function CoachPhysio() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">Tipo:</span>
+        {[{ v: "all", l: "Todas", icon: "📋" }, ...APPOINTMENT_TYPES].map((t) => (
+          <button key={t.v} type="button" onClick={() => setTypeFilter(t.v)}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border ${typeFilter === t.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
+            <span className="mr-1">{t.icon}</span>{t.l}
+          </button>
+        ))}
+      </div>
+
       <div className="grid md:grid-cols-3 gap-3 mb-8">
-        <Stat label="Citas totales" value={appointments.length} />
+        <Stat label={typeFilter === "all" ? "Citas totales" : `Citas (${typeLabel(typeFilter)})`} value={filtered.length} />
         <Stat label="Atletas con citas" value={byAthlete.length} />
-        <Stat label="Asistidas" value={appointments.filter((a) => a.status === "attended").length} />
+        <Stat label="Asistidas" value={filtered.filter((a) => a.status === "attended").length} />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
