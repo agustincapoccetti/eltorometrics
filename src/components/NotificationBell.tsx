@@ -17,6 +17,7 @@ export function NotificationBell() {
   const { user } = useAuth();
   const [list, setList] = useState<Notif[]>([]);
   const [open, setOpen] = useState(false);
+  const [perm, setPerm] = useState<NotificationPermission | "unsupported">("default");
 
   async function load() {
     if (!user) return;
