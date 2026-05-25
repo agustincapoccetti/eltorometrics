@@ -245,15 +245,24 @@ function CoachPhysio() {
             {dayAppointments.map((a) => {
               const p = profiles[a.user_id];
               return (
-                <button key={a.id} onClick={() => openEdit(a)} className="w-full text-left border border-border p-2 hover:bg-accent">
-                  <div className="flex items-center gap-2">
-                    <span className="font-display text-sm w-12 flex items-center gap-1"><Clock className="h-3 w-3" />{a.appointment_time?.slice(0, 5) ?? "--:--"}</span>
-                    <span className="text-base">{typeIcon(a.appointment_type)}</span>
-                    <span className="flex-1 text-sm font-medium truncate">{p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : "—"}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.status === "attended" ? "OK" : a.status === "cancelled" ? "X" : "•"}</span>
+                <div key={a.id} className="border border-border p-2">
+                  <button onClick={() => openEdit(a)} className="w-full text-left hover:bg-accent">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-sm w-12 flex items-center gap-1"><Clock className="h-3 w-3" />{a.appointment_time?.slice(0, 5) ?? "--:--"}</span>
+                      <span className="text-base">{typeIcon(a.appointment_type)}</span>
+                      <span className="flex-1 text-sm font-medium truncate">{p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : "—"}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 ml-14"><MapPin className="inline h-2.5 w-2.5 mr-0.5" />{typeLabel(a.appointment_type)}{a.reasons?.length ? ` · ${a.reasons.slice(0,2).join(", ")}` : ""}</p>
+                  </button>
+                  <div className="flex gap-1 mt-2 ml-14">
+                    {[{ v: "scheduled", l: "Programada" }, { v: "attended", l: "Asistida" }, { v: "cancelled", l: "Cancelada" }].map((s) => (
+                      <button key={s.v} type="button" onClick={(e) => { e.stopPropagation(); quickStatus(a, s.v); }}
+                        className={`px-2 py-0.5 text-[9px] uppercase tracking-wider border ${a.status === s.v ? (s.v === "attended" ? "bg-green-600 text-white border-green-600" : s.v === "cancelled" ? "bg-red-600 text-white border-red-600" : "bg-primary text-primary-foreground border-primary") : "border-border hover:bg-accent"}`}>
+                        {s.l}
+                      </button>
+                    ))}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 ml-14"><MapPin className="inline h-2.5 w-2.5 mr-0.5" />{typeLabel(a.appointment_type)}{a.reasons?.length ? ` · ${a.reasons.slice(0,2).join(", ")}` : ""}</p>
-                </button>
+                </div>
               );
             })}
           </div>
