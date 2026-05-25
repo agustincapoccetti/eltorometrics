@@ -59,6 +59,7 @@ function AthletePhysio() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({
+    appointment_type: "fisio_club" as string,
     appointment_date: new Date().toISOString().slice(0, 10),
     appointment_time: "",
     reasons: [] as string[],
