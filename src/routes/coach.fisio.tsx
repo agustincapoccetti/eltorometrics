@@ -171,6 +171,13 @@ function CoachPhysio() {
     load();
   }
 
+  async function quickStatus(a: any, status: string) {
+    const { error } = await supabase.from("physio_appointments").update({ status }).eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    setAppointments((cur) => cur.map((x) => x.id === a.id ? { ...x, status } : x));
+    toast.success("Estado actualizado");
+  }
+
   async function downloadPdf() {
     await exportPdf({
       title: "Citas con fisioterapeuta",
