@@ -70,9 +70,11 @@ function CoachPhysio() {
   }
   useEffect(() => { load(); }, []);
 
+  const filtered = useMemo(() => typeFilter === "all" ? appointments : appointments.filter((a) => a.appointment_type === typeFilter), [appointments, typeFilter]);
+
   const byAthlete = useMemo(() => {
     const map: Record<string, any> = {};
-    appointments.forEach((a) => {
+    filtered.forEach((a) => {
       const p = profiles[a.user_id];
       const name = p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : a.user_id.slice(0, 8);
       const e = (map[a.user_id] ??= { id: a.user_id, name, position: p?.position ?? "—", total: 0, attended: 0, scheduled: 0, cancelled: 0 });
@@ -82,27 +84,28 @@ function CoachPhysio() {
       else e.scheduled++;
     });
     return Object.values(map).sort((a: any, b: any) => b.total - a.total);
-  }, [appointments, profiles]);
+  }, [filtered, profiles]);
 
   const byReason = useMemo(() => {
     const counts: Record<string, number> = {};
-    appointments.forEach((a) => (a.reasons ?? []).forEach((r: string) => { counts[r] = (counts[r] ?? 0) + 1; }));
+    filtered.forEach((a) => (a.reasons ?? []).forEach((r: string) => { counts[r] = (counts[r] ?? 0) + 1; }));
     return Object.entries(counts).map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);
-  }, [appointments]);
+  }, [filtered]);
 
   // Calendar events: one per appointment
-  const calEvents = useMemo(() => appointments.map((a) => ({
+  const calEvents = useMemo(() => filtered.map((a) => ({
     id: a.id,
     event_date: a.appointment_date,
     name: `${typeIcon(a.appointment_type)} ${profiles[a.user_id]?.full_name ?? "—"}`,
     type: "training" as const,
-  })), [appointments, profiles]);
+  })), [filtered, profiles]);
 
   const dayAppointments = useMemo(() => {
     if (!selectedDate) return [];
-    return appointments.filter((a) => a.appointment_date === selectedDate)
+    return filtered.filter((a) => a.appointment_date === selectedDate)
       .sort((a, b) => (a.appointment_time ?? "99:99").localeCompare(b.appointment_time ?? "99:99"));
-  }, [appointments, selectedDate]);
+  }, [filtered, selectedDate]);
+
 
   function openNew(date?: string) {
     setEditing(null);
