@@ -1,27 +1,39 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
+const KEEP_KEY = "etr_keep_logged_in";
+
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [keep, setKeep] = useState(true);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { refreshRole } = useAuth();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const v = localStorage.getItem(KEEP_KEY);
+      if (v === "false") setKeep(false);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { toast.error(error.message); setLoading(false); return; }
+    localStorage.setItem(KEEP_KEY, keep ? "true" : "false");
     await refreshRole();
     const { data: roleData } = await supabase.from("user_roles").select("role").maybeSingle();
     toast.success("Bienvenido");
@@ -47,6 +59,10 @@ function LoginPage() {
             <Label htmlFor="pw">Contraseña</Label>
             <Input id="pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
+          <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <Checkbox checked={keep} onCheckedChange={(v) => setKeep(v === true)} />
+            <span>Mantener sesión iniciada en este dispositivo</span>
+          </label>
           <Button type="submit" disabled={loading} className="w-full">{loading ? "..." : "Entrar"}</Button>
         </form>
         <p className="mt-6 text-sm text-center text-muted-foreground">
@@ -56,3 +72,4 @@ function LoginPage() {
     </div>
   );
 }
+
