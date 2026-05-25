@@ -75,12 +75,13 @@ function AthletePhysio() {
 
   function openNew() {
     setEditing(null);
-    setForm({ appointment_date: new Date().toISOString().slice(0, 10), appointment_time: "", reasons: [], notes: "", status: "scheduled" });
+    setForm({ appointment_type: "fisio_club", appointment_date: new Date().toISOString().slice(0, 10), appointment_time: "", reasons: [], notes: "", status: "scheduled" });
     setOpen(true);
   }
   function openEdit(a: any) {
     setEditing(a);
     setForm({
+      appointment_type: a.appointment_type ?? "fisio_club",
       appointment_date: a.appointment_date,
       appointment_time: a.appointment_time?.slice(0, 5) ?? "",
       reasons: a.reasons ?? [],
