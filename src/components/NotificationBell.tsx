@@ -5,7 +5,8 @@ import { useAuth } from "@/lib/auth-context";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { tryShowPush, requestPushPermission } from "@/lib/notifications";
+import { tryShowPush, requestPushPermission, getPushPermission, ensureServiceWorker } from "@/lib/notifications";
+import { toast } from "sonner";
 
 interface Notif {
   id: string; title: string; body: string | null; link: string | null;
@@ -16,6 +17,7 @@ export function NotificationBell() {
   const { user } = useAuth();
   const [list, setList] = useState<Notif[]>([]);
   const [open, setOpen] = useState(false);
+  const [perm, setPerm] = useState<NotificationPermission | "unsupported">("default");
 
   async function load() {
     if (!user) return;
@@ -26,17 +28,28 @@ export function NotificationBell() {
   useEffect(() => {
     if (!user) return;
     load();
-    // Try to enable browser push once per session (best-effort)
-    requestPushPermission();
-    // Realtime new notifications
+    ensureServiceWorker();
+    setPerm(getPushPermission());
     const ch = supabase.channel(`notif-${user.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload: any) => {
         setList((cur) => [payload.new as Notif, ...cur]);
-        tryShowPush(payload.new.title, payload.new.body ?? undefined);
+        tryShowPush(payload.new.title, payload.new.body ?? undefined, payload.new.link ?? undefined);
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user]);
+
+  async function enablePush() {
+    const p = await requestPushPermission();
+    setPerm(p);
+    if (p === "granted") {
+      toast.success("Notificaciones activadas");
+      tryShowPush("El Toro Rugby", "Notificaciones activadas correctamente", "/");
+    } else if (p === "denied") {
+      toast.error("Permiso denegado. Activalo desde la configuración del navegador.");
+    }
+  }
+
 
   const unread = list.filter((n) => !n.read).length;
 
@@ -61,8 +74,13 @@ export function NotificationBell() {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0 max-h-[60vh] overflow-y-auto">
-        <div className="p-3 border-b border-border">
+        <div className="p-3 border-b border-border flex items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-widest font-medium">Notificaciones</p>
+          {perm !== "granted" && perm !== "unsupported" && (
+            <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={enablePush}>
+              {perm === "denied" ? "Bloqueadas" : "Activar push"}
+            </Button>
+          )}
         </div>
         {list.length === 0 ? (
           <p className="p-4 text-sm text-muted-foreground">Sin notificaciones.</p>

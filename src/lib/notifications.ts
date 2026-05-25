@@ -30,18 +30,39 @@ export async function notifyAllAthletes(input: Omit<CreateNotifInput, "user_ids"
   await createNotifications({ ...input, user_ids: ids });
 }
 
-// Browser push (best-effort). No service worker — works only while app is open / on supported browsers.
+// Service worker registration (best-effort)
+let swReg: ServiceWorkerRegistration | null = null;
+export async function ensureServiceWorker() {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return null;
+  if (swReg) return swReg;
+  try {
+    swReg = await navigator.serviceWorker.register("/sw.js");
+    return swReg;
+  } catch { return null; }
+}
+
 export async function requestPushPermission(): Promise<NotificationPermission> {
   if (typeof window === "undefined" || !("Notification" in window)) return "denied";
+  await ensureServiceWorker();
   if (Notification.permission === "default") {
     try { return await Notification.requestPermission(); } catch { return "denied"; }
   }
   return Notification.permission;
 }
 
-export function tryShowPush(title: string, body?: string) {
+export function getPushPermission(): NotificationPermission | "unsupported" {
+  if (typeof window === "undefined" || !("Notification" in window)) return "unsupported";
+  return Notification.permission;
+}
+
+export async function tryShowPush(title: string, body?: string, link?: string) {
   try {
-    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+    const reg = await ensureServiceWorker();
+    if (reg && reg.showNotification) {
+      reg.showNotification(title, { body, icon: "/icon-192.png", badge: "/icon-192.png", data: { link } });
+    } else {
       new Notification(title, { body, icon: "/icon-192.png" });
     }
   } catch { /* best-effort */ }

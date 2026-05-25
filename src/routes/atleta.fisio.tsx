@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { APPOINTMENT_TYPES, typeLabel, typeIcon } from "@/lib/appointment-types";
 
 export const Route = createFileRoute("/atleta/fisio")({
   component: () => <Protected requireRole="atleta"><AthletePhysio /></Protected>,
@@ -58,6 +59,7 @@ function AthletePhysio() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({
+    appointment_type: "fisio_club" as string,
     appointment_date: new Date().toISOString().slice(0, 10),
     appointment_time: "",
     reasons: [] as string[],
@@ -73,12 +75,13 @@ function AthletePhysio() {
 
   function openNew() {
     setEditing(null);
-    setForm({ appointment_date: new Date().toISOString().slice(0, 10), appointment_time: "", reasons: [], notes: "", status: "scheduled" });
+    setForm({ appointment_type: "fisio_club", appointment_date: new Date().toISOString().slice(0, 10), appointment_time: "", reasons: [], notes: "", status: "scheduled" });
     setOpen(true);
   }
   function openEdit(a: any) {
     setEditing(a);
     setForm({
+      appointment_type: a.appointment_type ?? "fisio_club",
       appointment_date: a.appointment_date,
       appointment_time: a.appointment_time?.slice(0, 5) ?? "",
       reasons: a.reasons ?? [],
@@ -91,8 +94,9 @@ function AthletePhysio() {
     setForm((f) => ({ ...f, reasons: f.reasons.includes(r) ? f.reasons.filter((x) => x !== r) : [...f.reasons, r] }));
   }
   async function save() {
-    if (!form.reasons.length) { toast.error("Marcá al menos un motivo"); return; }
+    if (form.appointment_type !== "presoterapia" && !form.reasons.length) { toast.error("Marcá al menos un motivo"); return; }
     const payload: any = {
+      appointment_type: form.appointment_type,
       appointment_date: form.appointment_date,
       appointment_time: form.appointment_time || null,
       reasons: form.reasons,
@@ -134,6 +138,19 @@ function AthletePhysio() {
           </DialogHeader>
 
           <div className="space-y-4">
+            <div>
+              <Label>Tipo de cita</Label>
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                {APPOINTMENT_TYPES.map((t) => (
+                  <button key={t.v} type="button" onClick={() => setForm({ ...form, appointment_type: t.v })}
+                    className={`p-3 text-center border ${form.appointment_type === t.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
+                    <div className="text-xl mb-1">{t.icon}</div>
+                    <div className="text-[10px] uppercase tracking-wider leading-tight">{t.l}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Fecha</Label>
@@ -204,13 +221,14 @@ function Section({ title, items, onEdit, onDelete }: any) {
       <div className="border border-border">
         {items.map((a: any) => (
           <div key={a.id} className="flex items-start gap-3 p-3 border-b border-border last:border-b-0">
-            <CalendarIcon className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span className="text-xl mt-0.5 flex-shrink-0" aria-hidden>{typeIcon(a.appointment_type)}</span>
             <button onClick={() => onEdit(a)} className="flex-1 text-left">
               <p className="text-sm font-medium">
                 {new Date(a.appointment_date + "T12:00").toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short" })}
                 {a.appointment_time && ` · ${a.appointment_time.slice(0, 5)}`}
                 <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">{a.status === "attended" ? "Asistida" : a.status === "cancelled" ? "Cancelada" : "Programada"}</span>
               </p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{typeLabel(a.appointment_type)}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{(a.reasons ?? []).join(" · ") || "—"}</p>
               {a.notes && <p className="text-xs mt-1 italic">{a.notes}</p>}
             </button>

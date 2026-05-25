@@ -38,6 +38,7 @@ function CoachPhysio() {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const reasonsRef = useRef<HTMLDivElement>(null);
   const athletesRef = useRef<HTMLDivElement>(null);
 
@@ -69,9 +70,11 @@ function CoachPhysio() {
   }
   useEffect(() => { load(); }, []);
 
+  const filtered = useMemo(() => typeFilter === "all" ? appointments : appointments.filter((a) => a.appointment_type === typeFilter), [appointments, typeFilter]);
+
   const byAthlete = useMemo(() => {
     const map: Record<string, any> = {};
-    appointments.forEach((a) => {
+    filtered.forEach((a) => {
       const p = profiles[a.user_id];
       const name = p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : a.user_id.slice(0, 8);
       const e = (map[a.user_id] ??= { id: a.user_id, name, position: p?.position ?? "—", total: 0, attended: 0, scheduled: 0, cancelled: 0 });
@@ -81,27 +84,28 @@ function CoachPhysio() {
       else e.scheduled++;
     });
     return Object.values(map).sort((a: any, b: any) => b.total - a.total);
-  }, [appointments, profiles]);
+  }, [filtered, profiles]);
 
   const byReason = useMemo(() => {
     const counts: Record<string, number> = {};
-    appointments.forEach((a) => (a.reasons ?? []).forEach((r: string) => { counts[r] = (counts[r] ?? 0) + 1; }));
+    filtered.forEach((a) => (a.reasons ?? []).forEach((r: string) => { counts[r] = (counts[r] ?? 0) + 1; }));
     return Object.entries(counts).map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);
-  }, [appointments]);
+  }, [filtered]);
 
   // Calendar events: one per appointment
-  const calEvents = useMemo(() => appointments.map((a) => ({
+  const calEvents = useMemo(() => filtered.map((a) => ({
     id: a.id,
     event_date: a.appointment_date,
     name: `${typeIcon(a.appointment_type)} ${profiles[a.user_id]?.full_name ?? "—"}`,
     type: "training" as const,
-  })), [appointments, profiles]);
+  })), [filtered, profiles]);
 
   const dayAppointments = useMemo(() => {
     if (!selectedDate) return [];
-    return appointments.filter((a) => a.appointment_date === selectedDate)
+    return filtered.filter((a) => a.appointment_date === selectedDate)
       .sort((a, b) => (a.appointment_time ?? "99:99").localeCompare(b.appointment_time ?? "99:99"));
-  }, [appointments, selectedDate]);
+  }, [filtered, selectedDate]);
+
 
   function openNew(date?: string) {
     setEditing(null);
@@ -167,6 +171,13 @@ function CoachPhysio() {
     load();
   }
 
+  async function quickStatus(a: any, status: string) {
+    const { error } = await supabase.from("physio_appointments").update({ status }).eq("id", a.id);
+    if (error) { toast.error(error.message); return; }
+    setAppointments((cur) => cur.map((x) => x.id === a.id ? { ...x, status } : x));
+    toast.success("Estado actualizado");
+  }
+
   async function downloadPdf() {
     await exportPdf({
       title: "Citas con fisioterapeuta",
@@ -188,7 +199,7 @@ function CoachPhysio() {
 
   return (
     <Shell title="Fisioterapia">
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <p className="text-sm text-muted-foreground">Asigná citas, viendo el orden por día y por horario.</p>
         <div className="flex gap-2">
           <Button onClick={() => openNew()}><Plus className="h-4 w-4 mr-2" />Nueva cita</Button>
@@ -196,10 +207,20 @@ function CoachPhysio() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">Tipo:</span>
+        {[{ v: "all", l: "Todas", icon: "📋" }, ...APPOINTMENT_TYPES].map((t) => (
+          <button key={t.v} type="button" onClick={() => setTypeFilter(t.v)}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border ${typeFilter === t.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
+            <span className="mr-1">{t.icon}</span>{t.l}
+          </button>
+        ))}
+      </div>
+
       <div className="grid md:grid-cols-3 gap-3 mb-8">
-        <Stat label="Citas totales" value={appointments.length} />
+        <Stat label={typeFilter === "all" ? "Citas totales" : `Citas (${typeLabel(typeFilter)})`} value={filtered.length} />
         <Stat label="Atletas con citas" value={byAthlete.length} />
-        <Stat label="Asistidas" value={appointments.filter((a) => a.status === "attended").length} />
+        <Stat label="Asistidas" value={filtered.filter((a) => a.status === "attended").length} />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
@@ -224,15 +245,24 @@ function CoachPhysio() {
             {dayAppointments.map((a) => {
               const p = profiles[a.user_id];
               return (
-                <button key={a.id} onClick={() => openEdit(a)} className="w-full text-left border border-border p-2 hover:bg-accent">
-                  <div className="flex items-center gap-2">
-                    <span className="font-display text-sm w-12 flex items-center gap-1"><Clock className="h-3 w-3" />{a.appointment_time?.slice(0, 5) ?? "--:--"}</span>
-                    <span className="text-base">{typeIcon(a.appointment_type)}</span>
-                    <span className="flex-1 text-sm font-medium truncate">{p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : "—"}</span>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{a.status === "attended" ? "OK" : a.status === "cancelled" ? "X" : "•"}</span>
+                <div key={a.id} className="border border-border p-2">
+                  <button onClick={() => openEdit(a)} className="w-full text-left hover:bg-accent">
+                    <div className="flex items-center gap-2">
+                      <span className="font-display text-sm w-12 flex items-center gap-1"><Clock className="h-3 w-3" />{a.appointment_time?.slice(0, 5) ?? "--:--"}</span>
+                      <span className="text-base">{typeIcon(a.appointment_type)}</span>
+                      <span className="flex-1 text-sm font-medium truncate">{p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : "—"}</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 ml-14"><MapPin className="inline h-2.5 w-2.5 mr-0.5" />{typeLabel(a.appointment_type)}{a.reasons?.length ? ` · ${a.reasons.slice(0,2).join(", ")}` : ""}</p>
+                  </button>
+                  <div className="flex gap-1 mt-2 ml-14">
+                    {[{ v: "scheduled", l: "Programada" }, { v: "attended", l: "Asistida" }, { v: "cancelled", l: "Cancelada" }].map((s) => (
+                      <button key={s.v} type="button" onClick={(e) => { e.stopPropagation(); quickStatus(a, s.v); }}
+                        className={`px-2 py-0.5 text-[9px] uppercase tracking-wider border ${a.status === s.v ? (s.v === "attended" ? "bg-green-600 text-white border-green-600" : s.v === "cancelled" ? "bg-red-600 text-white border-red-600" : "bg-primary text-primary-foreground border-primary") : "border-border hover:bg-accent"}`}>
+                        {s.l}
+                      </button>
+                    ))}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 ml-14"><MapPin className="inline h-2.5 w-2.5 mr-0.5" />{typeLabel(a.appointment_type)}{a.reasons?.length ? ` · ${a.reasons.slice(0,2).join(", ")}` : ""}</p>
-                </button>
+                </div>
               );
             })}
           </div>

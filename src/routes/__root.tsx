@@ -6,8 +6,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
+import { ensureServiceWorker } from "@/lib/notifications";
 
 import appCss from "../styles.css?url";
 
@@ -68,6 +71,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    ensureServiceWorker();
+    const keep = typeof window !== "undefined" ? localStorage.getItem("etr_keep_logged_in") : "true";
+    if (keep === "false") {
+      const handler = () => { supabase.auth.signOut(); };
+      window.addEventListener("pagehide", handler);
+      return () => window.removeEventListener("pagehide", handler);
+    }
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
