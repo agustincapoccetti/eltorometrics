@@ -6,8 +6,11 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
+import { ensureServiceWorker } from "@/lib/notifications";
 
 import appCss from "../styles.css?url";
 
