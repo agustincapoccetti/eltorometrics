@@ -138,6 +138,19 @@ function AthletePhysio() {
           </DialogHeader>
 
           <div className="space-y-4">
+            <div>
+              <Label>Tipo de cita</Label>
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                {APPOINTMENT_TYPES.map((t) => (
+                  <button key={t.v} type="button" onClick={() => setForm({ ...form, appointment_type: t.v })}
+                    className={`p-3 text-center border ${form.appointment_type === t.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
+                    <div className="text-xl mb-1">{t.icon}</div>
+                    <div className="text-[10px] uppercase tracking-wider leading-tight">{t.l}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Fecha</Label>
