@@ -94,8 +94,9 @@ function AthletePhysio() {
     setForm((f) => ({ ...f, reasons: f.reasons.includes(r) ? f.reasons.filter((x) => x !== r) : [...f.reasons, r] }));
   }
   async function save() {
-    if (!form.reasons.length) { toast.error("Marcá al menos un motivo"); return; }
+    if (form.appointment_type !== "presoterapia" && !form.reasons.length) { toast.error("Marcá al menos un motivo"); return; }
     const payload: any = {
+      appointment_type: form.appointment_type,
       appointment_date: form.appointment_date,
       appointment_time: form.appointment_time || null,
       reasons: form.reasons,
