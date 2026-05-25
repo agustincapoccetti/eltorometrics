@@ -28,17 +28,28 @@ export function NotificationBell() {
   useEffect(() => {
     if (!user) return;
     load();
-    // Try to enable browser push once per session (best-effort)
-    requestPushPermission();
-    // Realtime new notifications
+    ensureServiceWorker();
+    setPerm(getPushPermission());
     const ch = supabase.channel(`notif-${user.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload: any) => {
         setList((cur) => [payload.new as Notif, ...cur]);
-        tryShowPush(payload.new.title, payload.new.body ?? undefined);
+        tryShowPush(payload.new.title, payload.new.body ?? undefined, payload.new.link ?? undefined);
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user]);
+
+  async function enablePush() {
+    const p = await requestPushPermission();
+    setPerm(p);
+    if (p === "granted") {
+      toast.success("Notificaciones activadas");
+      tryShowPush("El Toro Rugby", "Notificaciones activadas correctamente", "/");
+    } else if (p === "denied") {
+      toast.error("Permiso denegado. Activalo desde la configuración del navegador.");
+    }
+  }
+
 
   const unread = list.filter((n) => !n.read).length;
 
