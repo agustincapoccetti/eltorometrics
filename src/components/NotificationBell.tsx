@@ -74,8 +74,13 @@ export function NotificationBell() {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0 max-h-[60vh] overflow-y-auto">
-        <div className="p-3 border-b border-border">
+        <div className="p-3 border-b border-border flex items-center justify-between gap-2">
           <p className="text-xs uppercase tracking-widest font-medium">Notificaciones</p>
+          {perm !== "granted" && perm !== "unsupported" && (
+            <Button size="sm" variant="outline" className="h-7 text-[10px]" onClick={enablePush}>
+              {perm === "denied" ? "Bloqueadas" : "Activar push"}
+            </Button>
+          )}
         </div>
         {list.length === 0 ? (
           <p className="p-4 text-sm text-muted-foreground">Sin notificaciones.</p>
