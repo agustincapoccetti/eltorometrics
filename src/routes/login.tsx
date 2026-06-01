@@ -61,15 +61,19 @@ function LoginPage() {
           </div>
           <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
             <Checkbox checked={keep} onCheckedChange={(v) => setKeep(v === true)} />
-            <span>Mantener sesión iniciada en este dispositivo</span>
+            <span>Mantener la sesión iniciada en este dispositivo</span>
           </label>
           <Button type="submit" disabled={loading} className="w-full">{loading ? "..." : "Entrar"}</Button>
         </form>
+        <div className="mt-4 text-center">
+          <Link to="/recuperar" className="text-xs text-muted-foreground underline">¿Olvidaste tu contraseña?</Link>
+        </div>
         <p className="mt-6 text-sm text-center text-muted-foreground">
-          ¿No tenés cuenta? <Link to="/registro" className="text-foreground underline">Registrate</Link>
+          ¿No tienes cuenta? <Link to="/registro" className="text-foreground underline">Regístrate</Link>
         </p>
       </div>
     </div>
   );
 }
+
 

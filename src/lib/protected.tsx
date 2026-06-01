@@ -3,6 +3,8 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { RugbyLoader } from "@/components/RugbyLoader";
+
 
 export function Protected({ children, requireRole }: { children: ReactNode; requireRole?: "atleta" | "coach" }) {
   const { user, role, loading } = useAuth();
@@ -29,7 +31,8 @@ export function Protected({ children, requireRole }: { children: ReactNode; requ
   }, [user, role, loading, requireRole, navigate, pathname]);
 
   if (loading || !user || (requireRole && role !== requireRole) || checking) {
-    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Cargando...</div>;
+    return <div className="min-h-screen flex items-center justify-center"><RugbyLoader /></div>;
   }
+
   return <>{children}</>;
 }

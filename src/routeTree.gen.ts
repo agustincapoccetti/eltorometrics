@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as RecuperarRouteImport } from './routes/recuperar'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
@@ -29,9 +31,19 @@ import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
 import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuperarRoute = RecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -128,7 +140,9 @@ const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
   '/atleta/gym': typeof AtletaGymRoute
@@ -149,7 +163,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
   '/atleta/gym': typeof AtletaGymRoute
@@ -171,7 +187,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
   '/atleta/gym': typeof AtletaGymRoute
@@ -194,7 +212,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/recuperar'
     | '/registro'
+    | '/reset-password'
     | '/atleta/calendario'
     | '/atleta/fisio'
     | '/atleta/gym'
@@ -215,7 +235,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/recuperar'
     | '/registro'
+    | '/reset-password'
     | '/atleta/calendario'
     | '/atleta/fisio'
     | '/atleta/gym'
@@ -236,7 +258,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/login'
+    | '/recuperar'
     | '/registro'
+    | '/reset-password'
     | '/atleta/calendario'
     | '/atleta/fisio'
     | '/atleta/gym'
@@ -258,7 +282,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  RecuperarRoute: typeof RecuperarRoute
   RegistroRoute: typeof RegistroRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   AtletaCalendarioRoute: typeof AtletaCalendarioRoute
   AtletaFisioRoute: typeof AtletaFisioRoute
   AtletaGymRoute: typeof AtletaGymRoute
@@ -279,11 +305,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/registro': {
       id: '/registro'
       path: '/registro'
       fullPath: '/registro'
       preLoaderRoute: typeof RegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recuperar': {
+      id: '/recuperar'
+      path: '/recuperar'
+      fullPath: '/recuperar'
+      preLoaderRoute: typeof RecuperarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -418,7 +458,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  RecuperarRoute: RecuperarRoute,
   RegistroRoute: RegistroRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   AtletaCalendarioRoute: AtletaCalendarioRoute,
   AtletaFisioRoute: AtletaFisioRoute,
   AtletaGymRoute: AtletaGymRoute,
@@ -439,13 +481,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

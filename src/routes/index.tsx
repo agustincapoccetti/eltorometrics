@@ -36,12 +36,9 @@ function Landing() {
           <p className="mt-6 text-base text-muted-foreground max-w-xl mx-auto">
             Plataforma oficial de El Toro Rugby Club Calvià: monitoreo de RPE, bienestar, carga de entrenamiento y recuperación. Datos claros para atletas y preparadores físicos.
           </p>
-          <div className="mt-10 flex justify-center gap-3">
-            <Link to="/registro"><Button size="lg">Crear cuenta</Button></Link>
-            <Link to="/login"><Button size="lg" variant="outline">Iniciar sesión</Button></Link>
-          </div>
         </div>
       </section>
+
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} El Toro Rugby Performance · Calvià
       </footer>

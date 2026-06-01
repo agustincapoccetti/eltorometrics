@@ -18,6 +18,8 @@ import { exportPdf } from "@/lib/pdf-export";
 import { MonthCalendar } from "@/components/MonthCalendar";
 import { COMMON_RUGBY_PAINS } from "@/routes/atleta.fisio";
 import { createNotifications } from "@/lib/notifications";
+import { RecurringDialog, RecurringList } from "@/components/RecurringDialog";
+
 
 export const Route = createFileRoute("/coach/fisio")({
   component: () => <Protected requireRole="coach"><CoachPhysio /></Protected>,
@@ -197,15 +199,20 @@ function CoachPhysio() {
     });
   }
 
+  const [recOpen, setRecOpen] = useState(false);
+  const [recKey, setRecKey] = useState(0);
+
   return (
     <Shell title="Fisioterapia">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <p className="text-sm text-muted-foreground">Asigná citas, viendo el orden por día y por horario.</p>
-        <div className="flex gap-2">
+        <p className="text-sm text-muted-foreground">Asigna citas y abre bloques de turnos para que los atletas reserven.</p>
+        <div className="flex gap-2 flex-wrap">
           <Button onClick={() => openNew()}><Plus className="h-4 w-4 mr-2" />Nueva cita</Button>
+          <Button variant="outline" onClick={() => setRecOpen(true)}>Abrir turnos recurrentes</Button>
           <Button variant="outline" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-2" />PDF</Button>
         </div>
       </div>
+
 
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">Tipo:</span>
@@ -399,9 +406,17 @@ function CoachPhysio() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <div className="mt-8">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Bloques recurrentes de turnos</p>
+        <RecurringList kind="physio_slot" refreshKey={recKey} />
+      </div>
+
+      <RecurringDialog open={recOpen} onOpenChange={setRecOpen} kind="physio_slot" onCreated={() => { setRecKey((k) => k + 1); load(); }} />
     </Shell>
   );
 }
+
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (

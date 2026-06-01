@@ -12,8 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, Repeat } from "lucide-react";
 import { notifyAllAthletes } from "@/lib/notifications";
+import { RecurringDialog, RecurringList } from "@/components/RecurringDialog";
+
 
 export const Route = createFileRoute("/coach/calendario")({
   component: () => <Protected requireRole="coach"><CoachCalendar /></Protected>,
@@ -26,6 +28,9 @@ function CoachCalendar() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({ name: "", type: "training", event_time: "", duration_minutes: "", description: "" });
+  const [recOpen, setRecOpen] = useState(false);
+  const [recKey, setRecKey] = useState(0);
+
 
   async function load() {
     const start = new Date(month.getFullYear(), month.getMonth(), 1).toISOString().slice(0, 10);
@@ -92,9 +97,13 @@ function CoachCalendar() {
 
   return (
     <Shell title="Calendario">
-      <p className="text-sm text-muted-foreground mb-6">Tocá un día para crear o editar un entrenamiento o partido.</p>
+      <div className="flex items-center justify-between gap-2 mb-6 flex-wrap">
+        <p className="text-sm text-muted-foreground">Toca un día para crear o editar un entrenamiento o partido.</p>
+        <Button variant="outline" onClick={() => setRecOpen(true)}><Repeat className="h-4 w-4 mr-2" />Repetir cada semana</Button>
+      </div>
 
       <MonthCalendar
+
         month={month}
         events={events}
         onPrev={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
@@ -166,6 +175,14 @@ function CoachCalendar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <div className="mt-8">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Programaciones recurrentes</p>
+        <RecurringList kind="training" refreshKey={recKey} />
+      </div>
+
+      <RecurringDialog open={recOpen} onOpenChange={setRecOpen} kind="training" onCreated={() => { setRecKey((k) => k + 1); load(); }} />
     </Shell>
   );
 }
+

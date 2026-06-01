@@ -8,8 +8,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
+import { checkPassword, PasswordRules } from "@/lib/password-validation";
 
 export const Route = createFileRoute("/registro")({ component: RegistroPage });
+
 
 const POSITIONS = [
   "Pilar", "Hooker", "Segunda Línea", "Ala", "Octavo",
@@ -26,6 +28,7 @@ function RegistroPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!checkPassword(form.password).ok) { toast.error("La contraseña no cumple los requisitos de seguridad"); return; }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email: form.email,
@@ -46,6 +49,7 @@ function RegistroPage() {
     toast.success("Cuenta creada");
     navigate({ to: role === "coach" ? "/coach" : "/atleta" });
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-background">
@@ -84,7 +88,8 @@ function RegistroPage() {
           </div>
           <div>
             <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" type="password" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+            <Input id="password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+            <PasswordRules pw={form.password} />
           </div>
 
           {role === "atleta" && (
@@ -115,8 +120,9 @@ function RegistroPage() {
         </form>
 
         <p className="mt-6 text-sm text-center text-muted-foreground">
-          ¿Ya tenés cuenta? <Link to="/login" className="text-foreground underline">Entrar</Link>
+          ¿Ya tienes cuenta? <Link to="/login" className="text-foreground underline">Entrar</Link>
         </p>
+
       </div>
     </div>
   );
