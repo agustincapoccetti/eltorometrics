@@ -28,6 +28,7 @@ function RegistroPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!checkPassword(form.password).ok) { toast.error("La contraseña no cumple los requisitos de seguridad"); return; }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email: form.email,
@@ -48,6 +49,7 @@ function RegistroPage() {
     toast.success("Cuenta creada");
     navigate({ to: role === "coach" ? "/coach" : "/atleta" });
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-background">
