@@ -18,6 +18,8 @@ import { exportPdf } from "@/lib/pdf-export";
 import { MonthCalendar } from "@/components/MonthCalendar";
 import { COMMON_RUGBY_PAINS } from "@/routes/atleta.fisio";
 import { createNotifications } from "@/lib/notifications";
+import { RecurringDialog, RecurringList } from "@/components/RecurringDialog";
+
 
 export const Route = createFileRoute("/coach/fisio")({
   component: () => <Protected requireRole="coach"><CoachPhysio /></Protected>,
