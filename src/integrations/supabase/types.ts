@@ -247,6 +247,56 @@ export type Database = {
         }
         Relationships: []
       }
+      physio_slots: {
+        Row: {
+          appointment_type: string
+          created_at: string
+          created_by: string
+          duration_minutes: number
+          id: string
+          recurring_schedule_id: string | null
+          reserved_at: string | null
+          reserved_by: string | null
+          slot_date: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_type?: string
+          created_at?: string
+          created_by: string
+          duration_minutes?: number
+          id?: string
+          recurring_schedule_id?: string | null
+          reserved_at?: string | null
+          reserved_by?: string | null
+          slot_date: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_type?: string
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number
+          id?: string
+          recurring_schedule_id?: string | null
+          reserved_at?: string | null
+          reserved_by?: string | null
+          slot_date?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "physio_slots_recurring_schedule_id_fkey"
+            columns: ["recurring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
@@ -400,6 +450,63 @@ export type Database = {
         }
         Relationships: []
       }
+      recurring_schedules: {
+        Row: {
+          active: boolean
+          appointment_type: string | null
+          created_at: string
+          created_by: string
+          duration_minutes: number
+          end_date: string | null
+          event_type: Database["public"]["Enums"]["event_type"] | null
+          id: string
+          kind: string
+          name: string
+          notes: string | null
+          slot_interval_minutes: number | null
+          start_date: string
+          start_time: string
+          updated_at: string
+          weekdays: number[]
+        }
+        Insert: {
+          active?: boolean
+          appointment_type?: string | null
+          created_at?: string
+          created_by: string
+          duration_minutes?: number
+          end_date?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          id?: string
+          kind: string
+          name: string
+          notes?: string | null
+          slot_interval_minutes?: number | null
+          start_date?: string
+          start_time: string
+          updated_at?: string
+          weekdays?: number[]
+        }
+        Update: {
+          active?: boolean
+          appointment_type?: string | null
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number
+          end_date?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"] | null
+          id?: string
+          kind?: string
+          name?: string
+          notes?: string | null
+          slot_interval_minutes?: number | null
+          start_date?: string
+          start_time?: string
+          updated_at?: string
+          weekdays?: number[]
+        }
+        Relationships: []
+      }
       rpe_entries: {
         Row: {
           created_at: string
@@ -513,6 +620,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_physio_slot: { Args: { _slot_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -521,6 +629,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _uid: string }; Returns: boolean }
+      reserve_physio_slot: { Args: { _slot_id: string }; Returns: string }
     }
     Enums: {
       app_role: "atleta" | "coach"
