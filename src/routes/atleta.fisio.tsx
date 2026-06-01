@@ -124,12 +124,15 @@ function AthletePhysio() {
 
   return (
     <Shell title="Fisioterapia">
-      <p className="text-sm text-muted-foreground mb-6">Registrá tus citas con el fisio y el motivo. El cuerpo técnico podrá ver tu historial.</p>
+      <p className="text-sm text-muted-foreground mb-6">Reserva un turno disponible o registra una cita externa.</p>
 
-      <Button onClick={openNew} className="mb-6"><Plus className="h-4 w-4 mr-2" />Nueva cita</Button>
+      <OpenSlots onBooked={load} />
+
+      <Button onClick={openNew} className="mb-6" variant="outline"><Plus className="h-4 w-4 mr-2" />Registrar cita externa</Button>
 
       <Section title="Próximas" items={upcoming} onEdit={openEdit} onDelete={remove} />
       <Section title="Historial" items={past} onEdit={openEdit} onDelete={remove} />
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
