@@ -406,9 +406,17 @@ function CoachPhysio() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <div className="mt-8">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Bloques recurrentes de turnos</p>
+        <RecurringList kind="physio_slot" refreshKey={recKey} />
+      </div>
+
+      <RecurringDialog open={recOpen} onOpenChange={setRecOpen} kind="physio_slot" onCreated={() => { setRecKey((k) => k + 1); load(); }} />
     </Shell>
   );
 }
+
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
