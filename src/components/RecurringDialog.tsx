@@ -215,13 +215,8 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
     setItems(data ?? []);
     setLoading(false);
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useState(() => { load(); });
-  // refresh on key change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  if (refreshKey !== undefined) {
-    useState(() => { load(); });
-  }
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [kind, refreshKey]);
+
 
   async function stop(id: string) {
     if (!confirm("¿Frenar esta programación? Se borrarán los próximos eventos sin reservar.")) return;
