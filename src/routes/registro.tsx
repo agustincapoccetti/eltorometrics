@@ -88,7 +88,8 @@ function RegistroPage() {
           </div>
           <div>
             <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" type="password" minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+            <Input id="password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+            <PasswordRules pw={form.password} />
           </div>
 
           {role === "atleta" && (
@@ -119,8 +120,9 @@ function RegistroPage() {
         </form>
 
         <p className="mt-6 text-sm text-center text-muted-foreground">
-          ¿Ya tenés cuenta? <Link to="/login" className="text-foreground underline">Entrar</Link>
+          ¿Ya tienes cuenta? <Link to="/login" className="text-foreground underline">Entrar</Link>
         </p>
+
       </div>
     </div>
   );
