@@ -97,9 +97,13 @@ function CoachCalendar() {
 
   return (
     <Shell title="Calendario">
-      <p className="text-sm text-muted-foreground mb-6">Tocá un día para crear o editar un entrenamiento o partido.</p>
+      <div className="flex items-center justify-between gap-2 mb-6 flex-wrap">
+        <p className="text-sm text-muted-foreground">Toca un día para crear o editar un entrenamiento o partido.</p>
+        <Button variant="outline" onClick={() => setRecOpen(true)}><Repeat className="h-4 w-4 mr-2" />Repetir cada semana</Button>
+      </div>
 
       <MonthCalendar
+
         month={month}
         events={events}
         onPrev={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
