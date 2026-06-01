@@ -12,8 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Trash2, Repeat } from "lucide-react";
 import { notifyAllAthletes } from "@/lib/notifications";
+import { RecurringDialog, RecurringList } from "@/components/RecurringDialog";
+
 
 export const Route = createFileRoute("/coach/calendario")({
   component: () => <Protected requireRole="coach"><CoachCalendar /></Protected>,
