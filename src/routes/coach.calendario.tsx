@@ -28,6 +28,9 @@ function CoachCalendar() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({ name: "", type: "training", event_time: "", duration_minutes: "", description: "" });
+  const [recOpen, setRecOpen] = useState(false);
+  const [recKey, setRecKey] = useState(0);
+
 
   async function load() {
     const start = new Date(month.getFullYear(), month.getMonth(), 1).toISOString().slice(0, 10);
