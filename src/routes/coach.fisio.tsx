@@ -199,15 +199,20 @@ function CoachPhysio() {
     });
   }
 
+  const [recOpen, setRecOpen] = useState(false);
+  const [recKey, setRecKey] = useState(0);
+
   return (
     <Shell title="Fisioterapia">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <p className="text-sm text-muted-foreground">Asigná citas, viendo el orden por día y por horario.</p>
-        <div className="flex gap-2">
+        <p className="text-sm text-muted-foreground">Asigna citas y abre bloques de turnos para que los atletas reserven.</p>
+        <div className="flex gap-2 flex-wrap">
           <Button onClick={() => openNew()}><Plus className="h-4 w-4 mr-2" />Nueva cita</Button>
+          <Button variant="outline" onClick={() => setRecOpen(true)}>Abrir turnos recurrentes</Button>
           <Button variant="outline" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-2" />PDF</Button>
         </div>
       </div>
+
 
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">Tipo:</span>
