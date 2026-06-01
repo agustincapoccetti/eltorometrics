@@ -242,3 +242,50 @@ function Section({ title, items, onEdit, onDelete }: any) {
     </div>
   );
 }
+
+function OpenSlots({ onBooked }: { onBooked: () => void }) {
+  const [slots, setSlots] = useState<any[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function load() {
+    const today = new Date().toISOString().slice(0, 10);
+    const { data } = await supabase.from("physio_slots").select("*").is("reserved_by", null).gte("slot_date", today).order("slot_date").order("start_time").limit(50);
+    setSlots(data ?? []);
+  }
+  useEffect(() => { load(); }, []);
+
+  async function book(id: string) {
+    setBusy(id);
+    const { error } = await supabase.rpc("reserve_physio_slot", { _slot_id: id });
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Turno reservado");
+    load(); onBooked();
+  }
+
+  if (!slots.length) return null;
+  const byDate: Record<string, any[]> = {};
+  slots.forEach((s) => { (byDate[s.slot_date] ??= []).push(s); });
+
+  return (
+    <div className="mb-8 border border-border p-4">
+      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Turnos disponibles</p>
+      <div className="space-y-3">
+        {Object.entries(byDate).map(([date, arr]) => (
+          <div key={date}>
+            <p className="text-xs font-medium mb-1">{new Date(date + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {arr.map((s) => (
+                <button key={s.id} type="button" disabled={busy === s.id} onClick={() => book(s.id)}
+                  className="px-2 py-1 text-xs border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-50">
+                  {typeIcon(s.appointment_type)} {s.start_time?.slice(0, 5)}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
