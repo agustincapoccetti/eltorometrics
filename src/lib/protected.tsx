@@ -31,7 +31,8 @@ export function Protected({ children, requireRole }: { children: ReactNode; requ
   }, [user, role, loading, requireRole, navigate, pathname]);
 
   if (loading || !user || (requireRole && role !== requireRole) || checking) {
-    return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">Cargando...</div>;
+    return <div className="min-h-screen flex items-center justify-center"><RugbyLoader /></div>;
   }
+
   return <>{children}</>;
 }
