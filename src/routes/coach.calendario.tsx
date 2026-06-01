@@ -175,6 +175,14 @@ function CoachCalendar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <div className="mt-8">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Programaciones recurrentes</p>
+        <RecurringList kind="training" refreshKey={recKey} />
+      </div>
+
+      <RecurringDialog open={recOpen} onOpenChange={setRecOpen} kind="training" onCreated={() => { setRecKey((k) => k + 1); load(); }} />
     </Shell>
   );
 }
+
