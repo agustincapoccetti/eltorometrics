@@ -3,6 +3,8 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { RugbyLoader } from "@/components/RugbyLoader";
+
 
 export function Protected({ children, requireRole }: { children: ReactNode; requireRole?: "atleta" | "coach" }) {
   const { user, role, loading } = useAuth();
