@@ -34,12 +34,12 @@ function CoachLibrary() {
 
   function openNew() {
     setEditing(null);
-    setForm({ title: "", description: "", url: "", category: "gym" });
+    setForm({ title: "", description: "", url: "", category: "gym", thumbnail_url: "" });
     setOpen(true);
   }
   function openEdit(it: any) {
     setEditing(it);
-    setForm({ title: it.title, description: it.description ?? "", url: it.url, category: it.category });
+    setForm({ title: it.title, description: it.description ?? "", url: it.url, category: it.category, thumbnail_url: it.thumbnail_url ?? "" });
     setOpen(true);
   }
   async function save() {
