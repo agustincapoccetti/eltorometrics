@@ -209,6 +209,10 @@ export function RecurringDialog({ open, onOpenChange, kind, onCreated }: Props) 
 export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio_slot"; refreshKey?: number }) {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState<any | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEndDate, setEditEndDate] = useState("");
+  const [editStartTime, setEditStartTime] = useState("");
 
   async function load() {
     const { data } = await supabase.from("recurring_schedules").select("*").eq("kind", kind).order("created_at", { ascending: false });
@@ -219,35 +223,76 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
 
 
   async function stop(id: string) {
-    if (!confirm("¿Frenar esta programación? Se borrarán los próximos eventos sin reservar.")) return;
+    if (!confirm("¿Cancelar esta programación? Se borrarán los próximos turnos sin reservar. El historial se mantiene.")) return;
     await supabase.from("recurring_schedules").update({ active: false, end_date: new Date().toISOString().slice(0, 10) }).eq("id", id);
     const today = new Date().toISOString().slice(0, 10);
-    if (kind === "training") {
-      // No hard link from calendar_events; rely on coach manual cleanup. Best-effort: nothing to delete here.
-    } else {
+    if (kind === "physio_slot") {
       await supabase.from("physio_slots").delete().eq("recurring_schedule_id", id).is("reserved_by", null).gte("slot_date", today);
     }
-    toast.success("Programación frenada");
+    toast.success("Programación cancelada");
     load();
   }
 
+  function openEdit(it: any) {
+    setEditing(it);
+    setEditName(it.name);
+    setEditEndDate(it.end_date ?? "");
+    setEditStartTime(it.start_time?.slice(0, 5) ?? "");
+  }
+
+  async function saveEdit() {
+    if (!editing) return;
+    const payload: any = { name: editName, end_date: editEndDate || null, start_time: editStartTime || editing.start_time };
+    const { error } = await supabase.from("recurring_schedules").update(payload).eq("id", editing.id);
+    if (error) { toast.error(error.message); return; }
+    // If end_date moved earlier, delete future unreserved slots beyond it
+    if (kind === "physio_slot" && editEndDate) {
+      await supabase.from("physio_slots").delete().eq("recurring_schedule_id", editing.id).is("reserved_by", null).gt("slot_date", editEndDate);
+    }
+    toast.success("Programación actualizada");
+    setEditing(null); load();
+  }
+
   if (loading) return null;
-  if (!items.length) return <p className="text-xs text-muted-foreground">No hay programaciones activas.</p>;
+  if (!items.length) return <p className="text-xs text-muted-foreground">No hay programaciones.</p>;
   const labelDay = (d: number) => WEEKDAYS.find((x) => x.v === d)?.l ?? d;
   return (
-    <div className="space-y-2">
-      {items.map((it) => (
-        <div key={it.id} className="border border-border p-3 flex items-center justify-between gap-2">
-          <div className="text-sm">
-            <p className="font-medium">{it.name} <span className="text-[10px] uppercase ml-1 text-muted-foreground">{it.active ? "Activa" : "Detenida"}</span></p>
-            <p className="text-xs text-muted-foreground">
-              {it.weekdays.map(labelDay).join(", ")} · {it.start_time?.slice(0, 5)}
-              {it.end_date ? ` · hasta ${it.end_date}` : " · sin fecha de fin"}
-            </p>
+    <>
+      <div className="space-y-2">
+        {items.map((it) => (
+          <div key={it.id} className="border border-border p-3 flex items-center justify-between gap-2">
+            <div className="text-sm">
+              <p className="font-medium">{it.name} <span className={`text-[10px] uppercase ml-1 ${it.active ? "text-green-700" : "text-muted-foreground"}`}>{it.active ? "Activa" : "Cancelada"}</span></p>
+              <p className="text-xs text-muted-foreground">
+                {it.weekdays.map(labelDay).join(", ")} · {it.start_time?.slice(0, 5)}
+                {it.end_date ? ` · hasta ${it.end_date}` : " · sin fecha de fin"}
+              </p>
+            </div>
+            {it.active && (
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" onClick={() => openEdit(it)}>Editar</Button>
+                <Button size="sm" variant="outline" onClick={() => stop(it.id)}>Cancelar</Button>
+              </div>
+            )}
           </div>
-          {it.active && <Button size="sm" variant="outline" onClick={() => stop(it.id)}>Frenar</Button>}
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar programación</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>Nombre</Label><Input value={editName} onChange={(e) => setEditName(e.target.value)} /></div>
+            <div><Label>Hora</Label><Input type="time" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} /></div>
+            <div><Label>Fecha de fin (opcional)</Label><Input type="date" value={editEndDate} onChange={(e) => setEditEndDate(e.target.value)} /></div>
+            <p className="text-[11px] text-muted-foreground">Si adelantas la fecha de fin, se borran turnos futuros sin reservar más allá de esa fecha.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>Cerrar</Button>
+            <Button onClick={saveEdit}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
