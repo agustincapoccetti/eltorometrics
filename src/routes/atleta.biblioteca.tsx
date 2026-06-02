@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink } from "lucide-react";
-import { LIBRARY_CATEGORIES, categoryLabel, categoryIcon } from "@/lib/library";
+import { ExternalLink, PlayCircle } from "lucide-react";
+import { LIBRARY_CATEGORIES, categoryLabel, categoryIcon, getThumbnail } from "@/lib/library";
 
 export const Route = createFileRoute("/atleta/biblioteca")({
   component: () => <Protected requireRole="atleta"><AthleteLibrary /></Protected>,
@@ -38,14 +38,27 @@ function AthleteLibrary() {
         <p className="text-sm text-muted-foreground">No hay recursos disponibles.</p>
       ) : (
         <div className="grid sm:grid-cols-2 gap-3">
-          {filtered.map((it) => (
-            <a key={it.id} href={it.url} target="_blank" rel="noopener noreferrer" className="border border-border p-4 hover:bg-accent">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{categoryIcon(it.category)} {categoryLabel(it.category)}</span>
-              <p className="text-sm font-medium mt-1">{it.title}</p>
-              {it.description && <p className="text-xs text-muted-foreground mt-1">{it.description}</p>}
-              <span className="text-xs text-primary mt-2 inline-flex items-center gap-1"><ExternalLink className="h-3 w-3" />Abrir</span>
-            </a>
-          ))}
+          {filtered.map((it) => {
+            const thumb = getThumbnail(it);
+            return (
+              <a key={it.id} href={it.url} target="_blank" rel="noopener noreferrer" className="border border-border hover:bg-accent flex flex-col overflow-hidden group">
+                {thumb ? (
+                  <div className="relative aspect-video bg-muted overflow-hidden">
+                    <img src={thumb} alt={it.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                    <PlayCircle className="absolute inset-0 m-auto h-10 w-10 text-white/90 drop-shadow group-hover:scale-110 transition" />
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-muted flex items-center justify-center text-3xl">{categoryIcon(it.category)}</div>
+                )}
+                <div className="p-4">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{categoryIcon(it.category)} {categoryLabel(it.category)}</span>
+                  <p className="text-sm font-medium mt-1">{it.title}</p>
+                  {it.description && <p className="text-xs text-muted-foreground mt-1">{it.description}</p>}
+                  <span className="text-xs text-primary mt-2 inline-flex items-center gap-1"><ExternalLink className="h-3 w-3" />Abrir</span>
+                </div>
+              </a>
+            );
+          })}
         </div>
       )}
     </Shell>

@@ -176,6 +176,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          thumbnail_url: string | null
           title: string
           updated_at: string
           url: string
@@ -186,6 +187,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          thumbnail_url?: string | null
           title: string
           updated_at?: string
           url: string
@@ -196,6 +198,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          thumbnail_url?: string | null
           title?: string
           updated_at?: string
           url?: string
