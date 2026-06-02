@@ -10,9 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Pencil, ExternalLink } from "lucide-react";
+import { Plus, Trash2, Pencil, ExternalLink, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
-import { LIBRARY_CATEGORIES, categoryLabel, categoryIcon } from "@/lib/library";
+import { LIBRARY_CATEGORIES, categoryLabel, categoryIcon, getThumbnail, deriveThumbnail } from "@/lib/library";
 
 export const Route = createFileRoute("/coach/biblioteca")({
   component: () => <Protected requireRole="coach"><CoachLibrary /></Protected>,
@@ -24,7 +24,7 @@ function CoachLibrary() {
   const [filter, setFilter] = useState<string>("all");
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-  const [form, setForm] = useState({ title: "", description: "", url: "", category: "gym" });
+  const [form, setForm] = useState({ title: "", description: "", url: "", category: "gym", thumbnail_url: "" });
 
   async function load() {
     const { data } = await supabase.from("library_items").select("*").order("created_at", { ascending: false });
