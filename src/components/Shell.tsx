@@ -26,6 +26,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
                 <NavLink to="/atleta/calendario">Calendario</NavLink>
                 <NavLink to="/atleta/recuperacion">Recuperación</NavLink>
                 <NavLink to="/atleta/fisio">Fisio</NavLink>
+                <NavLink to="/atleta/biblioteca">Biblioteca</NavLink>
                 <NavLink to="/atleta/perfil">Perfil</NavLink>
               </>
             )}
@@ -36,6 +37,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
                 <NavLink to="/coach/calendario">Calendario</NavLink>
                 <NavLink to="/coach/recuperacion">Recuperación</NavLink>
                 <NavLink to="/coach/fisio">Fisio</NavLink>
+                <NavLink to="/coach/biblioteca">Biblioteca</NavLink>
                 {isAdmin && <NavLink to="/coach/invitaciones">Invitaciones</NavLink>}
               </>
             )}
