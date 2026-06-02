@@ -244,13 +244,21 @@ function Section({ title, items, onEdit, onDelete }: any) {
 }
 
 function OpenSlots({ onBooked }: { onBooked: () => void }) {
+  const { user } = useAuth();
   const [slots, setSlots] = useState<any[]>([]);
+  const [bookedTypes, setBookedTypes] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
     const today = new Date().toISOString().slice(0, 10);
-    const { data } = await supabase.from("physio_slots").select("*").is("reserved_by", null).gte("slot_date", today).order("slot_date").order("start_time").limit(50);
-    setSlots(data ?? []);
+    const [{ data: s }, { data: a }] = await Promise.all([
+      supabase.from("physio_slots").select("*").is("reserved_by", null).gte("slot_date", today).order("slot_date").order("start_time").limit(80),
+      supabase.from("physio_appointments").select("appointment_type,status,appointment_date").eq("user_id", user!.id).gte("appointment_date", today),
+    ]);
+    setSlots(s ?? []);
+    const types = new Set<string>();
+    (a ?? []).forEach((x: any) => { if (x.status !== "cancelled") types.add(x.appointment_type); });
+    setBookedTypes(types);
   }
   useEffect(() => { load(); }, []);
 
@@ -264,23 +272,40 @@ function OpenSlots({ onBooked }: { onBooked: () => void }) {
   }
 
   if (!slots.length) return null;
-  const byDate: Record<string, any[]> = {};
-  slots.forEach((s) => { (byDate[s.slot_date] ??= []).push(s); });
+  // group by date then by type
+  const byDate: Record<string, Record<string, any[]>> = {};
+  slots.forEach((s) => {
+    (byDate[s.slot_date] ??= {});
+    (byDate[s.slot_date][s.appointment_type] ??= []).push(s);
+  });
 
   return (
     <div className="mb-8 border border-border p-4">
       <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Turnos disponibles</p>
-      <div className="space-y-3">
-        {Object.entries(byDate).map(([date, arr]) => (
+      {bookedTypes.size > 0 && (
+        <p className="text-[11px] text-muted-foreground mb-3 italic">Ya tienes una cita activa de: {Array.from(bookedTypes).map(typeLabel).join(", ")}. Esos tipos quedan bloqueados hasta cancelarla.</p>
+      )}
+      <div className="space-y-4">
+        {Object.entries(byDate).map(([date, byType]) => (
           <div key={date}>
-            <p className="text-xs font-medium mb-1">{new Date(date + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {arr.map((s) => (
-                <button key={s.id} type="button" disabled={busy === s.id} onClick={() => book(s.id)}
-                  className="px-2 py-1 text-xs border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-50">
-                  {typeIcon(s.appointment_type)} {s.start_time?.slice(0, 5)}
-                </button>
-              ))}
+            <p className="text-xs font-medium mb-2">{new Date(date + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}</p>
+            <div className="space-y-2">
+              {Object.entries(byType).map(([t, arr]) => {
+                const disabled = bookedTypes.has(t);
+                return (
+                  <div key={t}>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{typeIcon(t)} {typeLabel(t)}{disabled && " · bloqueado"}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {arr.map((s) => (
+                        <button key={s.id} type="button" disabled={busy === s.id || disabled} onClick={() => book(s.id)}
+                          className="px-2 py-1 text-xs border border-border hover:bg-primary hover:text-primary-foreground disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-foreground">
+                          {s.start_time?.slice(0, 5)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
