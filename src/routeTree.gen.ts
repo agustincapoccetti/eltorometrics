@@ -21,6 +21,7 @@ import { Route as CoachInvitacionesRouteImport } from './routes/coach.invitacion
 import { Route as CoachGymRouteImport } from './routes/coach.gym'
 import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
 import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
+import { Route as CoachBibliotecaRouteImport } from './routes/coach.biblioteca'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
 import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
@@ -29,6 +30,7 @@ import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding
 import { Route as AtletaGymRouteImport } from './routes/atleta.gym'
 import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
 import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
+import { Route as AtletaBibliotecaRouteImport } from './routes/atleta.biblioteca'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -91,6 +93,11 @@ const CoachCalendarioRoute = CoachCalendarioRouteImport.update({
   path: '/coach/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachBibliotecaRoute = CoachBibliotecaRouteImport.update({
+  id: '/coach/biblioteca',
+  path: '/coach/biblioteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
   id: '/atleta/wellness',
   path: '/atleta/wellness',
@@ -131,6 +138,11 @@ const AtletaCalendarioRoute = AtletaCalendarioRouteImport.update({
   path: '/atleta/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaBibliotecaRoute = AtletaBibliotecaRouteImport.update({
+  id: '/atleta/biblioteca',
+  path: '/atleta/biblioteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
   id: '/coach/atleta/$id',
   path: '/coach/atleta/$id',
@@ -143,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/atleta/biblioteca': typeof AtletaBibliotecaRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
   '/atleta/gym': typeof AtletaGymRoute
@@ -151,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/biblioteca': typeof CoachBibliotecaRoute
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
@@ -166,6 +180,7 @@ export interface FileRoutesByTo {
   '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/atleta/biblioteca': typeof AtletaBibliotecaRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
   '/atleta/gym': typeof AtletaGymRoute
@@ -174,6 +189,7 @@ export interface FileRoutesByTo {
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/biblioteca': typeof CoachBibliotecaRoute
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
@@ -190,6 +206,7 @@ export interface FileRoutesById {
   '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/atleta/biblioteca': typeof AtletaBibliotecaRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
   '/atleta/gym': typeof AtletaGymRoute
@@ -198,6 +215,7 @@ export interface FileRoutesById {
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
+  '/coach/biblioteca': typeof CoachBibliotecaRoute
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
@@ -215,6 +233,7 @@ export interface FileRouteTypes {
     | '/recuperar'
     | '/registro'
     | '/reset-password'
+    | '/atleta/biblioteca'
     | '/atleta/calendario'
     | '/atleta/fisio'
     | '/atleta/gym'
@@ -223,6 +242,7 @@ export interface FileRouteTypes {
     | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/biblioteca'
     | '/coach/calendario'
     | '/coach/fisio'
     | '/coach/gym'
@@ -238,6 +258,7 @@ export interface FileRouteTypes {
     | '/recuperar'
     | '/registro'
     | '/reset-password'
+    | '/atleta/biblioteca'
     | '/atleta/calendario'
     | '/atleta/fisio'
     | '/atleta/gym'
@@ -246,6 +267,7 @@ export interface FileRouteTypes {
     | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/biblioteca'
     | '/coach/calendario'
     | '/coach/fisio'
     | '/coach/gym'
@@ -261,6 +283,7 @@ export interface FileRouteTypes {
     | '/recuperar'
     | '/registro'
     | '/reset-password'
+    | '/atleta/biblioteca'
     | '/atleta/calendario'
     | '/atleta/fisio'
     | '/atleta/gym'
@@ -269,6 +292,7 @@ export interface FileRouteTypes {
     | '/atleta/recuperacion'
     | '/atleta/rpe'
     | '/atleta/wellness'
+    | '/coach/biblioteca'
     | '/coach/calendario'
     | '/coach/fisio'
     | '/coach/gym'
@@ -285,6 +309,7 @@ export interface RootRouteChildren {
   RecuperarRoute: typeof RecuperarRoute
   RegistroRoute: typeof RegistroRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  AtletaBibliotecaRoute: typeof AtletaBibliotecaRoute
   AtletaCalendarioRoute: typeof AtletaCalendarioRoute
   AtletaFisioRoute: typeof AtletaFisioRoute
   AtletaGymRoute: typeof AtletaGymRoute
@@ -293,6 +318,7 @@ export interface RootRouteChildren {
   AtletaRecuperacionRoute: typeof AtletaRecuperacionRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
+  CoachBibliotecaRoute: typeof CoachBibliotecaRoute
   CoachCalendarioRoute: typeof CoachCalendarioRoute
   CoachFisioRoute: typeof CoachFisioRoute
   CoachGymRoute: typeof CoachGymRoute
@@ -389,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoachCalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach/biblioteca': {
+      id: '/coach/biblioteca'
+      path: '/coach/biblioteca'
+      fullPath: '/coach/biblioteca'
+      preLoaderRoute: typeof CoachBibliotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atleta/wellness': {
       id: '/atleta/wellness'
       path: '/atleta/wellness'
@@ -445,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaCalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/biblioteca': {
+      id: '/atleta/biblioteca'
+      path: '/atleta/biblioteca'
+      fullPath: '/atleta/biblioteca'
+      preLoaderRoute: typeof AtletaBibliotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coach/atleta/$id': {
       id: '/coach/atleta/$id'
       path: '/coach/atleta/$id'
@@ -461,6 +501,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecuperarRoute: RecuperarRoute,
   RegistroRoute: RegistroRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  AtletaBibliotecaRoute: AtletaBibliotecaRoute,
   AtletaCalendarioRoute: AtletaCalendarioRoute,
   AtletaFisioRoute: AtletaFisioRoute,
   AtletaGymRoute: AtletaGymRoute,
@@ -469,6 +510,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaRecuperacionRoute: AtletaRecuperacionRoute,
   AtletaRpeRoute: AtletaRpeRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
+  CoachBibliotecaRoute: CoachBibliotecaRoute,
   CoachCalendarioRoute: CoachCalendarioRoute,
   CoachFisioRoute: CoachFisioRoute,
   CoachGymRoute: CoachGymRoute,
@@ -481,3 +523,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
