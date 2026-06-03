@@ -13,6 +13,15 @@ import {
   getEmbedUrl,
 } from "@/lib/library";
 
+type LibraryItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string;
+  category: string;
+  thumbnail_url?: string | null;
+};
+
 export const Route = createFileRoute("/atleta/biblioteca")({
   component: () => (
     <Protected requireRole="atleta">
@@ -22,9 +31,9 @@ export const Route = createFileRoute("/atleta/biblioteca")({
 });
 
 function AthleteLibrary() {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<LibraryItem[]>([]);
   const [filter, setFilter] = useState<string>("all");
-  const [preview, setPreview] = useState<any | null>(null);
+  const [preview, setPreview] = useState<LibraryItem | null>(null);
 
   useEffect(() => {
     supabase
@@ -109,10 +118,16 @@ function AthleteLibrary() {
                   {it.description && (
                     <p className="text-xs text-muted-foreground mt-1">{it.description}</p>
                   )}
-                  <span className="text-xs text-primary mt-2 inline-flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                    }
+                    className="text-xs text-primary mt-2 inline-flex items-center gap-1 hover:underline text-left"
+                  >
                     <ExternalLink className="h-3 w-3" />
                     Abrir
-                  </span>
+                  </button>
                 </div>
               </div>
             );
