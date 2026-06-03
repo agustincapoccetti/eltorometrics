@@ -46,3 +46,28 @@ export function deriveThumbnail(url: string): string | null {
 export function getThumbnail(item: { thumbnail_url?: string | null; url: string }): string | null {
   return item.thumbnail_url || deriveThumbnail(item.url);
 }
+
+export function getEmbedUrl(url: string): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      const parts = u.pathname.split("/").filter(Boolean);
+      const id = u.searchParams.get("v") || (parts[0] === "shorts" ? parts[1] : parts.pop());
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (host === "youtu.be") {
+      const id = u.pathname.replace(/^\//, "").split("/")[0];
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (host === "vimeo.com") {
+      const id = u.pathname.split("/").filter(Boolean)[0];
+      return id && /^\d+$/.test(id) ? `https://player.vimeo.com/video/${id}` : null;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
