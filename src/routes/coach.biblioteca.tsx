@@ -33,6 +33,15 @@ import {
   getEmbedUrl,
 } from "@/lib/library";
 
+type LibraryItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  url: string;
+  category: string;
+  thumbnail_url?: string | null;
+};
+
 export const Route = createFileRoute("/coach/biblioteca")({
   component: () => (
     <Protected requireRole="coach">
@@ -43,11 +52,11 @@ export const Route = createFileRoute("/coach/biblioteca")({
 
 function CoachLibrary() {
   const { user } = useAuth();
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<LibraryItem[]>([]);
   const [filter, setFilter] = useState<string>("all");
-  const [preview, setPreview] = useState<any | null>(null);
+  const [preview, setPreview] = useState<LibraryItem | null>(null);
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<LibraryItem | null>(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -72,7 +81,7 @@ function CoachLibrary() {
     setForm({ title: "", description: "", url: "", category: "gym", thumbnail_url: "" });
     setOpen(true);
   }
-  function openEdit(it: any) {
+  function openEdit(it: LibraryItem) {
     setEditing(it);
     setForm({
       title: it.title,
