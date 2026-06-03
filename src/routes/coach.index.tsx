@@ -46,6 +46,7 @@ function CoachDash() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("week");
+  const [positionFilter, setPositionFilter] = useState("all");
 
   const [exportType, setExportType] = useState<"rpe" | "wellness">("rpe");
   const [exportAthlete, setExportAthlete] = useState<string>("all");
@@ -147,6 +148,9 @@ function CoachDash() {
     })).sort((a, b) => b.cargaSemanal - a.cargaSemanal);
   }, [rows]);
 
+  const positions = useMemo(() => Array.from(new Set(rows.map((r) => r.position?.trim() || "Sin puesto"))).sort((a, b) => a.localeCompare(b)), [rows]);
+  const visibleRows = useMemo(() => positionFilter === "all" ? rows : rows.filter((r) => (r.position?.trim() || "Sin puesto") === positionFilter), [rows, positionFilter]);
+
   async function exportCsv() {
     const table = exportType === "rpe" ? "rpe_entries" : "wellness_entries";
     const dateCol = exportType === "rpe" ? "session_date" : "entry_date";
@@ -232,9 +236,16 @@ function CoachDash() {
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Carga y fatiga</p>
-            <p className="text-xs text-muted-foreground">{rows.length} atletas</p>
+            <p className="text-xs text-muted-foreground">{visibleRows.length} de {rows.length} atletas</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <Select value={positionFilter} onValueChange={setPositionFilter}>
+              <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los puestos</SelectItem>
+                {positions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
+            </Select>
             <div className="flex border border-border">
               {(["day", "week", "month"] as Period[]).map((p) => (
                 <button key={p} onClick={() => setPeriod(p)}
