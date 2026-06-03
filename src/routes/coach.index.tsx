@@ -269,18 +269,18 @@ function CoachDash() {
               <div className="text-center">Fatiga μ</div>
               <div></div>
             </div>
-            {rows.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin atletas todavía.</p>}
-            {rows.map((r) => {
+            {visibleRows.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin atletas para este filtro.</p>}
+            {visibleRows.map((r) => {
               const ac = acwrColor(r.acwr);
               const fc = fatigueColor(r.avgFatigue);
               return (
-                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[760px]">
-                  <div className="w-9 h-9 border border-border bg-secondary overflow-hidden">
+                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="grid grid-cols-[36px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-3 py-2 border-b border-border last:border-b-0 hover:bg-accent items-center min-w-[760px] text-xs">
+                  <div className="w-8 h-8 border border-border bg-secondary overflow-hidden">
                     {r.photo_url ? <img src={r.photo_url} alt={r.full_name} className="w-full h-full object-cover" /> : null}
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{r.full_name}{r.last_name ? ` ${r.last_name}` : ""}</p>
-                    {r.position && <p className="text-xs text-muted-foreground">{r.position}</p>}
+                    <p className="font-medium text-xs">{r.full_name}{r.last_name ? ` ${r.last_name}` : ""}</p>
+                    {r.position && <p className="text-[10px] text-muted-foreground">{r.position}</p>}
                   </div>
                   <div className="flex items-center justify-center gap-1 text-xs">
                     {r.wellnessThisWeek > 0 ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
@@ -290,7 +290,7 @@ function CoachDash() {
                     {r.rpeThisWeek > 0 ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
                     <span>{r.rpeThisWeek}</span>
                   </div>
-                  <div className="text-center text-sm font-medium">{r.weeklyLoad}<span className="text-xs text-muted-foreground"> UA</span></div>
+                  <div className="text-center text-xs font-medium">{r.weeklyLoad}<span className="text-[10px] text-muted-foreground"> UA</span></div>
                   <div className="text-center">
                     <span className={`inline-block px-2 py-0.5 text-xs font-medium ${ac.bg} ${ac.text}`}>{r.acwr ?? "—"} · {ac.label}</span>
                   </div>
