@@ -56,6 +56,7 @@ export const COMMON_RUGBY_PAINS = [
 function AthletePhysio() {
   const { user } = useAuth();
   const [list, setList] = useState<any[]>([]);
+  const [slotsRefresh, setSlotsRefresh] = useState(0);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({
@@ -110,13 +111,14 @@ function AthletePhysio() {
       const { error } = await supabase.from("physio_appointments").insert({ ...payload, user_id: user!.id });
       if (error) { toast.error(error.message); return; }
     }
-    toast.success("Guardado"); setOpen(false); load();
+    toast.success("Guardado"); setOpen(false); await load(); setSlotsRefresh((v) => v + 1);
   }
   async function remove(id: string) {
     if (!confirm("¿Eliminar esta cita?")) return;
     const { error } = await supabase.from("physio_appointments").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    load();
+    await load();
+    setSlotsRefresh((v) => v + 1);
   }
 
   const upcoming = list.filter((a) => a.appointment_date >= new Date().toISOString().slice(0, 10));
@@ -126,7 +128,7 @@ function AthletePhysio() {
     <Shell title="Fisioterapia">
       <p className="text-sm text-muted-foreground mb-6">Reserva un turno disponible o registra una cita externa.</p>
 
-      <OpenSlots onBooked={load} />
+      <OpenSlots refreshKey={slotsRefresh} onBooked={async () => { await load(); setSlotsRefresh((v) => v + 1); }} />
 
       <Button onClick={openNew} className="mb-6" variant="outline"><Plus className="h-4 w-4 mr-2" />Registrar cita externa</Button>
 
@@ -243,10 +245,10 @@ function Section({ title, items, onEdit, onDelete }: any) {
   );
 }
 
-function OpenSlots({ onBooked }: { onBooked: () => void }) {
+function OpenSlots({ refreshKey, onBooked }: { refreshKey: number; onBooked: () => void | Promise<void> }) {
   const { user } = useAuth();
   const [slots, setSlots] = useState<any[]>([]);
-  const [bookedTypes, setBookedTypes] = useState<Set<string>>(new Set());
+  const [bookedKeys, setBookedKeys] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
@@ -256,11 +258,11 @@ function OpenSlots({ onBooked }: { onBooked: () => void }) {
       supabase.from("physio_appointments").select("appointment_type,status,appointment_date").eq("user_id", user!.id).gte("appointment_date", today),
     ]);
     setSlots(s ?? []);
-    const types = new Set<string>();
-    (a ?? []).forEach((x: any) => { if (x.status !== "cancelled") types.add(x.appointment_type); });
-    setBookedTypes(types);
+    const keys = new Set<string>();
+    (a ?? []).forEach((x: any) => { if (x.status !== "cancelled") keys.add(`${x.appointment_date}|${x.appointment_type}`); });
+    setBookedKeys(keys);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [refreshKey]);
 
   async function book(id: string) {
     setBusy(id);
@@ -268,7 +270,7 @@ function OpenSlots({ onBooked }: { onBooked: () => void }) {
     setBusy(null);
     if (error) { toast.error(error.message); return; }
     toast.success("Turno reservado");
-    load(); onBooked();
+    await load(); await onBooked();
   }
 
   if (!slots.length) return null;
@@ -282,8 +284,8 @@ function OpenSlots({ onBooked }: { onBooked: () => void }) {
   return (
     <div className="mb-8 border border-border p-4">
       <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Turnos disponibles</p>
-      {bookedTypes.size > 0 && (
-        <p className="text-[11px] text-muted-foreground mb-3 italic">Ya tienes una cita activa de: {Array.from(bookedTypes).map(typeLabel).join(", ")}. Esos tipos quedan bloqueados hasta cancelarla.</p>
+      {bookedKeys.size > 0 && (
+        <p className="text-[11px] text-muted-foreground mb-3 italic">Solo se bloquea el mismo tipo de cita en el mismo día. Puedes reservar otros días u otro motivo.</p>
       )}
       <div className="space-y-4">
         {Object.entries(byDate).map(([date, byType]) => (
@@ -291,7 +293,7 @@ function OpenSlots({ onBooked }: { onBooked: () => void }) {
             <p className="text-xs font-medium mb-2">{new Date(date + "T12:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "long" })}</p>
             <div className="space-y-2">
               {Object.entries(byType).map(([t, arr]) => {
-                const disabled = bookedTypes.has(t);
+                const disabled = bookedKeys.has(`${date}|${t}`);
                 return (
                   <div key={t}>
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{typeIcon(t)} {typeLabel(t)}{disabled && " · bloqueado"}</p>
