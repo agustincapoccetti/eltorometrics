@@ -259,7 +259,7 @@ function CoachDash() {
         </div>
         {loading ? <p className="text-sm text-muted-foreground">Cargando...</p> : (
           <div ref={tableRef} className="border border-border overflow-x-auto bg-background">
-            <div className="grid grid-cols-[44px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-4 py-3 border-b border-border text-xs uppercase tracking-wider font-medium bg-secondary min-w-[760px]">
+            <div className="grid grid-cols-[36px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-3 py-2 border-b border-border text-[10px] uppercase tracking-wider font-medium bg-secondary min-w-[760px]">
               <div></div>
               <div>Atleta</div>
               <div className="text-center">Bienestar</div>
