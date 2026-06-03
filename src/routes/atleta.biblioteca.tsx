@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExternalLink, PlayCircle } from "lucide-react";
-import { LIBRARY_CATEGORIES, categoryLabel, categoryIcon, getThumbnail } from "@/lib/library";
+import { LIBRARY_CATEGORIES, categoryLabel, categoryIcon, getThumbnail, getEmbedUrl } from "@/lib/library";
 
 export const Route = createFileRoute("/atleta/biblioteca")({
   component: () => <Protected requireRole="atleta"><AthleteLibrary /></Protected>,
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/atleta/biblioteca")({
 function AthleteLibrary() {
   const [items, setItems] = useState<any[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [preview, setPreview] = useState<any | null>(null);
 
   useEffect(() => {
     supabase.from("library_items").select("*").order("created_at", { ascending: false }).then(({ data }) => setItems(data ?? []));
@@ -37,30 +39,40 @@ function AthleteLibrary() {
       {filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground">No hay recursos disponibles.</p>
       ) : (
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {filtered.map((it) => {
             const thumb = getThumbnail(it);
+            const embed = getEmbedUrl(it.url);
             return (
-              <a key={it.id} href={it.url} target="_blank" rel="noopener noreferrer" className="border border-border hover:bg-accent flex flex-col overflow-hidden group">
+              <div key={it.id} className="border border-border hover:bg-accent flex flex-col overflow-hidden group">
                 {thumb ? (
-                  <div className="relative aspect-video bg-muted overflow-hidden">
+                  <button type="button" onClick={() => embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")} className="relative aspect-video bg-muted overflow-hidden text-left">
                     <img src={thumb} alt={it.title} loading="lazy" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                    <PlayCircle className="absolute inset-0 m-auto h-10 w-10 text-white/90 drop-shadow group-hover:scale-110 transition" />
-                  </div>
+                    <PlayCircle className="absolute inset-0 m-auto h-8 w-8 text-white/90 drop-shadow group-hover:scale-110 transition" />
+                  </button>
                 ) : (
-                  <div className="aspect-video bg-muted flex items-center justify-center text-3xl">{categoryIcon(it.category)}</div>
+                  <button type="button" onClick={() => embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")} className="aspect-video bg-muted flex items-center justify-center text-2xl">{categoryIcon(it.category)}</button>
                 )}
-                <div className="p-4">
+                <div className="p-3">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{categoryIcon(it.category)} {categoryLabel(it.category)}</span>
-                  <p className="text-sm font-medium mt-1">{it.title}</p>
+                  <p className="text-xs font-medium mt-1 leading-snug">{it.title}</p>
                   {it.description && <p className="text-xs text-muted-foreground mt-1">{it.description}</p>}
                   <span className="text-xs text-primary mt-2 inline-flex items-center gap-1"><ExternalLink className="h-3 w-3" />Abrir</span>
                 </div>
-              </a>
+              </div>
             );
           })}
         </div>
       )}
+
+      <Dialog open={!!preview} onOpenChange={(v) => !v && setPreview(null)}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          <DialogHeader className="px-4 pt-4"><DialogTitle>{preview?.title}</DialogTitle></DialogHeader>
+          {preview && getEmbedUrl(preview.url) && (
+            <iframe src={getEmbedUrl(preview.url)!} title={preview.title} className="w-full aspect-video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+          )}
+        </DialogContent>
+      </Dialog>
     </Shell>
   );
 }
