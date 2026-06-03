@@ -97,7 +97,7 @@ function AthleteLibrary() {
                         (e.currentTarget as HTMLImageElement).style.display = "none";
                       }}
                     />
-                    <PlayCircle className="absolute inset-0 m-auto h-8 w-8 text-white/90 drop-shadow group-hover:scale-110 transition" />
+                    <PlayCircle className="absolute inset-0 m-auto h-8 w-8 text-background drop-shadow group-hover:scale-110 transition" />
                   </button>
                 ) : (
                   <button
