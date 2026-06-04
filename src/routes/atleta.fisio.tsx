@@ -375,21 +375,25 @@ function OpenSlots({
   const [busy, setBusy] = useState<string | null>(null);
 
   async function load() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = new Date();
+    const weekStart = isoDate(startOfWeek(today));
+    const weekEnd = isoDate(endOfWeek(today));
+    const todayIso = isoDate(today);
     const [{ data: s }, { data: a }] = await Promise.all([
       supabase
         .from("physio_slots")
         .select("*")
         .is("reserved_by", null)
-        .gte("slot_date", today)
+        .gte("slot_date", todayIso)
+        .lte("slot_date", weekEnd)
         .order("slot_date")
         .order("start_time")
-        .limit(80),
+        .limit(120),
       supabase
         .from("physio_appointments")
         .select("appointment_type,status,appointment_date")
         .eq("user_id", user!.id)
-        .gte("appointment_date", today),
+        .gte("appointment_date", weekStart),
     ]);
     setSlots(s ?? []);
     const keys = new Set<string>();
