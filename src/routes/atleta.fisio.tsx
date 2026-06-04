@@ -17,8 +17,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Trash2, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { APPOINTMENT_TYPES, typeLabel, typeIcon } from "@/lib/appointment-types";
+import { startOfWeek, endOfWeek, isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/fisio")({
   component: () => (
