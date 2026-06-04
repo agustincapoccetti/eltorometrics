@@ -339,7 +339,9 @@ function Section({ title, items, onEdit, onDelete }: any) {
                     ? "Asistida"
                     : a.status === "cancelled"
                       ? "Cancelada"
-                      : "Programada"}
+                      : a.status === "requested"
+                        ? "Solicitada"
+                        : "Programada"}
                 </span>
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
