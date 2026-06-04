@@ -233,7 +233,7 @@ function CoachPhysio() {
       <PendingRequests
         appointments={appointments}
         profiles={profiles}
-        onAssign={(a) => openEdit({ ...a, status: "scheduled" })}
+        onAssign={(a: any) => openEdit({ ...a, status: "scheduled" })}
       />
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
