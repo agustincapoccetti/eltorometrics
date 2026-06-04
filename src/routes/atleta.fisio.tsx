@@ -193,10 +193,13 @@ function AthletePhysio() {
         }}
       />
 
-      <Button onClick={openNew} className="mb-6" variant="outline">
-        <Plus className="h-4 w-4 mr-2" />
-        Registrar cita externa
-      </Button>
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Button onClick={openNew} variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Registrar cita externa
+        </Button>
+        <RequestFutureButton onCreated={load} />
+      </div>
 
       <Section title="Próximas" items={upcoming} onEdit={openEdit} onDelete={remove} />
       <Section title="Historial" items={past} onEdit={openEdit} onDelete={remove} />
