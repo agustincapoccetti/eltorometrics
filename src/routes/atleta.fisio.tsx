@@ -419,7 +419,18 @@ function OpenSlots({
     await onBooked();
   }
 
-  if (!slots.length) return null;
+  if (!slots.length) {
+    return (
+      <div className="mb-6 border border-border p-4">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+          Turnos de esta semana
+        </p>
+        <p className="text-sm text-muted-foreground">
+          No hay turnos disponibles esta semana. Solicitá una cita más adelante con el botón "Solicitar cita futura" o esperá a que los coaches abran nuevos horarios.
+        </p>
+      </div>
+    );
+  }
   // group by date then by type
   const byDate: Record<string, Record<string, any[]>> = {};
   slots.forEach((s) => {
@@ -429,13 +440,15 @@ function OpenSlots({
 
   return (
     <div className="mb-8 border border-border p-4">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-        Turnos disponibles
+      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+        Turnos de esta semana
+      </p>
+      <p className="text-[11px] text-muted-foreground mb-3">
+        Solo podés reservar turnos de la semana en curso. Para fechas posteriores, usá "Solicitar cita futura" o esperá la asignación del coach.
       </p>
       {bookedKeys.size > 0 && (
         <p className="text-[11px] text-muted-foreground mb-3 italic">
-          Solo se bloquea el mismo tipo de cita en el mismo día. Puedes reservar otros días u otro
-          motivo.
+          Solo se bloquea el mismo tipo de cita en el mismo día. Podés reservar otros días u otro motivo.
         </p>
       )}
       <div className="space-y-4">
