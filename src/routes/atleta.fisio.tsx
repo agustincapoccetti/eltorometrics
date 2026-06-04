@@ -493,3 +493,134 @@ function OpenSlots({
     </div>
   );
 }
+
+function RequestFutureButton({ onCreated }: { onCreated: () => void | Promise<void> }) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const minDate = isoDate(new Date(endOfWeek().getTime() + 86400000)); // next Monday
+  const [form, setForm] = useState({
+    appointment_type: "fisio_club",
+    appointment_date: minDate,
+    reasons: [] as string[],
+    notes: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  function toggleReason(r: string) {
+    setForm((f) => ({
+      ...f,
+      reasons: f.reasons.includes(r) ? f.reasons.filter((x) => x !== r) : [...f.reasons, r],
+    }));
+  }
+
+  async function submit() {
+    if (form.appointment_date < minDate) {
+      toast.error("Las solicitudes son para semanas posteriores a la actual");
+      return;
+    }
+    if (form.appointment_type !== "presoterapia" && !form.reasons.length) {
+      toast.error("Marcá al menos un motivo");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase.from("physio_appointments").insert({
+      user_id: user!.id,
+      appointment_type: form.appointment_type,
+      appointment_date: form.appointment_date,
+      appointment_time: null,
+      reasons: form.reasons,
+      notes: form.notes || null,
+      status: "requested",
+    });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Solicitud enviada. El coach te asignará un horario.");
+    setOpen(false);
+    setForm({ appointment_type: "fisio_club", appointment_date: minDate, reasons: [], notes: "" });
+    await onCreated();
+  }
+
+  return (
+    <>
+      <Button variant="outline" onClick={() => setOpen(true)}>
+        <CalendarPlus className="h-4 w-4 mr-2" />
+        Solicitar cita futura
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Solicitar cita futura</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground">
+              Las citas de la semana en curso se reservan eligiendo un turno disponible. Para fechas posteriores, dejá tu solicitud y el coach te asignará un horario.
+            </p>
+            <div>
+              <Label>Tipo de cita</Label>
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                {APPOINTMENT_TYPES.map((t) => (
+                  <button
+                    key={t.v}
+                    type="button"
+                    onClick={() => setForm({ ...form, appointment_type: t.v })}
+                    className={`p-3 text-center border ${form.appointment_type === t.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}
+                  >
+                    <div className="text-xl mb-1">{t.icon}</div>
+                    <div className="text-[10px] uppercase tracking-wider leading-tight">{t.l}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Fecha deseada</Label>
+              <Input
+                type="date"
+                min={minDate}
+                value={form.appointment_date}
+                onChange={(e) => setForm({ ...form, appointment_date: e.target.value })}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">A partir del {minDate}.</p>
+            </div>
+            <div>
+              <Label>Motivos</Label>
+              <div className="space-y-3 mt-2">
+                {COMMON_RUGBY_PAINS.map((g) => (
+                  <div key={g.group} className="border border-border p-3">
+                    <p className="text-xs uppercase tracking-wider font-medium mb-2">{g.group}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {g.items.map((it) => (
+                        <label key={it} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <Checkbox
+                            checked={form.reasons.includes(it)}
+                            onCheckedChange={() => toggleReason(it)}
+                          />
+                          <span>{it}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Notas (opcional)</Label>
+              <Textarea
+                rows={3}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                placeholder="Preferencia horaria, detalle de la molestia…"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={submit} disabled={saving}>{saving ? "..." : "Enviar solicitud"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
