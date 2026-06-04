@@ -230,6 +230,12 @@ function CoachPhysio() {
         <Stat label="Asistidas" value={filtered.filter((a) => a.status === "attended").length} />
       </div>
 
+      <PendingRequests
+        appointments={appointments}
+        profiles={profiles}
+        onAssign={(a: any) => openEdit({ ...a, status: "scheduled" })}
+      />
+
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
         <div>
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Agenda mensual</p>
@@ -423,6 +429,33 @@ function Stat({ label, value }: { label: string; value: number }) {
     <div className="border border-border p-4">
       <p className="text-xs uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className="text-3xl font-display mt-1">{value}</p>
+    </div>
+  );
+}
+
+function PendingRequests({ appointments, profiles, onAssign }: { appointments: any[]; profiles: Record<string, any>; onAssign: (a: any) => void }) {
+  const requests = appointments.filter((a) => a.status === "requested").sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
+  if (!requests.length) return null;
+  return (
+    <div className="mb-6 border border-border p-4">
+      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Solicitudes de cita pendientes ({requests.length})</p>
+      <div className="space-y-2">
+        {requests.map((a) => {
+          const p = profiles[a.user_id];
+          return (
+            <div key={a.id} className="flex items-start gap-3 p-2 border border-border">
+              <span className="text-lg mt-0.5">{typeIcon(a.appointment_type)}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : "—"}</p>
+                <p className="text-[11px] text-muted-foreground">{typeLabel(a.appointment_type)} · pedido para {a.appointment_date}</p>
+                {a.reasons?.length ? <p className="text-[11px] text-muted-foreground mt-0.5">{a.reasons.join(" · ")}</p> : null}
+                {a.notes && <p className="text-[11px] italic mt-0.5">{a.notes}</p>}
+              </div>
+              <Button size="sm" variant="outline" onClick={() => onAssign(a)}>Asignar horario</Button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
