@@ -230,6 +230,12 @@ function CoachPhysio() {
         <Stat label="Asistidas" value={filtered.filter((a) => a.status === "attended").length} />
       </div>
 
+      <PendingRequests
+        appointments={appointments}
+        profiles={profiles}
+        onAssign={(a) => openEdit({ ...a, status: "scheduled" })}
+      />
+
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
         <div>
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Agenda mensual</p>
