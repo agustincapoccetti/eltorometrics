@@ -274,18 +274,17 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
         {items.map((it) => (
           <div key={it.id} className="border border-border p-3 flex items-center justify-between gap-2">
             <div className="text-sm">
-              <p className="font-medium">{it.name} <span className={`text-[10px] uppercase ml-1 ${it.active ? "text-green-700" : "text-muted-foreground"}`}>{it.active ? "Activa" : "Cancelada"}</span></p>
+              <p className="font-medium">{it.name}</p>
               <p className="text-xs text-muted-foreground">
                 {it.weekdays.map(labelDay).join(", ")} · {it.start_time?.slice(0, 5)}
+                {it.start_date ? ` · desde ${it.start_date}` : ""}
                 {it.end_date ? ` · hasta ${it.end_date}` : " · sin fecha de fin"}
               </p>
             </div>
-            {it.active && (
-              <div className="flex gap-1">
-                <Button size="sm" variant="outline" onClick={() => openEdit(it)}>Editar</Button>
-                <Button size="sm" variant="outline" onClick={() => stop(it.id)}>Cancelar</Button>
-              </div>
-            )}
+            <div className="flex gap-1">
+              <Button size="sm" variant="outline" onClick={() => openEdit(it)}>Editar</Button>
+              <Button size="sm" variant="outline" onClick={() => stop(it.id)}>Eliminar</Button>
+            </div>
           </div>
         ))}
       </div>
