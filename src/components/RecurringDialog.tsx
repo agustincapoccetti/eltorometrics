@@ -296,8 +296,9 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
           <div className="space-y-3">
             <div><Label>Nombre</Label><Input value={editName} onChange={(e) => setEditName(e.target.value)} /></div>
             <div><Label>Hora</Label><Input type="time" value={editStartTime} onChange={(e) => setEditStartTime(e.target.value)} /></div>
+            <div><Label>Fecha de inicio</Label><Input type="date" value={editStartDate} onChange={(e) => setEditStartDate(e.target.value)} /></div>
             <div><Label>Fecha de fin (opcional)</Label><Input type="date" value={editEndDate} onChange={(e) => setEditEndDate(e.target.value)} /></div>
-            <p className="text-[11px] text-muted-foreground">Si adelantas la fecha de fin, se borran turnos futuros sin reservar más allá de esa fecha.</p>
+            <p className="text-[11px] text-muted-foreground">Si atrasas la fecha de inicio o adelantas la de fin, se borran los turnos sin reservar que queden fuera del nuevo rango.</p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cerrar</Button>
