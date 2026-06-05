@@ -214,8 +214,10 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
   const [editEndDate, setEditEndDate] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
 
+  const [editStartDate, setEditStartDate] = useState("");
+
   async function load() {
-    const { data } = await supabase.from("recurring_schedules").select("*").eq("kind", kind).order("created_at", { ascending: false });
+    const { data } = await supabase.from("recurring_schedules").select("*").eq("kind", kind).eq("active", true).order("created_at", { ascending: false });
     setItems(data ?? []);
     setLoading(false);
   }
@@ -223,13 +225,13 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
 
 
   async function stop(id: string) {
-    if (!confirm("¿Cancelar esta programación? Se borrarán los próximos turnos sin reservar. El historial se mantiene.")) return;
-    await supabase.from("recurring_schedules").update({ active: false, end_date: new Date().toISOString().slice(0, 10) }).eq("id", id);
+    if (!confirm("¿Eliminar esta programación de la lista? Se borrarán los próximos turnos sin reservar. El historial reservado se mantiene.")) return;
     const today = new Date().toISOString().slice(0, 10);
     if (kind === "physio_slot") {
       await supabase.from("physio_slots").delete().eq("recurring_schedule_id", id).is("reserved_by", null).gte("slot_date", today);
     }
-    toast.success("Programación cancelada");
+    await supabase.from("recurring_schedules").update({ active: false, end_date: today }).eq("id", id);
+    toast.success("Programación eliminada");
     load();
   }
 
@@ -237,17 +239,27 @@ export function RecurringList({ kind, refreshKey }: { kind: "training" | "physio
     setEditing(it);
     setEditName(it.name);
     setEditEndDate(it.end_date ?? "");
+    setEditStartDate(it.start_date ?? "");
     setEditStartTime(it.start_time?.slice(0, 5) ?? "");
   }
 
   async function saveEdit() {
     if (!editing) return;
-    const payload: any = { name: editName, end_date: editEndDate || null, start_time: editStartTime || editing.start_time };
+    const payload: any = {
+      name: editName,
+      end_date: editEndDate || null,
+      start_date: editStartDate || editing.start_date,
+      start_time: editStartTime || editing.start_time,
+    };
     const { error } = await supabase.from("recurring_schedules").update(payload).eq("id", editing.id);
     if (error) { toast.error(error.message); return; }
-    // If end_date moved earlier, delete future unreserved slots beyond it
-    if (kind === "physio_slot" && editEndDate) {
-      await supabase.from("physio_slots").delete().eq("recurring_schedule_id", editing.id).is("reserved_by", null).gt("slot_date", editEndDate);
+    if (kind === "physio_slot") {
+      if (editStartDate && editStartDate > (editing.start_date ?? "")) {
+        await supabase.from("physio_slots").delete().eq("recurring_schedule_id", editing.id).is("reserved_by", null).lt("slot_date", editStartDate);
+      }
+      if (editEndDate) {
+        await supabase.from("physio_slots").delete().eq("recurring_schedule_id", editing.id).is("reserved_by", null).gt("slot_date", editEndDate);
+      }
     }
     toast.success("Programación actualizada");
     setEditing(null); load();
