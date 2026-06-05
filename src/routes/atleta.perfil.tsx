@@ -69,6 +69,16 @@ function Perfil() {
           </div>
 
           <div className="border border-border p-6 mb-6">
+            <h3 className="text-lg mb-3">Temporada</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+              <Stat label="Entrenos (año)" value={attendanceYear} />
+              <Stat label="Partidos jugados" value={matchStats.matches} />
+              <Stat label="Minutos totales" value={`${matchStats.totalMinutes}'`} />
+              <Stat label="Lesiones" value={matchStats.injuries} />
+            </div>
+          </div>
+
+          <div className="border border-border p-6 mb-6">
             <h3 className="text-lg mb-1">Actualizar peso</h3>
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
               {daysSinceUpdate !== null ? `Última actualización: hace ${daysSinceUpdate} días` : "Sin registros"}
