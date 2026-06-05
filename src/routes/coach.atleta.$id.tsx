@@ -125,6 +125,27 @@ function AthleteDetail() {
               .map((w: any) => ({ date: w.date, text: w.pain_description ?? "—" }))
           } />
 
+          <div className="border border-border p-6 mt-4">
+            <h3 className="text-lg mb-3">Presentismo y partidos</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 text-center">
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Entrenos (año)</p><p className="text-xl font-medium">{attendance.length}</p></div>
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Partidos jugados</p><p className="text-xl font-medium">{matchStats.matches}</p></div>
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Minutos totales</p><p className="text-xl font-medium">{matchStats.totalMinutes}'</p></div>
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Lesiones</p><p className="text-xl font-medium">{matchStats.injuries}</p></div>
+            </div>
+            {matchStats.rows.length > 0 && (
+              <div className="space-y-1.5">
+                {matchStats.rows.slice(0, 8).map((r: any, idx: number) => (
+                  <div key={idx} className="text-xs border-l-2 border-primary pl-3">
+                    <p className="font-display uppercase tracking-wider">{r.match?.match_date ?? "—"} · {r.match?.opponent ?? "Sin rival"}</p>
+                    <p>{r.minutes_played ?? 0}' {r.convoked ? "· convocado" : ""} {r.injury ? `· lesión${r.injury_note ? ": " + r.injury_note : ""}` : ""}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+
           {physio.length > 0 && (
             <div className="border border-border p-6 mt-4">
               <h3 className="text-lg mb-4">Citas con fisio ({physio.length})</h3>
