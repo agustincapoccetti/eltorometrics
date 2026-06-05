@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance: {
+        Row: {
+          attendance_date: string
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          present: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attendance_date: string
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          present?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attendance_date?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          present?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           created_at: string
@@ -202,6 +235,83 @@ export type Database = {
           title?: string
           updated_at?: string
           url?: string
+        }
+        Relationships: []
+      }
+      match_participations: {
+        Row: {
+          convoked: boolean
+          created_at: string
+          id: string
+          injury: boolean
+          injury_note: string | null
+          match_id: string
+          minutes_played: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          convoked?: boolean
+          created_at?: string
+          id?: string
+          injury?: boolean
+          injury_note?: string | null
+          match_id: string
+          minutes_played?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          convoked?: boolean
+          created_at?: string
+          id?: string
+          injury?: boolean
+          injury_note?: string | null
+          match_id?: string
+          minutes_played?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_participations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          location: string | null
+          match_date: string
+          notes: string | null
+          opponent: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          location?: string | null
+          match_date: string
+          notes?: string | null
+          opponent?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          location?: string | null
+          match_date?: string
+          notes?: string | null
+          opponent?: string
+          updated_at?: string
         }
         Relationships: []
       }

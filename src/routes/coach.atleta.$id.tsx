@@ -21,6 +21,8 @@ function AthleteDetail() {
   const [weights, setWeights] = useState<any[]>([]);
   const [recovery, setRecovery] = useState<any[]>([]);
   const [physio, setPhysio] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
+  const [matchStats, setMatchStats] = useState<{ totalMinutes: number; matches: number; injuries: number; rows: any[] }>({ totalMinutes: 0, matches: 0, injuries: 0, rows: [] });
 
   const rpeChartRef = useRef<HTMLDivElement>(null);
   const wellChartRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,21 @@ function AthleteDetail() {
       setRecovery((rec ?? []).map((x) => ({ date: x.entry_date, pct: x.max_score ? Math.round((x.total_score / x.max_score) * 100) : 0 })));
       const { data: ph } = await supabase.from("physio_appointments").select("*").eq("user_id", id).order("appointment_date", { ascending: false });
       setPhysio(ph ?? []);
+      const { data: att } = await supabase.from("attendance").select("attendance_date, present").eq("user_id", id).eq("present", true).order("attendance_date", { ascending: false });
+      setAttendance(att ?? []);
+      const { data: mps } = await supabase.from("match_participations").select("match_id, minutes_played, convoked, injury, injury_note").eq("user_id", id);
+      const matchIds = Array.from(new Set((mps ?? []).map((m: any) => m.match_id)));
+      let mlookup: Record<string, any> = {};
+      if (matchIds.length) {
+        const { data: ms } = await supabase.from("matches").select("id, match_date, opponent").in("id", matchIds);
+        (ms ?? []).forEach((m: any) => { mlookup[m.id] = m; });
+      }
+      const rows = (mps ?? []).map((p: any) => ({ ...p, match: mlookup[p.match_id] }))
+        .sort((a: any, b: any) => (b.match?.match_date ?? "").localeCompare(a.match?.match_date ?? ""));
+      const totalMinutes = rows.reduce((s: number, r: any) => s + (r.minutes_played ?? 0), 0);
+      const played = rows.filter((r: any) => r.minutes_played > 0).length;
+      const injuries = rows.filter((r: any) => r.injury).length;
+      setMatchStats({ totalMinutes, matches: played, injuries, rows });
     })();
   }, [id]);
 
@@ -107,6 +124,27 @@ function AthleteDetail() {
             wellness.filter((w: any) => w.has_pain).slice(-5).reverse()
               .map((w: any) => ({ date: w.date, text: w.pain_description ?? "—" }))
           } />
+
+          <div className="border border-border p-6 mt-4">
+            <h3 className="text-lg mb-3">Presentismo y partidos</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 text-center">
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Entrenos (año)</p><p className="text-xl font-medium">{attendance.length}</p></div>
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Partidos jugados</p><p className="text-xl font-medium">{matchStats.matches}</p></div>
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Minutos totales</p><p className="text-xl font-medium">{matchStats.totalMinutes}'</p></div>
+              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Lesiones</p><p className="text-xl font-medium">{matchStats.injuries}</p></div>
+            </div>
+            {matchStats.rows.length > 0 && (
+              <div className="space-y-1.5">
+                {matchStats.rows.slice(0, 8).map((r: any, idx: number) => (
+                  <div key={idx} className="text-xs border-l-2 border-primary pl-3">
+                    <p className="font-display uppercase tracking-wider">{r.match?.match_date ?? "—"} · {r.match?.opponent ?? "Sin rival"}</p>
+                    <p>{r.minutes_played ?? 0}' {r.convoked ? "· convocado" : ""} {r.injury ? `· lesión${r.injury_note ? ": " + r.injury_note : ""}` : ""}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
 
           {physio.length > 0 && (
             <div className="border border-border p-6 mt-4">

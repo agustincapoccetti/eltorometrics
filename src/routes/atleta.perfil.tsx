@@ -17,6 +17,8 @@ function Perfil() {
   const [profile, setProfile] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [newWeight, setNewWeight] = useState("");
+  const [matchStats, setMatchStats] = useState({ totalMinutes: 0, matches: 0, injuries: 0 });
+  const [attendanceYear, setAttendanceYear] = useState(0);
 
   async function load() {
     if (!user) return;
@@ -24,6 +26,14 @@ function Perfil() {
     setProfile(p);
     const { data: h } = await supabase.from("weight_history").select("*").eq("user_id", user.id).order("recorded_at", { ascending: true });
     setHistory((h ?? []).map((x) => ({ id: x.id, date: new Date(x.recorded_at).toLocaleDateString("es"), weight: Number(x.weight) })));
+    const yearStart = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10);
+    const { data: att } = await supabase.from("attendance").select("attendance_date").eq("user_id", user.id).eq("present", true).gte("attendance_date", yearStart);
+    setAttendanceYear((att ?? []).length);
+    const { data: mps } = await supabase.from("match_participations").select("minutes_played, injury").eq("user_id", user.id);
+    const total = (mps ?? []).reduce((s: number, r: any) => s + (r.minutes_played ?? 0), 0);
+    const matches = (mps ?? []).filter((r: any) => r.minutes_played > 0).length;
+    const injuries = (mps ?? []).filter((r: any) => r.injury).length;
+    setMatchStats({ totalMinutes: total, matches, injuries });
   }
 
   useEffect(() => { load(); }, [user]);
@@ -55,6 +65,16 @@ function Perfil() {
               <Stat label="Peso" value={profile.weight ? `${profile.weight} kg` : "—"} />
               <Stat label="Altura" value={profile.height ? `${profile.height} cm` : "—"} />
               <Stat label="IMC" value={bmi ?? "—"} />
+            </div>
+          </div>
+
+          <div className="border border-border p-6 mb-6">
+            <h3 className="text-lg mb-3">Temporada</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+              <Stat label="Entrenos (año)" value={attendanceYear} />
+              <Stat label="Partidos jugados" value={matchStats.matches} />
+              <Stat label="Minutos totales" value={`${matchStats.totalMinutes}'`} />
+              <Stat label="Lesiones" value={matchStats.injuries} />
             </div>
           </div>
 

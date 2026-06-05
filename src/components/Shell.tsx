@@ -33,6 +33,8 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
             {role === "coach" && (
               <>
                 <NavLink to="/coach">Panel</NavLink>
+                <NavLink to="/coach/jugadores">Jugadores</NavLink>
+                <NavLink to="/coach/partidos">Partidos</NavLink>
                 <NavLink to="/coach/gym">Gym</NavLink>
                 <NavLink to="/coach/calendario">Calendario</NavLink>
                 <NavLink to="/coach/recuperacion">Recuperación</NavLink>
