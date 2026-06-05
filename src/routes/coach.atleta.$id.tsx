@@ -41,6 +41,21 @@ function AthleteDetail() {
       setRecovery((rec ?? []).map((x) => ({ date: x.entry_date, pct: x.max_score ? Math.round((x.total_score / x.max_score) * 100) : 0 })));
       const { data: ph } = await supabase.from("physio_appointments").select("*").eq("user_id", id).order("appointment_date", { ascending: false });
       setPhysio(ph ?? []);
+      const { data: att } = await supabase.from("attendance").select("attendance_date, present").eq("user_id", id).eq("present", true).order("attendance_date", { ascending: false });
+      setAttendance(att ?? []);
+      const { data: mps } = await supabase.from("match_participations").select("match_id, minutes_played, convoked, injury, injury_note").eq("user_id", id);
+      const matchIds = Array.from(new Set((mps ?? []).map((m: any) => m.match_id)));
+      let mlookup: Record<string, any> = {};
+      if (matchIds.length) {
+        const { data: ms } = await supabase.from("matches").select("id, match_date, opponent").in("id", matchIds);
+        (ms ?? []).forEach((m: any) => { mlookup[m.id] = m; });
+      }
+      const rows = (mps ?? []).map((p: any) => ({ ...p, match: mlookup[p.match_id] }))
+        .sort((a: any, b: any) => (b.match?.match_date ?? "").localeCompare(a.match?.match_date ?? ""));
+      const totalMinutes = rows.reduce((s: number, r: any) => s + (r.minutes_played ?? 0), 0);
+      const played = rows.filter((r: any) => r.minutes_played > 0).length;
+      const injuries = rows.filter((r: any) => r.injury).length;
+      setMatchStats({ totalMinutes, matches: played, injuries, rows });
     })();
   }, [id]);
 
