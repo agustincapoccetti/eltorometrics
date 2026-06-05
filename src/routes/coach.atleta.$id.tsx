@@ -21,6 +21,8 @@ function AthleteDetail() {
   const [weights, setWeights] = useState<any[]>([]);
   const [recovery, setRecovery] = useState<any[]>([]);
   const [physio, setPhysio] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
+  const [matchStats, setMatchStats] = useState<{ totalMinutes: number; matches: number; injuries: number; rows: any[] }>({ totalMinutes: 0, matches: 0, injuries: 0, rows: [] });
 
   const rpeChartRef = useRef<HTMLDivElement>(null);
   const wellChartRef = useRef<HTMLDivElement>(null);
