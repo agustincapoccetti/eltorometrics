@@ -94,3 +94,9 @@
 .animate-rugby-spin { animation: rugby-spin 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .animate-rugby-bounce { animation: rugby-bounce 1.2s ease-in-out infinite; }
 
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
+}
