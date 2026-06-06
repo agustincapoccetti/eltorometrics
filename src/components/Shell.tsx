@@ -73,7 +73,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
               className="flex-1 overflow-x-auto no-scrollbar mx-2"
               aria-label="Navegación principal"
             >
-              <div className="flex items-center gap-1 min-w-max bg-white border-2 border-black p-1.5 rounded-2xl shadow-sm">
+              <div className="flex items-stretch justify-between gap-1 w-full bg-white border-2 border-black p-1.5 rounded-2xl shadow-sm">
                 {items.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.to);
@@ -82,17 +82,14 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
                       key={item.to}
                       to={item.to}
                       className={[
-                        "group flex flex-col items-center justify-center px-3.5 py-2 rounded-xl transition-all duration-200",
+                        "group flex-1 flex flex-col items-center justify-center px-2 py-2.5 rounded-xl transition-all duration-200",
                         active
                           ? "bg-black text-white shadow-md"
                           : "text-black hover:bg-black hover:text-white",
                       ].join(" ")}
                     >
-                      <Icon className="w-[22px] h-[22px] mb-1" />
-                      <span
-                        className="text-[12px] uppercase tracking-wider font-bold leading-none"
-                        style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
-                      >
+                      <Icon className="w-6 h-6 mb-1" />
+                      <span className="text-[13px] font-semibold leading-none tracking-tight">
                         {item.label}
                       </span>
                     </Link>
