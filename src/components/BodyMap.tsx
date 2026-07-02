@@ -1,36 +1,44 @@
-// Silueta de zonas de dolor con intensidad por frecuencia
-// Consume un arreglo de strings (motivos/descripciones de dolor) y pinta rojo
-// más intenso donde hay más ocurrencias.
+// Silueta 3D de zonas de dolor con intensidad por frecuencia.
+// Acepta entradas con fecha opcional para mostrar historial y último registro por zona al hacer click.
+
+import { useMemo, useState } from "react";
 
 type ZoneId =
-  | "head"
-  | "neck"
-  | "shoulderL"
-  | "shoulderR"
-  | "chest"
-  | "abs"
-  | "elbowL"
-  | "elbowR"
-  | "wristL"
-  | "wristR"
-  | "handL"
-  | "handR"
+  | "head" | "neck"
+  | "shoulderL" | "shoulderR"
+  | "chest" | "abs"
+  | "elbowL" | "elbowR"
+  | "wristL" | "wristR"
+  | "handL" | "handR"
   | "hip"
-  | "quadL"
-  | "quadR"
+  | "quadL" | "quadR"
   | "adductor"
-  | "kneeL"
-  | "kneeR"
-  | "shinL"
-  | "shinR"
-  | "ankleL"
-  | "ankleR"
-  | "upperBack"
-  | "lowerBack"
-  | "hamL"
-  | "hamR"
-  | "calfL"
-  | "calfR";
+  | "kneeL" | "kneeR"
+  | "shinL" | "shinR"
+  | "ankleL" | "ankleR"
+  | "upperBack" | "lowerBack"
+  | "glute"
+  | "hamL" | "hamR"
+  | "calfL" | "calfR";
+
+const ZONE_LABEL: Record<ZoneId, string> = {
+  head: "Cabeza", neck: "Cuello",
+  shoulderL: "Hombro izq.", shoulderR: "Hombro der.",
+  chest: "Pecho / costillas", abs: "Abdomen",
+  elbowL: "Codo izq.", elbowR: "Codo der.",
+  wristL: "Muñeca izq.", wristR: "Muñeca der.",
+  handL: "Mano izq.", handR: "Mano der.",
+  hip: "Cadera",
+  quadL: "Cuádriceps izq.", quadR: "Cuádriceps der.",
+  adductor: "Aductores",
+  kneeL: "Rodilla izq.", kneeR: "Rodilla der.",
+  shinL: "Tibia izq.", shinR: "Tibia der.",
+  ankleL: "Tobillo izq.", ankleR: "Tobillo der.",
+  upperBack: "Espalda alta / dorsales", lowerBack: "Lumbar",
+  glute: "Glúteos",
+  hamL: "Isquios izq.", hamR: "Isquios der.",
+  calfL: "Gemelos izq.", calfR: "Gemelos der.",
+};
 
 function classify(text: string): ZoneId[] {
   const s = text.toLowerCase();
@@ -51,119 +59,183 @@ function classify(text: string): ZoneId[] {
   if (/tobillo/.test(s)) hits.push("ankleL", "ankleR");
   if (/dorsal|trapecio|espalda alta/.test(s)) hits.push("upperBack");
   if (/lumbar|espalda baja|espalda\b/.test(s)) hits.push("lowerBack");
+  if (/gl[uú]teo/.test(s)) hits.push("glute");
   if (/isquio/.test(s)) hits.push("hamL", "hamR");
   if (/gemel|s[oó]leo|pantorrilla/.test(s)) hits.push("calfL", "calfR");
   return hits;
 }
 
-function tallyZones(entries: string[]): Record<ZoneId, number> {
-  const counts = {} as Record<ZoneId, number>;
-  entries.forEach((e) => classify(e).forEach((z) => { counts[z] = (counts[z] ?? 0) + 1; }));
-  return counts;
+export type PainEntry = string | { text: string; date?: string };
+
+function normalize(entries: PainEntry[]): { text: string; date?: string }[] {
+  return entries.map((e) => (typeof e === "string" ? { text: e } : e));
 }
 
 export function BodyMap({
   entries,
   title = "Mapa de dolor",
 }: {
-  entries: string[];
+  entries: PainEntry[];
   title?: string;
 }) {
-  const counts = tallyZones(entries);
+  const [selected, setSelected] = useState<ZoneId | null>(null);
+
+  const normalized = useMemo(() => normalize(entries), [entries]);
+
+  const byZone = useMemo(() => {
+    const map: Record<string, { text: string; date?: string }[]> = {};
+    normalized.forEach((e) => {
+      classify(e.text).forEach((z) => {
+        (map[z] ??= []).push(e);
+      });
+    });
+    return map as Record<ZoneId, { text: string; date?: string }[]>;
+  }, [normalized]);
+
+  const counts = useMemo(() => {
+    const c = {} as Record<ZoneId, number>;
+    (Object.keys(byZone) as ZoneId[]).forEach((z) => { c[z] = byZone[z].length; });
+    return c;
+  }, [byZone]);
+
   const max = Math.max(1, ...Object.values(counts));
-  const fill = (id: ZoneId) => {
+
+  const intensity = (id: ZoneId) => {
     const c = counts[id] ?? 0;
-    if (!c) return "rgba(0,0,0,0.04)";
-    const t = 0.22 + (c / max) * 0.75;
+    if (!c) return 0;
+    return 0.25 + (c / max) * 0.7;
+  };
+
+  const zoneFill = (id: ZoneId) => {
+    const t = intensity(id);
+    if (!t) return "url(#skinGrad)";
+    // rojo con opacidad según frecuencia, encima del gradiente base
     return `rgba(220,38,38,${t})`;
   };
-  const stroke = (id: ZoneId) => (counts[id] ? "rgba(127,29,29,0.9)" : "rgba(0,0,0,0.35)");
+
+  const zoneStroke = (id: ZoneId) =>
+    selected === id ? "#111" : counts[id] ? "rgba(127,29,29,0.9)" : "rgba(0,0,0,0.25)";
+
+  const zoneStrokeW = (id: ZoneId) => (selected === id ? 2 : 1);
+
+  const selectedEntries = selected ? (byZone[selected] ?? []) : [];
+  const selectedLast = selectedEntries
+    .filter((e) => e.date)
+    .sort((a, b) => (b.date! > a.date! ? 1 : -1))[0];
 
   return (
     <div className="border border-border p-4 sm:p-6 mb-4">
       <div className="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
         <h3 className="text-base sm:text-lg">{title}</h3>
         <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-          {entries.length} registro{entries.length === 1 ? "" : "s"}
+          {normalized.length} registro{normalized.length === 1 ? "" : "s"} · toca una zona
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-6 max-w-md mx-auto">
-        {/* FRENTE */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-8 max-w-lg mx-auto">
+        {/* ========== FRENTE ========== */}
         <div>
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-            Frente
-          </p>
-          <svg viewBox="0 0 200 420" className="w-full h-auto">
-            {/* cuerpo silueta gris de referencia */}
-            <g fill="#f4f4f5" stroke="#9ca3af" strokeWidth="1">
-              <ellipse cx="100" cy="34" rx="22" ry="26" />
-              <rect x="88" y="58" width="24" height="18" rx="6" />
-              <path d="M60 82 Q100 72 140 82 L150 200 Q100 214 50 200 Z" />
-              <path d="M55 86 L36 200 L28 220 L36 224 L46 210 L64 106 Z" />
-              <path d="M145 86 L164 200 L172 220 L164 224 L154 210 L136 106 Z" />
-              <ellipse cx="28" cy="230" rx="10" ry="8" />
-              <ellipse cx="172" cy="230" rx="10" ry="8" />
-              <path d="M60 200 L58 320 L82 320 L92 210 Z" />
-              <path d="M140 200 L142 320 L118 320 L108 210 Z" />
-              <path d="M58 320 L54 400 L80 400 L82 320 Z" />
-              <path d="M142 320 L146 400 L120 400 L118 320 Z" />
-              <ellipse cx="67" cy="405" rx="16" ry="8" />
-              <ellipse cx="133" cy="405" rx="16" ry="8" />
+          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Frente</p>
+          <svg viewBox="0 0 220 460" className="w-full h-auto select-none">
+            <defs>
+              <radialGradient id="skinGrad" cx="50%" cy="35%" r="70%">
+                <stop offset="0%" stopColor="#f5f5f4" />
+                <stop offset="60%" stopColor="#d6d3d1" />
+                <stop offset="100%" stopColor="#78716c" />
+              </radialGradient>
+              <radialGradient id="skinGradSide" cx="30%" cy="50%" r="80%">
+                <stop offset="0%" stopColor="#e7e5e4" />
+                <stop offset="100%" stopColor="#57534e" />
+              </radialGradient>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
+                <feOffset dx="1" dy="2" result="off" />
+                <feComponentTransfer><feFuncA type="linear" slope="0.35" /></feComponentTransfer>
+                <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+
+            <g filter="url(#softShadow)">
+              {/* silueta base 3D */}
+              {/* cabeza */}
+              <ellipse cx="110" cy="38" rx="26" ry="30" fill="url(#skinGrad)" />
+              {/* cuello */}
+              <path d="M96,66 Q110,74 124,66 L126,84 Q110,90 94,84 Z" fill="url(#skinGrad)" />
+              {/* torso trapezoidal con hombros redondeados */}
+              <path d="M64,96 Q110,80 156,96 Q168,150 156,206 Q110,220 64,206 Q52,150 64,96 Z" fill="url(#skinGrad)" />
+              {/* brazos */}
+              <path d="M58,100 Q40,130 34,190 Q30,220 38,244 Q46,246 50,222 Q56,178 66,142 Z" fill="url(#skinGradSide)" />
+              <path d="M162,100 Q180,130 186,190 Q190,220 182,244 Q174,246 170,222 Q164,178 154,142 Z" fill="url(#skinGradSide)" />
+              {/* manos */}
+              <ellipse cx="42" cy="252" rx="12" ry="16" fill="url(#skinGrad)" />
+              <ellipse cx="178" cy="252" rx="12" ry="16" fill="url(#skinGrad)" />
+              {/* cadera */}
+              <path d="M66,204 Q110,220 154,204 L158,234 Q110,246 62,234 Z" fill="url(#skinGrad)" />
+              {/* piernas */}
+              <path d="M70,232 Q78,300 82,346 Q84,360 100,360 Q108,300 104,232 Z" fill="url(#skinGrad)" />
+              <path d="M150,232 Q142,300 138,346 Q136,360 120,360 Q112,300 116,232 Z" fill="url(#skinGrad)" />
+              {/* pantorrillas */}
+              <path d="M78,360 Q82,410 88,442 L100,442 Q102,400 100,360 Z" fill="url(#skinGrad)" />
+              <path d="M142,360 Q138,410 132,442 L120,442 Q118,400 120,360 Z" fill="url(#skinGrad)" />
+              {/* pies */}
+              <ellipse cx="88" cy="448" rx="14" ry="7" fill="url(#skinGrad)" />
+              <ellipse cx="132" cy="448" rx="14" ry="7" fill="url(#skinGrad)" />
             </g>
-            {/* zonas coloreables */}
-            <g strokeWidth="1.2">
-              <ellipse cx="100" cy="34" rx="22" ry="26" fill={fill("head")} stroke={stroke("head")} />
-              <rect x="88" y="58" width="24" height="18" rx="6" fill={fill("neck")} stroke={stroke("neck")} />
-              <ellipse cx="66" cy="92" rx="16" ry="12" fill={fill("shoulderL")} stroke={stroke("shoulderL")} />
-              <ellipse cx="134" cy="92" rx="16" ry="12" fill={fill("shoulderR")} stroke={stroke("shoulderR")} />
-              <rect x="70" y="100" width="60" height="46" rx="8" fill={fill("chest")} stroke={stroke("chest")} />
-              <rect x="76" y="150" width="48" height="42" rx="6" fill={fill("abs")} stroke={stroke("abs")} />
-              <ellipse cx="42" cy="160" rx="9" ry="10" fill={fill("elbowL")} stroke={stroke("elbowL")} />
-              <ellipse cx="158" cy="160" rx="9" ry="10" fill={fill("elbowR")} stroke={stroke("elbowR")} />
-              <ellipse cx="30" cy="216" rx="7" ry="8" fill={fill("wristL")} stroke={stroke("wristL")} />
-              <ellipse cx="170" cy="216" rx="7" ry="8" fill={fill("wristR")} stroke={stroke("wristR")} />
-              <ellipse cx="28" cy="232" rx="10" ry="8" fill={fill("handL")} stroke={stroke("handL")} />
-              <ellipse cx="172" cy="232" rx="10" ry="8" fill={fill("handR")} stroke={stroke("handR")} />
-              <rect x="70" y="192" width="60" height="14" rx="6" fill={fill("hip")} stroke={stroke("hip")} />
-              <rect x="62" y="210" width="32" height="80" rx="10" fill={fill("quadL")} stroke={stroke("quadL")} />
-              <rect x="106" y="210" width="32" height="80" rx="10" fill={fill("quadR")} stroke={stroke("quadR")} />
-              <rect x="94" y="212" width="12" height="60" rx="4" fill={fill("adductor")} stroke={stroke("adductor")} />
-              <ellipse cx="78" cy="308" rx="14" ry="10" fill={fill("kneeL")} stroke={stroke("kneeL")} />
-              <ellipse cx="122" cy="308" rx="14" ry="10" fill={fill("kneeR")} stroke={stroke("kneeR")} />
-              <rect x="66" y="322" width="22" height="66" rx="6" fill={fill("shinL")} stroke={stroke("shinL")} />
-              <rect x="112" y="322" width="22" height="66" rx="6" fill={fill("shinR")} stroke={stroke("shinR")} />
-              <ellipse cx="77" cy="398" rx="10" ry="6" fill={fill("ankleL")} stroke={stroke("ankleL")} />
-              <ellipse cx="123" cy="398" rx="10" ry="6" fill={fill("ankleR")} stroke={stroke("ankleR")} />
+
+            {/* zonas interactivas (overlays semitransparentes) */}
+            <g>
+              <Zone d="M84,14 A26,30 0 0,1 136,38 A26,30 0 0,1 84,38 Z" id="head" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M94,68 Q110,76 126,68 L126,86 Q110,92 94,86 Z" id="neck" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M60,96 Q70,86 90,90 L92,120 Q74,124 62,120 Z" id="shoulderL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M160,96 Q150,86 130,90 L128,120 Q146,124 158,120 Z" id="shoulderR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M74,116 Q110,108 146,116 L150,164 Q110,172 70,164 Z" id="chest" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M78,168 Q110,174 142,168 L144,208 Q110,214 76,208 Z" id="abs" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M36,170 Q30,182 34,196 Q46,196 48,182 Z" id="elbowL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M184,170 Q190,182 186,196 Q174,196 172,182 Z" id="elbowR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M34,232 Q30,242 40,246 Q48,244 46,232 Z" id="wristL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M186,232 Q190,242 180,246 Q172,244 174,232 Z" id="wristR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M30,248 A12,16 0 1,0 54,254 A12,16 0 1,0 30,248 Z" id="handL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M166,248 A12,16 0 1,0 190,254 A12,16 0 1,0 166,248 Z" id="handR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M68,210 Q110,222 152,210 L156,232 Q110,242 64,232 Z" id="hip" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M72,236 Q80,290 84,330 L102,330 Q104,286 104,236 Z" id="quadL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M148,236 Q140,290 136,330 L118,330 Q116,286 116,236 Z" id="quadR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M104,238 L116,238 L116,300 L104,300 Z" id="adductor" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M80,332 Q92,342 102,332 L102,356 Q92,362 82,356 Z" id="kneeL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M140,332 Q128,342 118,332 L118,356 Q128,362 138,356 Z" id="kneeR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M82,360 Q86,400 92,432 L102,432 L100,360 Z" id="shinL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M138,360 Q134,400 128,432 L118,432 L120,360 Z" id="shinR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M76,438 A14,7 0 1,0 100,442 A14,7 0 1,0 76,438 Z" id="ankleL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M120,438 A14,7 0 1,0 144,442 A14,7 0 1,0 120,438 Z" id="ankleR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
             </g>
           </svg>
         </div>
 
-        {/* ESPALDA */}
+        {/* ========== ESPALDA ========== */}
         <div>
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-            Espalda
-          </p>
-          <svg viewBox="0 0 200 420" className="w-full h-auto">
-            <g fill="#f4f4f5" stroke="#9ca3af" strokeWidth="1">
-              <ellipse cx="100" cy="34" rx="22" ry="26" />
-              <rect x="88" y="58" width="24" height="18" rx="6" />
-              <path d="M60 82 Q100 72 140 82 L150 200 Q100 214 50 200 Z" />
-              <path d="M55 86 L36 200 L28 220 L36 224 L46 210 L64 106 Z" />
-              <path d="M145 86 L164 200 L172 220 L164 224 L154 210 L136 106 Z" />
-              <path d="M60 200 L58 320 L82 320 L92 210 Z" />
-              <path d="M140 200 L142 320 L118 320 L108 210 Z" />
-              <path d="M58 320 L54 400 L80 400 L82 320 Z" />
-              <path d="M142 320 L146 400 L120 400 L118 320 Z" />
+          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Espalda</p>
+          <svg viewBox="0 0 220 460" className="w-full h-auto select-none">
+            <g filter="url(#softShadow)">
+              <ellipse cx="110" cy="38" rx="26" ry="30" fill="url(#skinGrad)" />
+              <path d="M96,66 Q110,74 124,66 L126,84 Q110,90 94,84 Z" fill="url(#skinGrad)" />
+              <path d="M64,96 Q110,80 156,96 Q168,150 156,206 Q110,220 64,206 Q52,150 64,96 Z" fill="url(#skinGrad)" />
+              <path d="M58,100 Q40,130 34,190 Q30,220 38,244 Q46,246 50,222 Q56,178 66,142 Z" fill="url(#skinGradSide)" />
+              <path d="M162,100 Q180,130 186,190 Q190,220 182,244 Q174,246 170,222 Q164,178 154,142 Z" fill="url(#skinGradSide)" />
+              <path d="M66,204 Q110,220 154,204 L158,244 Q110,258 62,244 Z" fill="url(#skinGrad)" />
+              <path d="M70,244 Q78,304 82,346 Q84,360 100,360 Q108,304 104,244 Z" fill="url(#skinGrad)" />
+              <path d="M150,244 Q142,304 138,346 Q136,360 120,360 Q112,304 116,244 Z" fill="url(#skinGrad)" />
+              <path d="M78,360 Q82,410 88,442 L100,442 Q102,400 100,360 Z" fill="url(#skinGrad)" />
+              <path d="M142,360 Q138,410 132,442 L120,442 Q118,400 120,360 Z" fill="url(#skinGrad)" />
             </g>
-            <g strokeWidth="1.2">
-              <rect x="88" y="58" width="24" height="18" rx="6" fill={fill("neck")} stroke={stroke("neck")} />
-              <rect x="66" y="82" width="68" height="58" rx="10" fill={fill("upperBack")} stroke={stroke("upperBack")} />
-              <rect x="72" y="144" width="56" height="52" rx="8" fill={fill("lowerBack")} stroke={stroke("lowerBack")} />
-              <rect x="62" y="222" width="32" height="76" rx="10" fill={fill("hamL")} stroke={stroke("hamL")} />
-              <rect x="106" y="222" width="32" height="76" rx="10" fill={fill("hamR")} stroke={stroke("hamR")} />
-              <rect x="66" y="322" width="22" height="66" rx="6" fill={fill("calfL")} stroke={stroke("calfL")} />
-              <rect x="112" y="322" width="22" height="66" rx="6" fill={fill("calfR")} stroke={stroke("calfR")} />
+
+            <g>
+              <Zone d="M94,68 Q110,76 126,68 L126,86 Q110,92 94,86 Z" id="neck" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M70,94 Q110,86 150,94 L152,150 Q110,158 68,150 Z" id="upperBack" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M74,152 Q110,158 146,152 L148,202 Q110,208 72,202 Z" id="lowerBack" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M68,208 Q110,224 152,208 L156,250 Q110,262 64,250 Z" id="glute" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M72,252 Q80,306 84,342 L102,342 Q104,300 104,252 Z" id="hamL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M148,252 Q140,306 136,342 L118,342 Q116,300 116,252 Z" id="hamR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M82,360 Q86,400 92,432 L102,432 L100,360 Z" id="calfL" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
+              <Zone d="M138,360 Q134,400 128,432 L118,432 L120,360 Z" id="calfR" onClick={setSelected} selected={selected} counts={counts} fill={zoneFill} stroke={zoneStroke} strokeW={zoneStrokeW} />
             </g>
           </svg>
         </div>
@@ -172,17 +244,86 @@ export function BodyMap({
       {/* Leyenda */}
       <div className="mt-4 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
         <span>Menos</span>
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.22)" }} />
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.5)" }} />
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.85)" }} />
+        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.28)" }} />
+        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.55)" }} />
+        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.9)" }} />
         <span>Más frecuente</span>
       </div>
 
-      {entries.length === 0 && (
+      {/* Detalle zona seleccionada */}
+      {selected && (
+        <div className="mt-5 border border-border p-4 bg-secondary/40">
+          <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Zona seleccionada</p>
+              <h4 className="text-base font-medium">{ZONE_LABEL[selected]}</h4>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Frecuencia</p>
+              <p className="text-lg font-medium">{selectedEntries.length}</p>
+            </div>
+            <button
+              onClick={() => setSelected(null)}
+              className="text-[10px] uppercase tracking-widest underline hover:no-underline"
+            >
+              Cerrar
+            </button>
+          </div>
+          {selectedLast && (
+            <p className="text-xs text-muted-foreground mb-2">
+              Último registro: <span className="font-medium text-foreground">{selectedLast.date}</span> · {selectedLast.text}
+            </p>
+          )}
+          {selectedEntries.length > 0 ? (
+            <ul className="space-y-1 max-h-40 overflow-auto pr-1">
+              {selectedEntries
+                .slice()
+                .sort((a, b) => (a.date && b.date ? (b.date > a.date ? 1 : -1) : 0))
+                .map((e, i) => (
+                  <li key={i} className="text-xs border-l-2 border-primary pl-2">
+                    {e.date && <span className="font-display uppercase tracking-wider mr-2">{e.date}</span>}
+                    <span>{e.text}</span>
+                  </li>
+                ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted-foreground">Sin registros para esta zona todavía.</p>
+          )}
+        </div>
+      )}
+
+      {normalized.length === 0 && (
         <p className="text-xs text-muted-foreground text-center mt-3">
           Sin registros de dolor aún.
         </p>
       )}
     </div>
+  );
+}
+
+function Zone({
+  id, d, onClick, selected, counts, fill, stroke, strokeW,
+}: {
+  id: ZoneId;
+  d: string;
+  onClick: (id: ZoneId) => void;
+  selected: ZoneId | null;
+  counts: Record<ZoneId, number>;
+  fill: (id: ZoneId) => string;
+  stroke: (id: ZoneId) => string;
+  strokeW: (id: ZoneId) => number;
+}) {
+  const has = (counts[id] ?? 0) > 0;
+  return (
+    <path
+      d={d}
+      fill={has || selected === id ? fill(id) : "rgba(0,0,0,0.001)"}
+      stroke={stroke(id)}
+      strokeWidth={strokeW(id)}
+      style={{ cursor: "pointer", transition: "fill .2s, stroke .2s" }}
+      onClick={() => onClick(selected === id ? (null as any) : id)}
+    >
+      <title>{ZONE_LABEL[id]}{has ? ` · ${counts[id]} registro${counts[id] === 1 ? "" : "s"}` : ""}</title>
+    </path>
   );
 }
