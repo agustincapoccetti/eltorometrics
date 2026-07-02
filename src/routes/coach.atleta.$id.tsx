@@ -149,8 +149,9 @@ function AthleteDetail() {
 
           <BodyMap
             entries={[
-              ...physio.flatMap((a: any) => (a.reasons ?? []) as string[]),
-              ...physio.map((a: any) => a.notes).filter(Boolean),
+              ...physio.flatMap((a: any) => ((a.reasons ?? []) as string[]).map((r) => ({ text: r, date: a.appointment_date }))),
+              ...physio.filter((a: any) => a.notes).map((a: any) => ({ text: a.notes as string, date: a.appointment_date })),
+              ...wellness.filter((w: any) => w.has_pain && w.pain_description).map((w: any) => ({ text: w.pain_description as string, date: w.date })),
             ]}
             title="Zonas de dolor del atleta"
           />
