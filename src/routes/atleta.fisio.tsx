@@ -180,9 +180,9 @@ function AthletePhysio() {
   const upcoming = list.filter((a) => a.appointment_date >= new Date().toISOString().slice(0, 10));
   const past = list.filter((a) => a.appointment_date < new Date().toISOString().slice(0, 10));
 
-  const painEntries: string[] = [
-    ...list.flatMap((a: any) => (a.reasons ?? []) as string[]),
-    ...list.map((a: any) => a.notes).filter(Boolean),
+  const painEntries = [
+    ...list.flatMap((a: any) => ((a.reasons ?? []) as string[]).map((r) => ({ text: r, date: a.appointment_date }))),
+    ...list.filter((a: any) => a.notes).map((a: any) => ({ text: a.notes as string, date: a.appointment_date })),
   ];
 
   return (
