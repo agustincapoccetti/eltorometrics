@@ -100,3 +100,8 @@
   -ms-overflow-style: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+/* Hide scrollbars for horizontal nav dock */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+

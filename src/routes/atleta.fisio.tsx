@@ -17,8 +17,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
+import { Trash2, CalendarPlus } from "lucide-react";
 import { APPOINTMENT_TYPES, typeLabel, typeIcon } from "@/lib/appointment-types";
+import { BodyMap } from "@/components/BodyMap";
 import { startOfWeek, endOfWeek, isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/fisio")({
@@ -179,11 +180,18 @@ function AthletePhysio() {
   const upcoming = list.filter((a) => a.appointment_date >= new Date().toISOString().slice(0, 10));
   const past = list.filter((a) => a.appointment_date < new Date().toISOString().slice(0, 10));
 
+  const painEntries: string[] = [
+    ...list.flatMap((a: any) => (a.reasons ?? []) as string[]),
+    ...list.map((a: any) => a.notes).filter(Boolean),
+  ];
+
   return (
     <Shell title="Fisioterapia">
       <p className="text-sm text-muted-foreground mb-6">
-        Reserva un turno disponible o registra una cita externa.
+        Reserva un turno disponible esta semana o solicita una cita futura.
       </p>
+
+      <BodyMap entries={painEntries} title="Zonas de dolor registradas" />
 
       <OpenSlots
         refreshKey={slotsRefresh}
@@ -194,15 +202,12 @@ function AthletePhysio() {
       />
 
       <div className="flex flex-wrap gap-2 mb-6">
-        <Button onClick={openNew} variant="outline">
-          <Plus className="h-4 w-4 mr-2" />
-          Registrar cita externa
-        </Button>
         <RequestFutureButton onCreated={load} />
       </div>
 
       <Section title="Próximas" items={upcoming} onEdit={openEdit} onDelete={remove} />
       <Section title="Historial" items={past} onEdit={openEdit} onDelete={remove} />
+
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">

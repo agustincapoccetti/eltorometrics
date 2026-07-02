@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { BodyMap } from "@/components/BodyMap";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -145,6 +146,14 @@ function AthleteDetail() {
             )}
           </div>
 
+
+          <BodyMap
+            entries={[
+              ...physio.flatMap((a: any) => (a.reasons ?? []) as string[]),
+              ...physio.map((a: any) => a.notes).filter(Boolean),
+            ]}
+            title="Zonas de dolor del atleta"
+          />
 
           {physio.length > 0 && (
             <div className="border border-border p-6 mt-4">
