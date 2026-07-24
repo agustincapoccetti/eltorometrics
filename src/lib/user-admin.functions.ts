@@ -51,15 +51,22 @@ export const inviteAthlete = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    const origin = context.claims?.iss ? "" : "";
+    const request = (await import("@tanstack/react-start/server")).getRequest();
+    const host = request?.headers.get("origin") ?? request?.headers.get("referer") ?? "";
+    const redirectTo = host ? `${host.replace(/\/$/, "")}/reset-password` : undefined;
+
     const { data: invited, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
       data: {
         full_name: data.fullName || "",
         position: data.position || null,
         role: "atleta",
       },
+      redirectTo,
     });
     if (error) throw new Error(error.message);
     return { ok: true, userId: invited.user?.id };
+    void origin;
   });
 
 export const deleteUser = createServerFn({ method: "POST" })
