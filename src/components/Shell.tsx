@@ -114,7 +114,10 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
       : role === "coach"
         ? [
             ...COACH_NAV,
-            ...(isAdmin ? [{ to: "/coach/invitaciones", label: "Invitac.", icon: Mail }] : []),
+            ...(isAdmin ? [
+              { to: "/coach/usuarios", label: "Usuarios", icon: UserCog },
+              { to: "/coach/invitaciones", label: "Invitac.", icon: Mail },
+            ] : []),
           ]
         : [];
 
