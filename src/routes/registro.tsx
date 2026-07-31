@@ -13,13 +13,9 @@ import { checkPassword, PasswordRules } from "@/lib/password-validation";
 export const Route = createFileRoute("/registro")({ component: RegistroPage });
 
 
-const POSITIONS = [
-  "Pilar", "Hooker", "Segunda Línea", "Ala", "Octavo",
-  "Medio Scrum", "Apertura", "Centro", "Wing", "Fullback",
-];
-
 function RegistroPage() {
   const [role, setRole] = useState<"atleta" | "coach">("atleta");
+  const [coachType, setCoachType] = useState<string>("preparador_fisico");
   const [form, setForm] = useState({
     email: "", password: "", full_name: "", position: "", weight: "", height: "",
   });
