@@ -10,12 +10,10 @@ import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { Camera } from "lucide-react";
 
+import { POSITIONS } from "@/lib/positions";
+
 export const Route = createFileRoute("/atleta/onboarding")({ component: Onboarding });
 
-const POSITIONS = [
-  "Pilar", "Hooker", "Segunda Línea", "Ala", "Octavo",
-  "Medio Scrum", "Apertura", "Centro", "Wing", "Fullback",
-];
 
 function Onboarding() {
   const { user, loading } = useAuth();
