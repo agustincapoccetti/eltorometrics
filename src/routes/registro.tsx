@@ -9,17 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { checkPassword, PasswordRules } from "@/lib/password-validation";
+import { POSITIONS, COACH_TYPES } from "@/lib/positions";
 
 export const Route = createFileRoute("/registro")({ component: RegistroPage });
 
 
-const POSITIONS = [
-  "Pilar", "Hooker", "Segunda Línea", "Ala", "Octavo",
-  "Medio Scrum", "Apertura", "Centro", "Wing", "Fullback",
-];
-
 function RegistroPage() {
   const [role, setRole] = useState<"atleta" | "coach">("atleta");
+  const [coachType, setCoachType] = useState<string>("preparador_fisico");
   const [form, setForm] = useState({
     email: "", password: "", full_name: "", position: "", weight: "", height: "",
   });
@@ -38,6 +35,7 @@ function RegistroPage() {
         data: {
           full_name: form.full_name,
           role,
+          coach_type: role === "coach" ? coachType : null,
           position: role === "atleta" ? form.position : null,
           weight: role === "atleta" ? form.weight : null,
           height: role === "atleta" ? form.height : null,
@@ -46,7 +44,7 @@ function RegistroPage() {
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Cuenta creada");
+    toast.success(role === "coach" ? "Cuenta creada. Pendiente de validación del administrador." : "Cuenta creada");
     navigate({ to: role === "coach" ? "/coach" : "/atleta" });
   }
 
@@ -70,11 +68,24 @@ function RegistroPage() {
               </label>
               <label className={`border p-3 cursor-pointer flex items-center gap-2 ${role === "coach" ? "bg-primary text-primary-foreground border-primary" : ""}`}>
                 <RadioGroupItem value="coach" className="sr-only" />
-                <span className="font-display text-xs">PREPARADOR FÍSICO</span>
+                <span className="font-display text-xs">CUERPO TÉCNICO</span>
               </label>
             </RadioGroup>
             {role === "coach" && (
-              <p className="text-xs text-muted-foreground mt-2">Solo emails previamente invitados por el admin pueden registrarse como coach.</p>
+              <>
+                <div className="mt-3">
+                  <Label>Categoría</Label>
+                  <Select value={coachType} onValueChange={setCoachType}>
+                    <SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
+                    <SelectContent>
+                      {COACH_TYPES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Tu cuenta quedará pendiente hasta que el administrador valide tu ingreso.
+                </p>
+              </>
             )}
           </div>
 

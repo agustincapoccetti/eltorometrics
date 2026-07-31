@@ -86,6 +86,45 @@ export type Database = {
         }
         Relationships: []
       }
+      coach_applications: {
+        Row: {
+          coach_type: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          email: string
+          full_name: string | null
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coach_type: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coach_type?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       coach_invites: {
         Row: {
           created_at: string
@@ -446,6 +485,7 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          coach_type: string | null
           created_at: string
           full_name: string
           height: number | null
@@ -460,6 +500,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          coach_type?: string | null
           created_at?: string
           full_name: string
           height?: number | null
@@ -474,6 +515,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          coach_type?: string | null
           created_at?: string
           full_name?: string
           height?: number | null

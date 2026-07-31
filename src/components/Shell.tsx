@@ -13,7 +13,9 @@ import {
   LayoutDashboard,
   Users,
   Trophy,
-  Mail,
+  TrafficCone,
+  ClipboardList,
+  ShieldCheck,
   UserCog,
   type LucideIcon,
 } from "lucide-react";
@@ -37,6 +39,8 @@ const ATLETA_NAV: NavItem[] = [
 
 const COACH_NAV: NavItem[] = [
   { to: "/coach", label: "Panel", icon: LayoutDashboard },
+  { to: "/coach/semaforo", label: "Semáforo", icon: TrafficCone },
+  { to: "/coach/cuestionarios", label: "Cuestion.", icon: ClipboardList },
   { to: "/coach/jugadores", label: "Jugadores", icon: Users },
   { to: "/coach/partidos", label: "Partidos", icon: Trophy },
   { to: "/coach/gym", label: "Gym", icon: Dumbbell },
@@ -116,7 +120,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
             ...COACH_NAV,
             ...(isAdmin ? [
               { to: "/coach/usuarios", label: "Usuarios", icon: UserCog },
-              { to: "/coach/invitaciones", label: "Invitac.", icon: Mail },
+              { to: "/coach/coaches", label: "Cuerpo T.", icon: ShieldCheck },
             ] : []),
           ]
         : [];
