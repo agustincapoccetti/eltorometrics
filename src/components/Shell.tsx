@@ -17,6 +17,7 @@ import {
   ClipboardList,
   ShieldCheck,
   UserCog,
+  type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { NotificationBell } from "@/components/NotificationBell";
