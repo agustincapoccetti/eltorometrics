@@ -120,7 +120,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
             ...COACH_NAV,
             ...(isAdmin ? [
               { to: "/coach/usuarios", label: "Usuarios", icon: UserCog },
-              { to: "/coach/invitaciones", label: "Invitac.", icon: Mail },
+              { to: "/coach/coaches", label: "Cuerpo T.", icon: ShieldCheck },
             ] : []),
           ]
         : [];
