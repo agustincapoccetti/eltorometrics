@@ -118,8 +118,13 @@ function Page() {
             <Input id="n" value={fullName} onChange={(ev) => setFullName(ev.target.value)} placeholder="Nombre Apellido" />
           </div>
           <div>
-            <Label htmlFor="p">Puesto</Label>
-            <Input id="p" value={position} onChange={(ev) => setPosition(ev.target.value)} placeholder="Pilar, Wing..." />
+            <Label>Puesto</Label>
+            <Select value={position} onValueChange={setPosition}>
+              <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectContent>
+                {POSITIONS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <Button onClick={onInvite} disabled={sending}>
             <Mail className="h-4 w-4 mr-2" />
