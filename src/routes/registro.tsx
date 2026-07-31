@@ -35,6 +35,7 @@ function RegistroPage() {
         data: {
           full_name: form.full_name,
           role,
+          coach_type: role === "coach" ? coachType : null,
           position: role === "atleta" ? form.position : null,
           weight: role === "atleta" ? form.weight : null,
           height: role === "atleta" ? form.height : null,
@@ -43,7 +44,7 @@ function RegistroPage() {
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Cuenta creada");
+    toast.success(role === "coach" ? "Cuenta creada. Pendiente de validación del administrador." : "Cuenta creada");
     navigate({ to: role === "coach" ? "/coach" : "/atleta" });
   }
 
