@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Logo } from "@/components/Logo";
 import { checkPassword, PasswordRules } from "@/lib/password-validation";
+import { POSITIONS, COACH_TYPES } from "@/lib/positions";
 
 export const Route = createFileRoute("/registro")({ component: RegistroPage });
 
