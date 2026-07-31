@@ -67,11 +67,24 @@ function RegistroPage() {
               </label>
               <label className={`border p-3 cursor-pointer flex items-center gap-2 ${role === "coach" ? "bg-primary text-primary-foreground border-primary" : ""}`}>
                 <RadioGroupItem value="coach" className="sr-only" />
-                <span className="font-display text-xs">PREPARADOR FÍSICO</span>
+                <span className="font-display text-xs">CUERPO TÉCNICO</span>
               </label>
             </RadioGroup>
             {role === "coach" && (
-              <p className="text-xs text-muted-foreground mt-2">Solo emails previamente invitados por el admin pueden registrarse como coach.</p>
+              <>
+                <div className="mt-3">
+                  <Label>Categoría</Label>
+                  <Select value={coachType} onValueChange={setCoachType}>
+                    <SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
+                    <SelectContent>
+                      {COACH_TYPES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Tu cuenta quedará pendiente hasta que el administrador valide tu ingreso.
+                </p>
+              </>
             )}
           </div>
 
