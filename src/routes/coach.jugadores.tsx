@@ -116,35 +116,70 @@ function CoachPlayers() {
 
   return (
     <Shell title="Lista de jugadores">
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
         <Select value={positionFilter} onValueChange={setPositionFilter}>
-          <SelectTrigger className="h-8 w-[160px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 w-full sm:w-[160px] text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los puestos</SelectItem>
             {positions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="ml-auto flex items-center gap-1">
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-2">Presentismo del día</span>
+        <div className="sm:ml-auto flex items-center gap-1">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1 hidden sm:inline">Presentismo del día</span>
           <Button size="sm" variant="outline" onClick={() => shiftDate(-1)}><ChevronLeft className="h-3 w-3" /></Button>
-          <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="h-8 w-[150px] text-xs" />
+          <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="h-9 flex-1 sm:w-[150px] text-xs" />
           <Button size="sm" variant="outline" onClick={() => shiftDate(1)}><ChevronRight className="h-3 w-3" /></Button>
         </div>
       </div>
 
-      <div className="border border-border bg-background overflow-x-auto">
+      {/* Mobile: compact cards with sort controls */}
+      <div className="sm:hidden">
+        <div className="flex flex-wrap gap-2 items-center text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+          <span>Ordenar:</span>
+          <SortBtn k="name">Apellido</SortBtn>
+          <SortBtn k="position">Puesto</SortBtn>
+          <SortBtn k="week">Semana</SortBtn>
+          <SortBtn k="year">Año</SortBtn>
+          <SortBtn k="minutes">Minutos</SortBtn>
+        </div>
+        <div className="border border-border">
+          {sorted.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin jugadores.</p>}
+          {sorted.map((p: any) => {
+            const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false };
+            return (
+              <div key={p.id} className="flex gap-3 items-center px-3 py-2.5 border-b border-border last:border-0">
+                <div className="w-9 h-9 shrink-0 border border-border bg-secondary overflow-hidden">
+                  {p.photo_url && <img src={p.photo_url} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Link to="/coach/atleta/$id" params={{ id: p.id }} className="text-sm font-medium hover:underline block truncate">
+                    {(p.last_name ? p.last_name + ", " : "") + p.full_name}
+                  </Link>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
+                    {p.position ?? "—"} · Sem {s.week} · Mes {s.month} · Año {s.year} · {matchMinutes[p.id] ?? 0}'
+                  </p>
+                </div>
+                <Checkbox checked={s.today} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="h-5 w-5" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Desktop table */}
+      <div className="hidden sm:block border border-border bg-background overflow-x-auto">
         <div className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_60px] gap-2 px-3 py-2 border-b border-border bg-secondary text-[10px] uppercase tracking-wider font-medium min-w-[720px]">
           <div></div>
-          <div>Jugador</div>
-          <div>Puesto</div>
-          <div className="text-center">Sem.</div>
-          <div className="text-center">Mes</div>
-          <div className="text-center">Año</div>
-          <div className="text-center">Min. part.</div>
+          <div><SortBtn k="name">Jugador</SortBtn></div>
+          <div><SortBtn k="position">Puesto</SortBtn></div>
+          <div className="text-center"><SortBtn k="week">Sem.</SortBtn></div>
+          <div className="text-center"><SortBtn k="month">Mes</SortBtn></div>
+          <div className="text-center"><SortBtn k="year">Año</SortBtn></div>
+          <div className="text-center"><SortBtn k="minutes">Min. part.</SortBtn></div>
           <div className="text-center">Hoy</div>
         </div>
-        {visible.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin jugadores.</p>}
-        {visible.map((p) => {
+        {sorted.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin jugadores.</p>}
+        {sorted.map((p: any) => {
           const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false };
           return (
             <div key={p.id} className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_60px] gap-2 px-3 py-2 border-b border-border last:border-b-0 items-center text-xs min-w-[720px]">
@@ -166,6 +201,7 @@ function CoachPlayers() {
           );
         })}
       </div>
+
       <p className="text-[11px] text-muted-foreground mt-3">El presentismo se marca con el checkbox de la columna "Hoy" para la fecha seleccionada. Los conteos por semana, mes y año se actualizan al instante.</p>
     </Shell>
   );
