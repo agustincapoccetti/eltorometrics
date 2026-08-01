@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSort, sortIndicator } from "@/lib/sort";
 
 export const Route = createFileRoute("/coach/jugadores")({
   component: () => <Protected requireRole="coach"><CoachPlayers /></Protected>,
@@ -77,12 +78,12 @@ function CoachPlayers() {
   const { sorted, sort, toggle } = useSort<any, "name" | "position" | "week" | "month" | "year" | "minutes">(
     visible,
     {
-      name: (p) => lastNameOf(p),
-      position: (p) => p.position?.trim() || "",
-      week: (p) => stats[p.id]?.week ?? 0,
-      month: (p) => stats[p.id]?.month ?? 0,
-      year: (p) => stats[p.id]?.year ?? 0,
-      minutes: (p) => matchMinutes[p.id] ?? 0,
+      name: (p: any) => lastNameOf(p),
+      position: (p: any) => p.position?.trim() || "",
+      week: (p: any) => stats[p.id]?.week ?? 0,
+      month: (p: any) => stats[p.id]?.month ?? 0,
+      year: (p: any) => stats[p.id]?.year ?? 0,
+      minutes: (p: any) => matchMinutes[p.id] ?? 0,
     },
     { key: "name", dir: "asc" },
   );
