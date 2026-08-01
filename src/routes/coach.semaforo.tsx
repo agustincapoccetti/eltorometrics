@@ -8,6 +8,7 @@ import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { classifyReadiness, READINESS_META, type ReadinessLevel } from "@/lib/readiness";
 import { startOfWeek, endOfWeek, isoDate } from "@/lib/week-utils";
+import { useSort, sortIndicator } from "@/lib/sort";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/coach/semaforo")({
@@ -91,11 +92,33 @@ function Page() {
     (r) => (positionFilter === "all" || r.position === positionFilter) && (levelFilter === "all" || r.level === levelFilter),
   );
 
+  const LEVEL_ORDER: Record<ReadinessLevel, number> = { red: 0, amber: 1, green: 2 };
+  const { sorted, sort, toggle } = useSort<Row, "level" | "name" | "position" | "load" | "acwr" | "fatigue" | "wellness">(
+    visible,
+    {
+      level: (r) => LEVEL_ORDER[r.level],
+      name: (r) => r.name,
+      position: (r) => r.position,
+      load: (r) => r.weeklyLoad,
+      acwr: (r) => r.acwr,
+      fatigue: (r) => r.avgFatigue,
+      wellness: (r) => r.avgWellness,
+    },
+    { key: "level", dir: "asc" },
+  );
+
+  const SortBtn = ({ k, children }: { k: any; children: React.ReactNode }) => (
+    <button onClick={() => toggle(k)} className="inline-flex items-center gap-1">
+      {children}<span className="opacity-50 text-[9px]">{sortIndicator(sort.key === k, sort.dir)}</span>
+    </button>
+  );
+
   const counts = {
     green: rows.filter((r) => r.level === "green").length,
     amber: rows.filter((r) => r.level === "amber").length,
     red: rows.filter((r) => r.level === "red").length,
   };
+
 
   return (
     <Shell title="Semáforo semanal">
@@ -120,26 +143,38 @@ function Page() {
         })}
       </div>
 
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
         <Select value={positionFilter} onValueChange={setPositionFilter}>
-          <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 w-full sm:w-[180px] text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los puestos</SelectItem>
             {positions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
         {levelFilter !== "all" && (
-          <button onClick={() => setLevelFilter("all")} className="text-xs underline">Ver todas las categorías</button>
+          <button onClick={() => setLevelFilter("all")} className="text-xs underline self-start">Ver todas las categorías</button>
         )}
+      </div>
+
+      <div className="flex flex-wrap gap-x-3 gap-y-1 items-center text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+        <span>Ordenar:</span>
+        <SortBtn k="level">Estado físico</SortBtn>
+        <SortBtn k="name">Nombre</SortBtn>
+        <SortBtn k="position">Puesto</SortBtn>
+        <SortBtn k="load">Carga</SortBtn>
+        <SortBtn k="acwr">ACWR</SortBtn>
+        <SortBtn k="fatigue">Fatiga</SortBtn>
+        <SortBtn k="wellness">Bienestar</SortBtn>
       </div>
 
       {loading ? (
         <div className="py-12 flex justify-center"><RugbyLoader /></div>
       ) : (
         <div className="border border-border">
-          {visible.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground">Sin jugadores.</p>}
-          {visible.map((r) => {
+          {sorted.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground">Sin jugadores.</p>}
+          {sorted.map((r) => {
             const m = READINESS_META[r.level];
+
             return (
               <div key={r.id} className="flex flex-wrap gap-3 items-start px-3 py-3 border-b border-border last:border-0">
                 <span className={`${m.bg} ${m.text} text-[10px] font-semibold uppercase tracking-wider px-2 py-1 shrink-0`}>

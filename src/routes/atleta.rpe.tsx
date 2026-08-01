@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Trash2, Lock } from "lucide-react";
 import { WeekStrip } from "@/components/WeekStrip";
 import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
+import { rpeColor } from "@/lib/score-colors";
 
 export const Route = createFileRoute("/atleta/rpe")({ component: () => <Protected requireRole="atleta"><RpeForm /></Protected> });
 
@@ -96,19 +97,36 @@ function RpeForm() {
           <h2 className="text-xl">{editingId ? "Editar registro" : "¿Qué tan duro fue hoy?"}</h2>
           {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo lectura</span>}
         </div>
-        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-6">0 reposo · 5 duro · 10 máximo</p>
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+          0 reposo · 3 moderado · 5 duro · 7 muy duro · 10 máximo
+        </p>
+        <div className="grid grid-cols-4 gap-1 mb-4 text-[9px] uppercase tracking-wide text-center">
+          <div className="bg-emerald-500 text-white py-1">0-3 Suave</div>
+          <div className="bg-amber-400 text-black py-1">4-6 Moderado</div>
+          <div className="bg-orange-500 text-white py-1">7-8 Alto</div>
+          <div className="bg-red-600 text-white py-1">9-10 Máximo</div>
+        </div>
 
-        <div className="grid grid-cols-11 gap-1 mb-4">
-          {Array.from({ length: 11 }).map((_, i) => (
-            <button key={i} type="button" disabled={!editable} onClick={() => setScore(i)}
-              className={`aspect-square flex items-center justify-center border text-base font-display transition disabled:opacity-50 disabled:cursor-not-allowed ${
-                score === i ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"
-              }`}>{i}</button>
-          ))}
+        <div className="grid grid-cols-6 sm:grid-cols-11 gap-1.5 mb-4">
+          {Array.from({ length: 11 }).map((_, i) => {
+            const c = rpeColor(i);
+            const active = score === i;
+            return (
+              <button key={i} type="button" disabled={!editable} onClick={() => setScore(i)}
+                className={`aspect-square flex flex-col items-center justify-center border-2 transition disabled:opacity-50 disabled:cursor-not-allowed ${
+                  active ? `${c.bg} ${c.text} border-foreground` : "border-border hover:border-foreground"
+                }`}>
+                <span className="text-lg font-display leading-none">{i}</span>
+              </button>
+            );
+          })}
         </div>
         {score !== null && (
-          <p className="text-center text-sm font-medium uppercase tracking-wider">{LABELS[score]}</p>
+          <p className="text-center text-sm font-medium uppercase tracking-wider">
+            {LABELS[score]} · {rpeColor(score).label}
+          </p>
         )}
+
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
