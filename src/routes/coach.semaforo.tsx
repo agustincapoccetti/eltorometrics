@@ -143,26 +143,38 @@ function Page() {
         })}
       </div>
 
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
         <Select value={positionFilter} onValueChange={setPositionFilter}>
-          <SelectTrigger className="h-8 w-[180px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-9 w-full sm:w-[180px] text-xs"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los puestos</SelectItem>
             {positions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
         {levelFilter !== "all" && (
-          <button onClick={() => setLevelFilter("all")} className="text-xs underline">Ver todas las categorías</button>
+          <button onClick={() => setLevelFilter("all")} className="text-xs underline self-start">Ver todas las categorías</button>
         )}
+      </div>
+
+      <div className="flex flex-wrap gap-x-3 gap-y-1 items-center text-[10px] uppercase tracking-wider text-muted-foreground mb-3">
+        <span>Ordenar:</span>
+        <SortBtn k="level">Estado físico</SortBtn>
+        <SortBtn k="name">Nombre</SortBtn>
+        <SortBtn k="position">Puesto</SortBtn>
+        <SortBtn k="load">Carga</SortBtn>
+        <SortBtn k="acwr">ACWR</SortBtn>
+        <SortBtn k="fatigue">Fatiga</SortBtn>
+        <SortBtn k="wellness">Bienestar</SortBtn>
       </div>
 
       {loading ? (
         <div className="py-12 flex justify-center"><RugbyLoader /></div>
       ) : (
         <div className="border border-border">
-          {visible.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground">Sin jugadores.</p>}
-          {visible.map((r) => {
+          {sorted.length === 0 && <p className="px-4 py-6 text-sm text-muted-foreground">Sin jugadores.</p>}
+          {sorted.map((r) => {
             const m = READINESS_META[r.level];
+
             return (
               <div key={r.id} className="flex flex-wrap gap-3 items-start px-3 py-3 border-b border-border last:border-0">
                 <span className={`${m.bg} ${m.text} text-[10px] font-semibold uppercase tracking-wider px-2 py-1 shrink-0`}>
