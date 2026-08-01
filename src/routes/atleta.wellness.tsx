@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Lock } from "lucide-react";
 import { WeekStrip } from "@/components/WeekStrip";
 import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
+import { wellnessColor } from "@/lib/score-colors";
 
 export const Route = createFileRoute("/atleta/wellness")({ component: () => <Protected requireRole="atleta"><WellnessForm /></Protected> });
 
