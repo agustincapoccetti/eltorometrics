@@ -201,9 +201,11 @@ function Page() {
             <div className="space-y-4">
               {WELL_FIELDS.map((f) => (
                 <div key={f.key}>
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-1.5 gap-2">
                     <Label>{f.label}</Label>
-                    <span className="text-xs text-muted-foreground">{wellnessColor(well[f.key]).label}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      1 {f.scale[0]} · 5 {f.scale[4]}
+                    </span>
                   </div>
                   <div className="grid grid-cols-5 gap-1.5">
                     {[1, 2, 3, 4, 5].map((n) => {
@@ -213,15 +215,17 @@ function Page() {
                         <button
                           key={n}
                           onClick={() => setWell((w) => ({ ...w, [f.key]: n }))}
-                          className={`py-2 border-2 font-display ${active ? `${c.bg} ${c.text} border-black` : "border-border hover:border-black"}`}
+                          className={`py-2 border-2 flex flex-col items-center gap-0.5 min-h-[58px] justify-center ${active ? `${c.bg} ${c.text} border-black` : "border-border hover:border-black"}`}
                         >
-                          {n}
+                          <span className="font-display leading-none">{n}</span>
+                          <span className="text-[8px] uppercase leading-tight text-center px-0.5">{f.scale[n - 1]}</span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
               ))}
+
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <Checkbox checked={hasPain} onCheckedChange={(v) => setHasPain(v === true)} />
                 <span>Reporta dolor o molestia</span>
