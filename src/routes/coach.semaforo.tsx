@@ -8,6 +8,7 @@ import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { classifyReadiness, READINESS_META, type ReadinessLevel } from "@/lib/readiness";
 import { startOfWeek, endOfWeek, isoDate } from "@/lib/week-utils";
+import { useSort, sortIndicator } from "@/lib/sort";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/coach/semaforo")({
@@ -91,11 +92,33 @@ function Page() {
     (r) => (positionFilter === "all" || r.position === positionFilter) && (levelFilter === "all" || r.level === levelFilter),
   );
 
+  const LEVEL_ORDER: Record<ReadinessLevel, number> = { red: 0, amber: 1, green: 2 };
+  const { sorted, sort, toggle } = useSort<Row, "level" | "name" | "position" | "load" | "acwr" | "fatigue" | "wellness">(
+    visible,
+    {
+      level: (r) => LEVEL_ORDER[r.level],
+      name: (r) => r.name,
+      position: (r) => r.position,
+      load: (r) => r.weeklyLoad,
+      acwr: (r) => r.acwr,
+      fatigue: (r) => r.avgFatigue,
+      wellness: (r) => r.avgWellness,
+    },
+    { key: "level", dir: "asc" },
+  );
+
+  const SortBtn = ({ k, children }: { k: any; children: React.ReactNode }) => (
+    <button onClick={() => toggle(k)} className="inline-flex items-center gap-1">
+      {children}<span className="opacity-50 text-[9px]">{sortIndicator(sort.key === k, sort.dir)}</span>
+    </button>
+  );
+
   const counts = {
     green: rows.filter((r) => r.level === "green").length,
     amber: rows.filter((r) => r.level === "amber").length,
     red: rows.filter((r) => r.level === "red").length,
   };
+
 
   return (
     <Shell title="Semáforo semanal">
