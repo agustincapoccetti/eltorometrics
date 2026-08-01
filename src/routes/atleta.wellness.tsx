@@ -94,12 +94,24 @@ function WellnessForm() {
 
   return (
     <Shell title="Bienestar">
-      <p className="text-sm text-muted-foreground mb-4">Cuestionario matutino · escala 1 (mejor) a 5 (peor)</p>
+      <p className="text-sm text-muted-foreground mb-3">
+        Cuestionario matutino · <strong>1 = MUY BUENO</strong> (estás bien) → <strong>5 = MUY MALO</strong> (peor estado)
+      </p>
+      <div className="grid grid-cols-5 gap-1 mb-4">
+        {GLOBAL_SCALE.map((s, i) => {
+          const c = wellnessColor(i + 1);
+          return (
+            <div key={s} className={`${c.bg} ${c.text} text-[9px] sm:text-[10px] uppercase tracking-wide text-center py-1 px-0.5 leading-tight`}>
+              {s}
+            </div>
+          );
+        })}
+      </div>
 
       <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} />
 
-      <div className="border border-border p-4 mb-6 flex items-end gap-3 flex-wrap">
-        <div className="flex-1 min-w-[180px]">
+      <div className="border border-border p-4 mb-6 flex flex-col sm:flex-row sm:items-end gap-3">
+        <div className="flex-1 min-w-[160px]">
           <Label htmlFor="wd">Fecha</Label>
           <Input id="wd" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
@@ -107,24 +119,39 @@ function WellnessForm() {
         <Button variant="outline" size="sm" disabled={!editable} onClick={removeEntry}>Eliminar registro</Button>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         {Q.map((q) => (
-          <div key={q.key} className="border border-border p-5">
-            <h3 className="text-lg mb-1">{q.label}</h3>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">1 {q.min} · 5 {q.max}</p>
-            <div className="grid grid-cols-5 gap-2">
-              {[1,2,3,4,5].map((n) => (
-                <button
-                  key={n} type="button" disabled={!editable}
-                  onClick={() => setV({ ...v, [q.key]: n })}
-                  className={`aspect-square flex items-center justify-center border text-xl font-display transition disabled:opacity-50 disabled:cursor-not-allowed ${
-                    v[q.key] === n ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"
-                  }`}
-                >{n}</button>
-              ))}
+          <div key={q.key} className="border border-border p-4 sm:p-5">
+            <div className="flex items-baseline justify-between gap-2 mb-1">
+              <h3 className="text-lg">{q.label}</h3>
+              {v[q.key] ? (
+                <span className="text-xs uppercase tracking-wider font-semibold">{q.scale[v[q.key] - 1]}</span>
+              ) : null}
+            </div>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-3">
+              1 {q.scale[0]} · 5 {q.scale[4]}
+            </p>
+            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+              {[1, 2, 3, 4, 5].map((n) => {
+                const c = wellnessColor(n);
+                const active = v[q.key] === n;
+                return (
+                  <button
+                    key={n} type="button" disabled={!editable}
+                    onClick={() => setV({ ...v, [q.key]: n })}
+                    className={`flex flex-col items-center justify-center gap-0.5 border-2 py-2 min-h-[64px] transition disabled:opacity-50 disabled:cursor-not-allowed ${
+                      active ? `${c.bg} ${c.text} border-foreground` : "border-border hover:border-foreground"
+                    }`}
+                  >
+                    <span className="text-xl font-display leading-none">{n}</span>
+                    <span className="text-[8px] sm:text-[9px] uppercase leading-tight text-center px-0.5">{q.scale[n - 1]}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
+
 
         <div className="border border-border p-5">
           <div className="flex items-center justify-between mb-4">
