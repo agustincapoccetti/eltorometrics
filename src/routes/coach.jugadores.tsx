@@ -56,6 +56,7 @@ function CoachPlayers() {
     [athletes, positionFilter],
   );
 
+
   const wStart = isoDate(startOfWeek());
   const mStart = isoDate(startOfMonth());
   const yStart = isoDate(startOfYear());

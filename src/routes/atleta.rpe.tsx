@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Trash2, Lock } from "lucide-react";
 import { WeekStrip } from "@/components/WeekStrip";
 import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
+import { rpeColor } from "@/lib/score-colors";
 
 export const Route = createFileRoute("/atleta/rpe")({ component: () => <Protected requireRole="atleta"><RpeForm /></Protected> });
 
