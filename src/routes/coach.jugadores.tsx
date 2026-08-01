@@ -74,6 +74,26 @@ function CoachPlayers() {
     return map;
   }, [attendance, selectedDate, wStart, mStart, yStart]);
 
+  const { sorted, sort, toggle } = useSort<any, "name" | "position" | "week" | "month" | "year" | "minutes">(
+    visible,
+    {
+      name: (p) => lastNameOf(p),
+      position: (p) => p.position?.trim() || "",
+      week: (p) => stats[p.id]?.week ?? 0,
+      month: (p) => stats[p.id]?.month ?? 0,
+      year: (p) => stats[p.id]?.year ?? 0,
+      minutes: (p) => matchMinutes[p.id] ?? 0,
+    },
+    { key: "name", dir: "asc" },
+  );
+
+  const SortBtn = ({ k, children, className = "" }: { k: any; children: React.ReactNode; className?: string }) => (
+    <button onClick={() => toggle(k)} className={`inline-flex items-center gap-1 ${className}`}>
+      {children}<span className="opacity-50 text-[9px]">{sortIndicator(sort.key === k, sort.dir)}</span>
+    </button>
+  );
+
+
   async function togglePresent(uid: string, present: boolean) {
     const existing = attendance.find((a) => a.user_id === uid && a.attendance_date === selectedDate);
     if (existing) {
