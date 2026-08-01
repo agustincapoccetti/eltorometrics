@@ -16,12 +16,16 @@ import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/wellness")({ component: () => <Protected requireRole="atleta"><WellnessForm /></Protected> });
 
+// Scale is always 1 = MUY BUENO (mejor estado) → 5 = MUY MALO (peor estado)
 const Q = [
-  { key: "sleep", label: "Calidad del sueño", min: "Excelente", max: "Muy mala" },
-  { key: "stress", label: "Nivel de estrés", min: "Muy bajo", max: "Muy alto" },
-  { key: "fatigue", label: "Fatiga muscular", min: "Fresco", max: "Muy fatigado" },
-  { key: "mood", label: "Ánimo", min: "Excelente", max: "Muy malo" },
+  { key: "sleep", label: "Calidad del sueño", scale: ["Dormí muy bien", "Dormí bien", "Normal", "Dormí mal", "Dormí muy mal"] },
+  { key: "stress", label: "Nivel de estrés", scale: ["Muy relajado", "Relajado", "Normal", "Estresado", "Muy estresado"] },
+  { key: "fatigue", label: "Fatiga muscular", scale: ["Muy fresco", "Fresco", "Normal", "Cansado", "Muy cansado"] },
+  { key: "mood", label: "Dolor muscular", scale: ["Sin dolor", "Molestia leve", "Moderado", "Dolor alto", "Dolor muy alto"] },
 ] as const;
+
+const GLOBAL_SCALE = ["1 · Muy bueno", "2 · Bueno", "3 · Regular", "4 · Malo", "5 · Muy malo"];
+
 
 function WellnessForm() {
   const { user } = useAuth();
