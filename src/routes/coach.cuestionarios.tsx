@@ -24,11 +24,12 @@ const RPE_LABELS: Record<number, string> = {
 };
 
 const WELL_FIELDS = [
-  { key: "fatigue", label: "Fatiga" },
-  { key: "sleep", label: "Calidad del sueño" },
-  { key: "stress", label: "Estrés" },
-  { key: "mood", label: "Dolor muscular" },
+  { key: "fatigue", label: "Fatiga", scale: ["Muy fresco", "Fresco", "Normal", "Cansado", "Muy cansado"] },
+  { key: "sleep", label: "Calidad del sueño", scale: ["Muy bien", "Bien", "Normal", "Mal", "Muy mal"] },
+  { key: "stress", label: "Estrés", scale: ["Muy relajado", "Relajado", "Normal", "Estresado", "Muy estresado"] },
+  { key: "mood", label: "Dolor muscular", scale: ["Sin dolor", "Leve", "Moderado", "Alto", "Muy alto"] },
 ] as const;
+
 
 function Page() {
   const [athletes, setAthletes] = useState<any[]>([]);
