@@ -108,13 +108,16 @@ export function BodyMap({
 
   const zoneFill = (id: ZoneId) => {
     const t = intensity(id);
-    if (!t) return "url(#skinGrad)";
-    // rojo con opacidad según frecuencia, encima del gradiente base
-    return `rgba(220,38,38,${t})`;
+    if (!t) return "rgba(56,189,248,0.06)";
+    return `rgba(248,58,58,${0.2 + t * 0.6})`;
   };
 
   const zoneStroke = (id: ZoneId) =>
-    selected === id ? "#111" : counts[id] ? "rgba(127,29,29,0.9)" : "rgba(0,0,0,0.25)";
+    selected === id
+      ? "#ffffff"
+      : counts[id]
+        ? "rgba(255,120,120,0.95)"
+        : "rgba(125,211,252,0.35)";
 
   const zoneStrokeW = (id: ZoneId) => (selected === id ? 2 : 1);
 
@@ -124,13 +127,20 @@ export function BodyMap({
     .sort((a, b) => (b.date! > a.date! ? 1 : -1))[0];
 
   return (
-    <div className="border border-border p-4 sm:p-6 mb-4">
+    <div
+      className="border border-border p-4 sm:p-6 mb-4"
+      style={{
+        background:
+          "radial-gradient(120% 90% at 50% 0%, #0d2murky 0%, transparent 0%), linear-gradient(180deg, #061024 0%, #030814 100%)",
+      }}
+    >
       <div className="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
-        <h3 className="text-base sm:text-lg">{title}</h3>
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        <h3 className="text-base sm:text-lg text-sky-100">{title}</h3>
+        <p className="text-[10px] uppercase tracking-widest text-sky-300/60">
           {normalized.length} registro{normalized.length === 1 ? "" : "s"} · toca una zona
         </p>
       </div>
+
 
       <div className="grid grid-cols-2 gap-3 sm:gap-8 max-w-lg mx-auto">
         {/* ========== FRENTE ========== */}
