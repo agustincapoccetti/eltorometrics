@@ -339,12 +339,14 @@ function Zone({
   return (
     <path
       d={d}
-      fill={has || selected === id ? fill(id) : "rgba(0,0,0,0.001)"}
+      fill={has || selected === id ? fill(id) : "rgba(56,189,248,0.04)"}
       stroke={stroke(id)}
       strokeWidth={strokeW(id)}
+      filter={has ? "url(#painGlow)" : undefined}
       style={{ cursor: "pointer", transition: "fill .2s, stroke .2s" }}
       onClick={() => onClick(selected === id ? (null as any) : id)}
     >
+
       <title>{ZONE_LABEL[id]}{has ? ` · ${counts[id]} registro${counts[id] === 1 ? "" : "s"}` : ""}</title>
     </path>
   );
