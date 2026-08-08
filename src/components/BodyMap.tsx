@@ -108,13 +108,16 @@ export function BodyMap({
 
   const zoneFill = (id: ZoneId) => {
     const t = intensity(id);
-    if (!t) return "url(#skinGrad)";
-    // rojo con opacidad según frecuencia, encima del gradiente base
-    return `rgba(220,38,38,${t})`;
+    if (!t) return "rgba(56,189,248,0.06)";
+    return `rgba(248,58,58,${0.2 + t * 0.6})`;
   };
 
   const zoneStroke = (id: ZoneId) =>
-    selected === id ? "#111" : counts[id] ? "rgba(127,29,29,0.9)" : "rgba(0,0,0,0.25)";
+    selected === id
+      ? "#ffffff"
+      : counts[id]
+        ? "rgba(255,120,120,0.95)"
+        : "rgba(125,211,252,0.35)";
 
   const zoneStrokeW = (id: ZoneId) => (selected === id ? 2 : 1);
 
@@ -124,10 +127,16 @@ export function BodyMap({
     .sort((a, b) => (b.date! > a.date! ? 1 : -1))[0];
 
   return (
-    <div className="border border-border p-4 sm:p-6 mb-4">
+    <div
+      className="border border-sky-500/30 p-4 sm:p-6 mb-4 rounded-sm"
+      style={{
+        background:
+          "radial-gradient(90% 70% at 50% 0%, rgba(14,90,160,0.45) 0%, rgba(3,10,26,0) 70%), linear-gradient(180deg, #061024 0%, #02060f 100%)",
+      }}
+    >
       <div className="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
-        <h3 className="text-base sm:text-lg">{title}</h3>
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+        <h3 className="text-base sm:text-lg text-sky-100">{title}</h3>
+        <p className="text-[10px] uppercase tracking-widest text-sky-300/60">
           {normalized.length} registro{normalized.length === 1 ? "" : "s"} · toca una zona
         </p>
       </div>
@@ -135,27 +144,37 @@ export function BodyMap({
       <div className="grid grid-cols-2 gap-3 sm:gap-8 max-w-lg mx-auto">
         {/* ========== FRENTE ========== */}
         <div>
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Frente</p>
+          <p className="text-center text-[10px] uppercase tracking-widest text-sky-300/60 mb-1">Frente</p>
           <svg viewBox="0 0 220 460" className="w-full h-auto select-none">
             <defs>
-              <radialGradient id="skinGrad" cx="50%" cy="35%" r="70%">
-                <stop offset="0%" stopColor="#f5f5f4" />
-                <stop offset="60%" stopColor="#d6d3d1" />
-                <stop offset="100%" stopColor="#78716c" />
-              </radialGradient>
-              <radialGradient id="skinGradSide" cx="30%" cy="50%" r="80%">
-                <stop offset="0%" stopColor="#e7e5e4" />
-                <stop offset="100%" stopColor="#57534e" />
-              </radialGradient>
-              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                <feOffset dx="1" dy="2" result="off" />
-                <feComponentTransfer><feFuncA type="linear" slope="0.35" /></feComponentTransfer>
-                <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.55" />
+                <stop offset="45%" stopColor="#38bdf8" stopOpacity="0.28" />
+                <stop offset="100%" stopColor="#0369a1" stopOpacity="0.5" />
+              </linearGradient>
+              <linearGradient id="skinGradSide" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.42" />
+                <stop offset="100%" stopColor="#0c4a6e" stopOpacity="0.5" />
+              </linearGradient>
+              <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="painGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
               </filter>
             </defs>
 
-            <g filter="url(#softShadow)">
+            <g filter="url(#softShadow)" stroke="rgba(125,211,252,0.85)" strokeWidth="0.8">
+
               {/* silueta base 3D */}
               {/* cabeza */}
               <ellipse cx="110" cy="38" rx="26" ry="30" fill="url(#skinGrad)" />
@@ -212,9 +231,10 @@ export function BodyMap({
 
         {/* ========== ESPALDA ========== */}
         <div>
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Espalda</p>
+          <p className="text-center text-[10px] uppercase tracking-widest text-sky-300/60 mb-1">Espalda</p>
           <svg viewBox="0 0 220 460" className="w-full h-auto select-none">
-            <g filter="url(#softShadow)">
+            <g filter="url(#softShadow)" stroke="rgba(125,211,252,0.85)" strokeWidth="0.8">
+
               <ellipse cx="110" cy="38" rx="26" ry="30" fill="url(#skinGrad)" />
               <path d="M96,66 Q110,74 124,66 L126,84 Q110,90 94,84 Z" fill="url(#skinGrad)" />
               <path d="M64,96 Q110,80 156,96 Q168,150 156,206 Q110,220 64,206 Q52,150 64,96 Z" fill="url(#skinGrad)" />
@@ -242,61 +262,63 @@ export function BodyMap({
       </div>
 
       {/* Leyenda */}
-      <div className="mt-4 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+      <div className="mt-4 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-sky-300/70">
         <span>Menos</span>
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.28)" }} />
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.55)" }} />
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.9)" }} />
+        <span className="inline-block w-4 h-3 border border-sky-500/30" style={{ background: "rgba(248,58,58,0.28)" }} />
+        <span className="inline-block w-4 h-3 border border-sky-500/30" style={{ background: "rgba(248,58,58,0.55)" }} />
+        <span className="inline-block w-4 h-3 border border-sky-500/30" style={{ background: "rgba(248,58,58,0.9)" }} />
         <span>Más frecuente</span>
       </div>
 
       {/* Detalle zona seleccionada */}
       {selected && (
-        <div className="mt-5 border border-border p-4 bg-secondary/40">
+        <div className="mt-5 border border-sky-500/30 p-4 bg-sky-950/40">
           <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Zona seleccionada</p>
-              <h4 className="text-base font-medium">{ZONE_LABEL[selected]}</h4>
+              <p className="text-[10px] uppercase tracking-widest text-sky-300/60">Zona seleccionada</p>
+              <h4 className="text-base font-medium text-sky-50">{ZONE_LABEL[selected]}</h4>
             </div>
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Frecuencia</p>
-              <p className="text-lg font-medium">{selectedEntries.length}</p>
+              <p className="text-[10px] uppercase tracking-widest text-sky-300/60">Frecuencia</p>
+              <p className="text-lg font-medium text-sky-50">{selectedEntries.length}</p>
             </div>
             <button
               onClick={() => setSelected(null)}
-              className="text-[10px] uppercase tracking-widest underline hover:no-underline"
+              className="text-[10px] uppercase tracking-widest underline hover:no-underline text-sky-200"
             >
               Cerrar
             </button>
           </div>
           {selectedLast && (
-            <p className="text-xs text-muted-foreground mb-2">
-              Último registro: <span className="font-medium text-foreground">{selectedLast.date}</span> · {selectedLast.text}
+            <p className="text-xs text-sky-300/70 mb-2">
+              Último registro: <span className="font-medium text-sky-50">{selectedLast.date}</span> · {selectedLast.text}
             </p>
           )}
+
           {selectedEntries.length > 0 ? (
             <ul className="space-y-1 max-h-40 overflow-auto pr-1">
               {selectedEntries
                 .slice()
                 .sort((a, b) => (a.date && b.date ? (b.date > a.date ? 1 : -1) : 0))
                 .map((e, i) => (
-                  <li key={i} className="text-xs border-l-2 border-primary pl-2">
-                    {e.date && <span className="font-display uppercase tracking-wider mr-2">{e.date}</span>}
+                  <li key={i} className="text-xs border-l-2 border-red-500 pl-2 text-sky-100">
+                    {e.date && <span className="font-display uppercase tracking-wider mr-2 text-sky-300/70">{e.date}</span>}
                     <span>{e.text}</span>
                   </li>
                 ))}
             </ul>
           ) : (
-            <p className="text-xs text-muted-foreground">Sin registros para esta zona todavía.</p>
+            <p className="text-xs text-sky-300/70">Sin registros para esta zona todavía.</p>
           )}
         </div>
       )}
 
       {normalized.length === 0 && (
-        <p className="text-xs text-muted-foreground text-center mt-3">
+        <p className="text-xs text-sky-300/60 text-center mt-3">
           Sin registros de dolor aún.
         </p>
       )}
+
     </div>
   );
 }
@@ -317,12 +339,14 @@ function Zone({
   return (
     <path
       d={d}
-      fill={has || selected === id ? fill(id) : "rgba(0,0,0,0.001)"}
+      fill={has || selected === id ? fill(id) : "rgba(56,189,248,0.04)"}
       stroke={stroke(id)}
       strokeWidth={strokeW(id)}
+      filter={has ? "url(#painGlow)" : undefined}
       style={{ cursor: "pointer", transition: "fill .2s, stroke .2s" }}
       onClick={() => onClick(selected === id ? (null as any) : id)}
     >
+
       <title>{ZONE_LABEL[id]}{has ? ` · ${counts[id]} registro${counts[id] === 1 ? "" : "s"}` : ""}</title>
     </path>
   );
