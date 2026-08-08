@@ -301,23 +301,24 @@ export function BodyMap({
                 .slice()
                 .sort((a, b) => (a.date && b.date ? (b.date > a.date ? 1 : -1) : 0))
                 .map((e, i) => (
-                  <li key={i} className="text-xs border-l-2 border-primary pl-2">
-                    {e.date && <span className="font-display uppercase tracking-wider mr-2">{e.date}</span>}
+                  <li key={i} className="text-xs border-l-2 border-red-500 pl-2 text-sky-100">
+                    {e.date && <span className="font-display uppercase tracking-wider mr-2 text-sky-300/70">{e.date}</span>}
                     <span>{e.text}</span>
                   </li>
                 ))}
             </ul>
           ) : (
-            <p className="text-xs text-muted-foreground">Sin registros para esta zona todavía.</p>
+            <p className="text-xs text-sky-300/70">Sin registros para esta zona todavía.</p>
           )}
         </div>
       )}
 
       {normalized.length === 0 && (
-        <p className="text-xs text-muted-foreground text-center mt-3">
+        <p className="text-xs text-sky-300/60 text-center mt-3">
           Sin registros de dolor aún.
         </p>
       )}
+
     </div>
   );
 }
