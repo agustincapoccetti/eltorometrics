@@ -128,10 +128,10 @@ export function BodyMap({
 
   return (
     <div
-      className="border border-border p-4 sm:p-6 mb-4"
+      className="border border-sky-500/30 p-4 sm:p-6 mb-4 rounded-sm"
       style={{
         background:
-          "radial-gradient(120% 90% at 50% 0%, #0d2murky 0%, transparent 0%), linear-gradient(180deg, #061024 0%, #030814 100%)",
+          "radial-gradient(90% 70% at 50% 0%, rgba(14,90,160,0.45) 0%, rgba(3,10,26,0) 70%), linear-gradient(180deg, #061024 0%, #02060f 100%)",
       }}
     >
       <div className="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
@@ -141,31 +141,40 @@ export function BodyMap({
         </p>
       </div>
 
-
       <div className="grid grid-cols-2 gap-3 sm:gap-8 max-w-lg mx-auto">
         {/* ========== FRENTE ========== */}
         <div>
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Frente</p>
+          <p className="text-center text-[10px] uppercase tracking-widest text-sky-300/60 mb-1">Frente</p>
           <svg viewBox="0 0 220 460" className="w-full h-auto select-none">
             <defs>
-              <radialGradient id="skinGrad" cx="50%" cy="35%" r="70%">
-                <stop offset="0%" stopColor="#f5f5f4" />
-                <stop offset="60%" stopColor="#d6d3d1" />
-                <stop offset="100%" stopColor="#78716c" />
-              </radialGradient>
-              <radialGradient id="skinGradSide" cx="30%" cy="50%" r="80%">
-                <stop offset="0%" stopColor="#e7e5e4" />
-                <stop offset="100%" stopColor="#57534e" />
-              </radialGradient>
-              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="2" />
-                <feOffset dx="1" dy="2" result="off" />
-                <feComponentTransfer><feFuncA type="linear" slope="0.35" /></feComponentTransfer>
-                <feMerge><feMergeNode /><feMergeNode in="SourceGraphic" /></feMerge>
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.55" />
+                <stop offset="45%" stopColor="#38bdf8" stopOpacity="0.28" />
+                <stop offset="100%" stopColor="#0369a1" stopOpacity="0.5" />
+              </linearGradient>
+              <linearGradient id="skinGradSide" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.42" />
+                <stop offset="100%" stopColor="#0c4a6e" stopOpacity="0.5" />
+              </linearGradient>
+              <filter id="softShadow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="painGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
               </filter>
             </defs>
 
-            <g filter="url(#softShadow)">
+            <g filter="url(#softShadow)" stroke="rgba(125,211,252,0.85)" strokeWidth="0.8">
+
               {/* silueta base 3D */}
               {/* cabeza */}
               <ellipse cx="110" cy="38" rx="26" ry="30" fill="url(#skinGrad)" />
