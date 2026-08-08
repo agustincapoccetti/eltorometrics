@@ -231,9 +231,10 @@ export function BodyMap({
 
         {/* ========== ESPALDA ========== */}
         <div>
-          <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Espalda</p>
+          <p className="text-center text-[10px] uppercase tracking-widest text-sky-300/60 mb-1">Espalda</p>
           <svg viewBox="0 0 220 460" className="w-full h-auto select-none">
-            <g filter="url(#softShadow)">
+            <g filter="url(#softShadow)" stroke="rgba(125,211,252,0.85)" strokeWidth="0.8">
+
               <ellipse cx="110" cy="38" rx="26" ry="30" fill="url(#skinGrad)" />
               <path d="M96,66 Q110,74 124,66 L126,84 Q110,90 94,84 Z" fill="url(#skinGrad)" />
               <path d="M64,96 Q110,80 156,96 Q168,150 156,206 Q110,220 64,206 Q52,150 64,96 Z" fill="url(#skinGrad)" />
