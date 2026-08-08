@@ -262,38 +262,39 @@ export function BodyMap({
       </div>
 
       {/* Leyenda */}
-      <div className="mt-4 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+      <div className="mt-4 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-sky-300/70">
         <span>Menos</span>
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.28)" }} />
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.55)" }} />
-        <span className="inline-block w-4 h-3 border border-border" style={{ background: "rgba(220,38,38,0.9)" }} />
+        <span className="inline-block w-4 h-3 border border-sky-500/30" style={{ background: "rgba(248,58,58,0.28)" }} />
+        <span className="inline-block w-4 h-3 border border-sky-500/30" style={{ background: "rgba(248,58,58,0.55)" }} />
+        <span className="inline-block w-4 h-3 border border-sky-500/30" style={{ background: "rgba(248,58,58,0.9)" }} />
         <span>Más frecuente</span>
       </div>
 
       {/* Detalle zona seleccionada */}
       {selected && (
-        <div className="mt-5 border border-border p-4 bg-secondary/40">
+        <div className="mt-5 border border-sky-500/30 p-4 bg-sky-950/40">
           <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Zona seleccionada</p>
-              <h4 className="text-base font-medium">{ZONE_LABEL[selected]}</h4>
+              <p className="text-[10px] uppercase tracking-widest text-sky-300/60">Zona seleccionada</p>
+              <h4 className="text-base font-medium text-sky-50">{ZONE_LABEL[selected]}</h4>
             </div>
             <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Frecuencia</p>
-              <p className="text-lg font-medium">{selectedEntries.length}</p>
+              <p className="text-[10px] uppercase tracking-widest text-sky-300/60">Frecuencia</p>
+              <p className="text-lg font-medium text-sky-50">{selectedEntries.length}</p>
             </div>
             <button
               onClick={() => setSelected(null)}
-              className="text-[10px] uppercase tracking-widest underline hover:no-underline"
+              className="text-[10px] uppercase tracking-widest underline hover:no-underline text-sky-200"
             >
               Cerrar
             </button>
           </div>
           {selectedLast && (
-            <p className="text-xs text-muted-foreground mb-2">
-              Último registro: <span className="font-medium text-foreground">{selectedLast.date}</span> · {selectedLast.text}
+            <p className="text-xs text-sky-300/70 mb-2">
+              Último registro: <span className="font-medium text-sky-50">{selectedLast.date}</span> · {selectedLast.text}
             </p>
           )}
+
           {selectedEntries.length > 0 ? (
             <ul className="space-y-1 max-h-40 overflow-auto pr-1">
               {selectedEntries
