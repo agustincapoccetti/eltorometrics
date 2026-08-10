@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
+import { isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/coach/cuestionarios")({
   component: () => <Protected requireRole="coach"><Page /></Protected>,
@@ -36,7 +37,7 @@ function Page() {
   const [loading, setLoading] = useState(true);
   const [positionFilter, setPositionFilter] = useState("all");
   const [athleteId, setAthleteId] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(isoDate(new Date()));
 
   const [rpeScore, setRpeScore] = useState<number | null>(null);
   const [sessionLabel, setSessionLabel] = useState("");

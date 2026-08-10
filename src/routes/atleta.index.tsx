@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Activity, Heart, CheckCircle2, Circle, Sparkles, Calendar as CalendarIcon } from "lucide-react";
+import { isoDate } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/")({ component: () => <Protected requireRole="atleta"><AthleteHome /></Protected> });
 
@@ -39,11 +40,11 @@ function AthleteHome() {
         setNewWeight(String(p.weight ?? "")); setShowWeightModal(true);
       }
 
-      const today = new Date().toISOString().slice(0, 10);
+      const today = isoDate(new Date());
       const { data: w } = await supabase.from("wellness_entries").select("id").eq("user_id", user.id).eq("entry_date", today).maybeSingle();
       setTodayWellness(!!w);
 
-      const weekStart = startOfWeek().toISOString().slice(0, 10);
+      const weekStart = isoDate(startOfWeek());
       const { count } = await supabase.from("rpe_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("session_date", weekStart);
       setWeekRpe(count ?? 0);
 

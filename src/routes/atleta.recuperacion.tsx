@@ -21,7 +21,7 @@ export const Route = createFileRoute("/atleta/recuperacion")({
 
 function Recuperacion() {
   const { user } = useAuth();
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(isoDate(new Date()));
   const [strategies, setStrategies] = useState<any[]>([]);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [notes, setNotes] = useState("");

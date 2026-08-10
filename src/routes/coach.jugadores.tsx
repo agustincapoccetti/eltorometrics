@@ -16,7 +16,7 @@ export const Route = createFileRoute("/coach/jugadores")({
   component: () => <Protected requireRole="coach"><CoachPlayers /></Protected>,
 });
 
-function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
+function isoDate(d: Date) { const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, "0"); const dd = String(d.getDate()).padStart(2, "0"); return `${y}-${m}-${dd}`; }
 function startOfWeek(d = new Date()) { const x = new Date(d); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0,0,0,0); return x; }
 function startOfMonth(d = new Date()) { const x = new Date(d); x.setDate(1); x.setHours(0,0,0,0); return x; }
 function startOfYear(d = new Date()) { const x = new Date(d.getFullYear(), 0, 1); return x; }
