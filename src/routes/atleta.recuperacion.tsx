@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Lock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { WeekStrip } from "@/components/WeekStrip";
-import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
+import { isCurrentWeek, startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/recuperacion")({
   component: () => <Protected requireRole="atleta"><Recuperacion /></Protected>,
