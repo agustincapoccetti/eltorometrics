@@ -31,6 +31,7 @@ function CoachPlayers() {
   const [attendance, setAttendance] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(isoDate(new Date()));
   const [positionFilter, setPositionFilter] = useState("all");
+  const [q, setQ] = useState("");
   const [matchMinutes, setMatchMinutes] = useState<Record<string, number>>({});
 
   async function load() {
