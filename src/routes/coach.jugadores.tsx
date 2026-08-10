@@ -130,6 +130,15 @@ function CoachPlayers() {
             {positions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
+        <div className="relative w-full sm:w-[220px]">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre o apellido…"
+            className="h-9 pl-7 text-xs"
+          />
+        </div>
         <div className="sm:ml-auto flex items-center gap-1">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1 hidden sm:inline">Presentismo del día</span>
           <Button size="sm" variant="outline" onClick={() => shiftDate(-1)}><ChevronLeft className="h-3 w-3" /></Button>
