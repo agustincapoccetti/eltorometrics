@@ -4,7 +4,15 @@ import { Shell } from "@/components/Shell";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ExternalLink, PlayCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ExternalLink, PlayCircle, Search } from "lucide-react";
 import {
   LIBRARY_CATEGORIES,
   categoryLabel,
