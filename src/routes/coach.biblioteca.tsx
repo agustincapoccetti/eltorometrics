@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Pencil, ExternalLink, PlayCircle } from "lucide-react";
+import { Plus, Trash2, Pencil, ExternalLink, PlayCircle, Search } from "lucide-react";
 import { toast } from "sonner";
 import {
   LIBRARY_CATEGORIES,
