@@ -35,9 +35,16 @@ function Page() {
   useEffect(() => { load(); }, [user]);
 
   async function openPdf(path: string) {
+    // Open the tab synchronously so mobile browsers don't block it after the await.
+    const win = window.open("", "_blank");
     const { data, error } = await supabase.storage.from("gym-pdfs").createSignedUrl(path, 3600);
-    if (error || !data?.signedUrl) { toast.error("No se pudo abrir"); return; }
-    window.open(data.signedUrl, "_blank");
+    if (error || !data?.signedUrl) {
+      win?.close();
+      toast.error("No se pudo abrir el PDF");
+      return;
+    }
+    if (win) win.location.href = data.signedUrl;
+    else window.location.href = data.signedUrl;
   }
 
   return (
