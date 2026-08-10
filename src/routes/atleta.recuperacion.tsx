@@ -73,7 +73,7 @@ function Recuperacion() {
     return new Set(entries.filter((e) => e.entry_date >= start && e.entry_date <= end).map((e) => e.entry_date));
   }, [entries]);
 
-  const editable = isCurrentWeek(date);
+  const editable = isCurrentWeek(date) && date === sunday;
 
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
