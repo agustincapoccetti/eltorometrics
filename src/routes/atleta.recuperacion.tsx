@@ -81,7 +81,7 @@ function Recuperacion() {
 
   async function save() {
     if (!user) return;
-    if (!editable) { toast.error("Solo podés editar la semana actual"); return; }
+    if (!editable) { toast.error("La recuperación solo se completa los domingos"); return; }
     setSaving(true);
     let id = entryId;
     if (!id) {
