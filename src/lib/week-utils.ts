@@ -14,7 +14,11 @@ export function endOfWeek(d = new Date()): Date {
   return e;
 }
 export function isoDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  // Local date (never UTC) so the strip labels match the real weekday.
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 export function isCurrentWeek(iso: string): boolean {
   const s = startOfWeek();
