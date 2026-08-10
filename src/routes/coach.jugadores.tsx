@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useSort, sortIndicator } from "@/lib/sort";
 
 export const Route = createFileRoute("/coach/jugadores")({
@@ -31,6 +31,7 @@ function CoachPlayers() {
   const [attendance, setAttendance] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(isoDate(new Date()));
   const [positionFilter, setPositionFilter] = useState("all");
+  const [q, setQ] = useState("");
   const [matchMinutes, setMatchMinutes] = useState<Record<string, number>>({});
 
   async function load() {
@@ -52,10 +53,15 @@ function CoachPlayers() {
   useEffect(() => { load(); }, []);
 
   const positions = useMemo(() => Array.from(new Set(athletes.map((a) => a.position?.trim() || "Sin puesto"))).sort(), [athletes]);
-  const visible = useMemo(
-    () => positionFilter === "all" ? athletes : athletes.filter((a) => (a.position?.trim() || "Sin puesto") === positionFilter),
-    [athletes, positionFilter],
-  );
+  const visible = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return athletes
+      .filter((a) => positionFilter === "all" || (a.position?.trim() || "Sin puesto") === positionFilter)
+      .filter((a) =>
+        !term ? true : `${a.last_name ?? ""} ${a.full_name ?? ""}`.toLowerCase().includes(term),
+      );
+  }, [athletes, positionFilter, q]);
+
 
 
   const wStart = isoDate(startOfWeek());
@@ -124,6 +130,15 @@ function CoachPlayers() {
             {positions.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>
         </Select>
+        <div className="relative w-full sm:w-[220px]">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nombre o apellido…"
+            className="h-9 pl-7 text-xs"
+          />
+        </div>
         <div className="sm:ml-auto flex items-center gap-1">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1 hidden sm:inline">Presentismo del día</span>
           <Button size="sm" variant="outline" onClick={() => shiftDate(-1)}><ChevronLeft className="h-3 w-3" /></Button>
