@@ -124,7 +124,17 @@ function CoachLibrary() {
     load();
   }
 
-  const filtered = filter === "all" ? items : items.filter((i) => i.category === filter);
+  const term = q.trim().toLowerCase();
+  const filtered = items
+    .filter((i) => (filter === "all" ? true : i.category === filter))
+    .filter((i) =>
+      !term ? true : `${i.title} ${i.description ?? ""}`.toLowerCase().includes(term),
+    )
+    .sort((a, b) => {
+      if (sortBy === "recent") return 0;
+      const cmp = a.title.localeCompare(b.title, "es", { sensitivity: "base" });
+      return sortBy === "az" ? cmp : -cmp;
+    });
 
   return (
     <Shell title="Biblioteca">
@@ -137,6 +147,29 @@ function CoachLibrary() {
           Nuevo recurso
         </Button>
       </div>
+
+      <div className="flex flex-col sm:flex-row gap-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar ejercicio o palabra clave…"
+            className="h-9 pl-7 text-xs"
+          />
+        </div>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as any)}>
+          <SelectTrigger className="h-9 w-full sm:w-[190px] text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Más recientes</SelectItem>
+            <SelectItem value="az">Nombre A → Z</SelectItem>
+            <SelectItem value="za">Nombre Z → A</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
 
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
