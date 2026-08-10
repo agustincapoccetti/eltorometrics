@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { isoDate } from "@/lib/week-utils";
 
 interface CalendarEvent {
   id: string;
@@ -39,7 +40,7 @@ export function MonthCalendar({
   events.forEach((e) => { (byDate[e.event_date] ??= []).push(e); });
 
   const monthLabel = month.toLocaleDateString("es", { month: "long", year: "numeric" });
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = isoDate(new Date());
 
   return (
     <div className="border border-border">

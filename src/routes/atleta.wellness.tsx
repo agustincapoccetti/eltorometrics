@@ -35,7 +35,7 @@ function WellnessForm() {
   const [hasPain, setHasPain] = useState(false);
   const [pain, setPain] = useState("");
   const [saving, setSaving] = useState(false);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(isoDate(new Date()));
   const [entries, setEntries] = useState<any[]>([]);
 
   async function loadEntries() {
