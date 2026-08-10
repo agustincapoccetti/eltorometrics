@@ -53,10 +53,15 @@ function CoachPlayers() {
   useEffect(() => { load(); }, []);
 
   const positions = useMemo(() => Array.from(new Set(athletes.map((a) => a.position?.trim() || "Sin puesto"))).sort(), [athletes]);
-  const visible = useMemo(
-    () => positionFilter === "all" ? athletes : athletes.filter((a) => (a.position?.trim() || "Sin puesto") === positionFilter),
-    [athletes, positionFilter],
-  );
+  const visible = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return athletes
+      .filter((a) => positionFilter === "all" || (a.position?.trim() || "Sin puesto") === positionFilter)
+      .filter((a) =>
+        !term ? true : `${a.last_name ?? ""} ${a.full_name ?? ""}`.toLowerCase().includes(term),
+      );
+  }, [athletes, positionFilter, q]);
+
 
 
   const wStart = isoDate(startOfWeek());
