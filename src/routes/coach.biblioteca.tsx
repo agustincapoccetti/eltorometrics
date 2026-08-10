@@ -54,6 +54,8 @@ function CoachLibrary() {
   const { user } = useAuth();
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [q, setQ] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "az" | "za">("recent");
   const [preview, setPreview] = useState<LibraryItem | null>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LibraryItem | null>(null);
