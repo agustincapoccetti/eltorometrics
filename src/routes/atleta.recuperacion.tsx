@@ -110,17 +110,25 @@ function Recuperacion() {
 
   return (
     <Shell title="Recuperación">
-      <p className="text-sm text-muted-foreground mb-4">Marcá las estrategias que cumpliste hoy. Cada una suma puntos a tu score.</p>
+      <p className="text-sm text-muted-foreground mb-4">Este formulario se completa <strong>los domingos</strong>, al cerrar la semana. Marca las estrategias que cumpliste. Cada una suma puntos a tu score.</p>
 
-      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} />
+      <WeekStrip
+        completed={completed}
+        selected={date}
+        onSelect={setDate}
+        allowedIndices={[6]}
+        hideDisabled
+        label="Domingo de cierre · única fecha habilitada"
+      />
 
       <div className="border border-border p-6 mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
-            <Label htmlFor="d" className="text-xs uppercase tracking-wider">Fecha</Label>
-            <Input id="d" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1 w-44" />
+            <Label className="text-xs uppercase tracking-wider">Fecha</Label>
+            <p className="mt-1 font-display text-xl">Domingo {sunday}</p>
             {!editable && <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Lock className="h-3 w-3" />Solo lectura</p>}
           </div>
+
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Score</p>
             <p className="text-4xl font-display">{totalPoints}<span className="text-lg text-muted-foreground">/{maxPoints}</span></p>
