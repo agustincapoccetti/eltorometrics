@@ -89,17 +89,51 @@ function AthleteDetail() {
       {profile && (
         <>
           <div className="mb-8 flex items-start gap-4">
-            <div className="w-24 h-24 border border-border bg-secondary overflow-hidden flex-shrink-0">
+            <label className="w-24 h-24 border border-border bg-secondary overflow-hidden flex-shrink-0 cursor-pointer block">
               {profile.photo_url ? <img src={profile.photo_url} alt={fullName} className="w-full h-full object-cover" /> : null}
-            </div>
-            <div>
+              <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                if (f.size > 5 * 1024 * 1024) { toast.error("Foto muy grande (máx 5MB)"); return; }
+                const ext = f.name.split(".").pop() || "jpg";
+                const path = `${id}/avatar.${ext}`;
+                const { error: upErr } = await supabase.storage.from("athlete-photos").upload(path, f, { upsert: true, cacheControl: "3600" });
+                if (upErr) { toast.error(upErr.message); return; }
+                const { data: pub } = supabase.storage.from("athlete-photos").getPublicUrl(path);
+                const url = `${pub.publicUrl}?t=${Date.now()}`;
+                const { error } = await supabase.from("profiles").update({ photo_url: url }).eq("id", id);
+                if (error) { toast.error(error.message); return; }
+                setProfile({ ...profile, photo_url: url });
+                toast.success("Foto actualizada");
+              }} />
+            </label>
+            <div className="flex-1">
               <p className="text-xs uppercase tracking-widest text-muted-foreground">Atleta</p>
-              <h1 className="text-4xl mt-1">{fullName}</h1>
+              {editName ? (
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <Input className="w-32" value={nameForm.full_name} onChange={(e) => setNameForm({ ...nameForm, full_name: e.target.value })} placeholder="Nombre" />
+                  <Input className="w-32" value={nameForm.last_name} onChange={(e) => setNameForm({ ...nameForm, last_name: e.target.value })} placeholder="Apellido" />
+                  <Button size="sm" onClick={async () => {
+                    const { error } = await supabase.from("profiles").update({ full_name: nameForm.full_name, last_name: nameForm.last_name }).eq("id", id);
+                    if (error) { toast.error(error.message); return; }
+                    setProfile({ ...profile, ...nameForm });
+                    setEditName(false);
+                    toast.success("Nombre actualizado");
+                  }}>Guardar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditName(false)}>Cancelar</Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mt-1">
+                  <h1 className="text-4xl">{fullName}</h1>
+                  <Button size="sm" variant="ghost" onClick={() => { setNameForm({ full_name: profile.full_name ?? "", last_name: profile.last_name ?? "" }); setEditName(true); }}>Editar</Button>
+                </div>
+              )}
               <p className="text-sm text-muted-foreground mt-1">
                 {profile.position ?? "—"}{profile.age ? ` · ${profile.age} años` : ""} · {profile.weight ?? "—"} kg · {profile.height ?? "—"} cm{bmi && ` · IMC ${bmi}`}
               </p>
             </div>
           </div>
+
 
           <div ref={rpeChartRef} className="bg-background">
             <Chart title="RPE" data={rpe} keys={[{ key: "value", name: "RPE" }]} domain={[0, 10]} />
