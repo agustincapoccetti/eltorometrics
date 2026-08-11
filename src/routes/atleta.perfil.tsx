@@ -15,10 +15,39 @@ export const Route = createFileRoute("/atleta/perfil")({ component: () => <Prote
 function Perfil() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const [editName, setEditName] = useState(false);
+  const [nameForm, setNameForm] = useState({ full_name: "", last_name: "" });
   const [history, setHistory] = useState<any[]>([]);
   const [newWeight, setNewWeight] = useState("");
   const [matchStats, setMatchStats] = useState({ totalMinutes: 0, matches: 0, injuries: 0 });
   const [attendanceYear, setAttendanceYear] = useState(0);
+
+  async function changePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f || !user) return;
+    if (f.size > 5 * 1024 * 1024) { toast.error("Foto muy grande (máx 5MB)"); return; }
+    const ext = f.name.split(".").pop() || "jpg";
+    const path = `${user.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage.from("athlete-photos").upload(path, f, { upsert: true, cacheControl: "3600" });
+    if (upErr) { toast.error(upErr.message); return; }
+    const { data: pub } = supabase.storage.from("athlete-photos").getPublicUrl(path);
+    const url = `${pub.publicUrl}?t=${Date.now()}`;
+    const { error } = await supabase.from("profiles").update({ photo_url: url }).eq("id", user.id);
+    if (error) { toast.error(error.message); return; }
+    setProfile((p: any) => ({ ...p, photo_url: url }));
+    toast.success("Foto actualizada");
+  }
+
+  async function saveName() {
+    if (!user) return;
+    if (!nameForm.full_name.trim()) { toast.error("El nombre no puede estar vacío"); return; }
+    const { error } = await supabase.from("profiles").update({ full_name: nameForm.full_name, last_name: nameForm.last_name }).eq("id", user.id);
+    if (error) { toast.error(error.message); return; }
+    setProfile((p: any) => ({ ...p, ...nameForm }));
+    setEditName(false);
+    toast.success("Nombre actualizado");
+  }
+
 
   async function load() {
     if (!user) return;
