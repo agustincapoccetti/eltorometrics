@@ -7,8 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ArrowLeft, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { exportPdf } from "@/lib/pdf-export";
+
 
 export const Route = createFileRoute("/coach/atleta/$id")({
   component: () => <Protected requireRole="coach"><AthleteDetail /></Protected>,
