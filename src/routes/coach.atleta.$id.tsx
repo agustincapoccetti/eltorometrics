@@ -20,6 +20,9 @@ export const Route = createFileRoute("/coach/atleta/$id")({
 function AthleteDetail() {
   const { id } = Route.useParams();
   const [profile, setProfile] = useState<any>(null);
+  const [editName, setEditName] = useState(false);
+  const [nameForm, setNameForm] = useState({ full_name: "", last_name: "" });
+
   const [rpe, setRpe] = useState<any[]>([]);
   const [wellness, setWellness] = useState<any[]>([]);
   const [weights, setWeights] = useState<any[]>([]);
