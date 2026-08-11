@@ -15,10 +15,39 @@ export const Route = createFileRoute("/atleta/perfil")({ component: () => <Prote
 function Perfil() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const [editName, setEditName] = useState(false);
+  const [nameForm, setNameForm] = useState({ full_name: "", last_name: "" });
   const [history, setHistory] = useState<any[]>([]);
   const [newWeight, setNewWeight] = useState("");
   const [matchStats, setMatchStats] = useState({ totalMinutes: 0, matches: 0, injuries: 0 });
   const [attendanceYear, setAttendanceYear] = useState(0);
+
+  async function changePhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f || !user) return;
+    if (f.size > 5 * 1024 * 1024) { toast.error("Foto muy grande (máx 5MB)"); return; }
+    const ext = f.name.split(".").pop() || "jpg";
+    const path = `${user.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage.from("athlete-photos").upload(path, f, { upsert: true, cacheControl: "3600" });
+    if (upErr) { toast.error(upErr.message); return; }
+    const { data: pub } = supabase.storage.from("athlete-photos").getPublicUrl(path);
+    const url = `${pub.publicUrl}?t=${Date.now()}`;
+    const { error } = await supabase.from("profiles").update({ photo_url: url }).eq("id", user.id);
+    if (error) { toast.error(error.message); return; }
+    setProfile((p: any) => ({ ...p, photo_url: url }));
+    toast.success("Foto actualizada");
+  }
+
+  async function saveName() {
+    if (!user) return;
+    if (!nameForm.full_name.trim()) { toast.error("El nombre no puede estar vacío"); return; }
+    const { error } = await supabase.from("profiles").update({ full_name: nameForm.full_name, last_name: nameForm.last_name }).eq("id", user.id);
+    if (error) { toast.error(error.message); return; }
+    setProfile((p: any) => ({ ...p, ...nameForm }));
+    setEditName(false);
+    toast.success("Nombre actualizado");
+  }
+
 
   async function load() {
     if (!user) return;
@@ -58,15 +87,37 @@ function Perfil() {
       {profile && (
         <>
           <div className="border border-border p-6 mb-6">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Atleta</p>
-            <h2 className="text-3xl mt-1">{profile.full_name}</h2>
-            {profile.position && <p className="text-sm text-muted-foreground mt-1">{profile.position}</p>}
+            <div className="flex items-start gap-4">
+              <label className="w-24 h-24 border border-border bg-secondary overflow-hidden flex-shrink-0 cursor-pointer block">
+                {profile.photo_url ? <img src={profile.photo_url} alt={profile.full_name} className="w-full h-full object-cover" /> : null}
+                <input type="file" accept="image/*" className="hidden" onChange={changePhoto} />
+              </label>
+              <div className="flex-1">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground">Atleta</p>
+                {editName ? (
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <Input className="w-32" placeholder="Nombre" value={nameForm.full_name} onChange={(e) => setNameForm({ ...nameForm, full_name: e.target.value })} />
+                    <Input className="w-32" placeholder="Apellido" value={nameForm.last_name} onChange={(e) => setNameForm({ ...nameForm, last_name: e.target.value })} />
+                    <Button size="sm" onClick={saveName}>Guardar</Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditName(false)}>Cancelar</Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mt-1">
+                    <h2 className="text-3xl">{profile.full_name}{profile.last_name ? ` ${profile.last_name}` : ""}</h2>
+                    <Button size="sm" variant="ghost" onClick={() => { setNameForm({ full_name: profile.full_name ?? "", last_name: profile.last_name ?? "" }); setEditName(true); }}>Editar</Button>
+                  </div>
+                )}
+                {profile.position && <p className="text-sm text-muted-foreground mt-1">{profile.position}</p>}
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-2">Toca la foto para cambiarla</p>
+              </div>
+            </div>
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
               <Stat label="Peso" value={profile.weight ? `${profile.weight} kg` : "—"} />
               <Stat label="Altura" value={profile.height ? `${profile.height} cm` : "—"} />
               <Stat label="IMC" value={bmi ?? "—"} />
             </div>
           </div>
+
 
           <div className="border border-border p-6 mb-6">
             <h3 className="text-lg mb-3">Temporada</h3>
