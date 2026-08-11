@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
 import { WeekStrip } from "@/components/WeekStrip";
-import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
+import { isCurrentWeek, startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
 import { wellnessColor } from "@/lib/score-colors";
 
 export const Route = createFileRoute("/atleta/wellness")({ component: () => <Protected requireRole="atleta"><WellnessForm /></Protected> });
@@ -35,7 +35,8 @@ function WellnessForm() {
   const [hasPain, setHasPain] = useState(false);
   const [pain, setPain] = useState("");
   const [saving, setSaving] = useState(false);
-  const [date, setDate] = useState(isoDate(new Date()));
+  const monday = weekDays()[0];
+  const [date, setDate] = useState(monday);
   const [entries, setEntries] = useState<any[]>([]);
 
   async function loadEntries() {
@@ -64,10 +65,10 @@ function WellnessForm() {
     return new Set(entries.filter((e) => e.entry_date >= start && e.entry_date <= end).map((e) => e.entry_date));
   }, [entries]);
 
-  const editable = isCurrentWeek(date);
+  const editable = isCurrentWeek(date) && date === monday;
 
   async function submit() {
-    if (!editable) { toast.error("Solo podés editar la semana actual"); return; }
+    if (!editable) { toast.error("El bienestar solo se completa los lunes"); return; }
     if (Q.some((q) => !v[q.key])) { toast.error("Completá todas las preguntas"); return; }
     if (hasPain && !pain.trim()) { toast.error("Describí la molestia"); return; }
     setSaving(true);
@@ -84,7 +85,7 @@ function WellnessForm() {
   }
 
   async function removeEntry() {
-    if (!editable) { toast.error("Solo podés borrar la semana actual"); return; }
+    if (!editable) { toast.error("El bienestar solo se completa los lunes"); return; }
     if (!confirm("¿Eliminar el registro de este día?")) return;
     const { error } = await supabase.from("wellness_entries").delete().eq("user_id", user!.id).eq("entry_date", date);
     if (error) { toast.error(error.message); return; }
@@ -96,7 +97,7 @@ function WellnessForm() {
   return (
     <Shell title="Bienestar">
       <p className="text-sm text-muted-foreground mb-3">
-        Cuestionario matutino · <strong>1 = MUY BUENO</strong> (estás bien) → <strong>5 = MUY MALO</strong> (peor estado)
+        Cuestionario matutino · se completa <strong>los lunes</strong> · <strong>1 = MUY BUENO</strong> (estás bien) → <strong>5 = MUY MALO</strong> (peor estado)
       </p>
       <div className="grid grid-cols-5 gap-1 mb-4">
         {GLOBAL_SCALE.map((s, i) => {
@@ -109,14 +110,14 @@ function WellnessForm() {
         })}
       </div>
 
-      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} />
+      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} allowedIndices={[0]} hideDisabled />
 
       <div className="border border-border p-4 mb-6 flex flex-col sm:flex-row sm:items-end gap-3">
         <div className="flex-1 min-w-[160px]">
           <Label htmlFor="wd">Fecha</Label>
-          <Input id="wd" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Input id="wd" type="date" value={date} readOnly disabled />
         </div>
-        {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo semana actual</span>}
+        {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo lunes de la semana actual</span>}
         <Button variant="outline" size="sm" disabled={!editable} onClick={removeEntry}>Eliminar registro</Button>
       </div>
 
