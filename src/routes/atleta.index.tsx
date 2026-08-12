@@ -9,28 +9,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Activity, Heart, CheckCircle2, Circle, Sparkles, Calendar as CalendarIcon } from "lucide-react";
+import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calendar as CalendarIcon, ArrowRight } from "lucide-react";
 import { isoDate } from "@/lib/week-utils";
+import { typeLabel, typeIcon } from "@/lib/appointment-types";
 
-export const Route = createFileRoute("/atleta/")({ component: () => <Protected requireRole="atleta"><AthleteHome /></Protected> });
+export const Route = createFileRoute("/atleta/")({
+  head: () => ({
+    meta: [
+      { title: "Hoy · El Toro Rugby Performance" },
+      { name: "description", content: "Tu resumen diario: bienestar, RPE, gimnasio y turnos de fisio en una sola pantalla." },
+      { property: "og:title", content: "Hoy · El Toro Rugby Performance" },
+      { property: "og:description", content: "Tu resumen diario: bienestar, RPE, gimnasio y turnos de fisio en una sola pantalla." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: () => <Protected requireRole="atleta"><AthleteToday /></Protected>,
+});
 
-function startOfWeek(d = new Date()) {
-  const x = new Date(d); const day = (x.getDay() + 6) % 7; x.setDate(x.getDate() - day); x.setHours(0,0,0,0); return x;
-}
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-function AthleteHome() {
+function AthleteToday() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
-  const [todayWellness, setTodayWellness] = useState(false);
-  const [weekRpe, setWeekRpe] = useState(0);
+  const [wellnessDone, setWellnessDone] = useState(true);
+  const [pendingRpe, setPendingRpe] = useState<any | null>(null);
+  const [routine, setRoutine] = useState<any | null>(null);
+  const [appt, setAppt] = useState<any | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
-  const [trainingToday, setTrainingToday] = useState<any | null>(null);
-  const [hasRpeToday, setHasRpeToday] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
+      const today = isoDate(new Date());
+
       const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       setProfile(p);
       if (p?.last_weight_update) {
@@ -40,18 +54,40 @@ function AthleteHome() {
         setNewWeight(String(p.weight ?? "")); setShowWeightModal(true);
       }
 
-      const today = isoDate(new Date());
-      const { data: w } = await supabase.from("wellness_entries").select("id").eq("user_id", user.id).eq("entry_date", today).maybeSingle();
-      setTodayWellness(!!w);
+      const { data: w } = await supabase
+        .from("wellness_entries").select("id").eq("user_id", user.id).eq("entry_date", today).maybeSingle();
+      setWellnessDone(!!w);
 
-      const weekStart = isoDate(startOfWeek());
-      const { count } = await supabase.from("rpe_entries").select("id", { count: "exact", head: true }).eq("user_id", user.id).gte("session_date", weekStart);
-      setWeekRpe(count ?? 0);
+      // Última sesión de calendario ya pasada (hoy incluido) sin RPE cargado
+      const { data: evs } = await supabase
+        .from("calendar_events").select("*").lte("event_date", today)
+        .order("event_date", { ascending: false }).limit(5);
+      let pending: any = null;
+      for (const ev of evs ?? []) {
+        const { count } = await supabase
+          .from("rpe_entries").select("id", { count: "exact", head: true })
+          .eq("user_id", user.id).eq("session_date", ev.event_date);
+        if (!count) { pending = ev; break; }
+      }
+      setPendingRpe(pending);
 
-      const { data: ev } = await supabase.from("calendar_events").select("*").eq("event_date", today).eq("type","training").maybeSingle();
-      setTrainingToday(ev ?? null);
-      const { count: rc } = await supabase.from("rpe_entries").select("id",{count:"exact",head:true}).eq("user_id", user.id).eq("session_date", today);
-      setHasRpeToday((rc ?? 0) > 0);
+      // Rutina de gym del mes en curso para su puesto
+      const now = new Date();
+      const { data: rs } = await supabase
+        .from("gym_routines").select("*")
+        .eq("month", now.getMonth() + 1).eq("year", now.getFullYear());
+      setRoutine((rs ?? []).find((r) => !r.position || r.position === p?.position) ?? null);
+
+      // Turno de fisio en las próximas 48hs
+      const in48 = new Date(); in48.setDate(in48.getDate() + 2);
+      const { data: aps } = await supabase
+        .from("physio_appointments").select("*").eq("user_id", user.id)
+        .gte("appointment_date", today).lte("appointment_date", isoDate(in48))
+        .neq("status", "cancelada")
+        .order("appointment_date", { ascending: true }).limit(1);
+      setAppt(aps?.[0] ?? null);
+
+      setLoaded(true);
     })();
   }, [user]);
 
@@ -66,70 +102,82 @@ function AthleteHome() {
     setProfile({ ...profile, weight: w, last_weight_update: new Date().toISOString() });
   }
 
-  const bmi = profile?.weight && profile?.height ? (profile.weight / Math.pow(profile.height / 100, 2)).toFixed(1) : null;
+  const nothingPending = loaded && wellnessDone && !pendingRpe && !routine && !appt;
 
   return (
     <Shell>
-      <div className="mb-8 flex items-center gap-4">
+      <div className="mb-6 flex items-center gap-4">
         {profile?.photo_url && (
           <div className="w-16 h-16 border border-border bg-secondary overflow-hidden flex-shrink-0">
             <img src={profile.photo_url} alt={profile.full_name} className="w-full h-full object-cover" />
           </div>
         )}
         <div>
-          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Hola</p>
-          <h1 className="text-4xl">{profile?.full_name || "Atleta"}{profile?.last_name ? ` ${profile.last_name}` : ""}</h1>
-          {profile?.position && <p className="mt-1 text-sm text-muted-foreground">{profile.position}{bmi && ` · IMC ${bmi}`}</p>}
+          <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Hoy</p>
+          <h1 className="text-3xl sm:text-4xl">{profile?.full_name || "Atleta"}{profile?.last_name ? ` ${profile.last_name}` : ""}</h1>
+          {profile?.position && <p className="mt-1 text-sm text-muted-foreground">{profile.position}</p>}
         </div>
       </div>
 
-      {trainingToday && !hasRpeToday && (
-        <Link to="/atleta/rpe" className="block border-2 border-primary bg-primary text-primary-foreground p-4 mb-4 hover:opacity-90 transition">
-          <p className="text-xs uppercase tracking-widest opacity-80 mb-1">Aviso</p>
-          <p className="font-medium">Hoy hay entrenamiento ({trainingToday.name}). Cargá tu RPE cuando termines →</p>
-        </Link>
-      )}
+      <div className="space-y-4">
+        {!wellnessDone && (
+          <TodayCard
+            highlight
+            icon={<Heart className="h-5 w-5" />}
+            title="Completá tu bienestar de hoy"
+            text="Sueño, estrés, fatiga y dolor muscular. Toma menos de un minuto."
+            to="/atleta/wellness"
+            cta="Ir al formulario"
+          />
+        )}
 
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
-        <FormCard
-          to="/atleta/wellness"
-          icon={<Heart className="h-5 w-5" />}
-          title="Bienestar"
-          subtitle="Cada mañana"
-          done={todayWellness}
-          doneLabel="Completado hoy"
-          pendingLabel="Pendiente hoy"
-        />
-        <FormCard
-          to="/atleta/rpe"
-          icon={<Activity className="h-5 w-5" />}
-          title="RPE"
-          subtitle="Después de cada entrenamiento"
-          done={weekRpe > 0}
-          doneLabel={`${weekRpe} sesión(es) esta semana`}
-          pendingLabel="Sin registros esta semana"
-        />
+        {pendingRpe && (
+          <TodayCard
+            icon={<Activity className="h-5 w-5" />}
+            title={`Cargá tu RPE de ${pendingRpe.name}`}
+            text={`Sesión del ${pendingRpe.event_date}${pendingRpe.event_time ? ` · ${String(pendingRpe.event_time).slice(0,5)}` : ""}`}
+            to="/atleta/rpe"
+            cta="Cargar RPE"
+          />
+        )}
+
+        {routine && (
+          <TodayCard
+            icon={<Dumbbell className="h-5 w-5" />}
+            title={routine.title}
+            text={`Rutina de ${MONTHS[(routine.month ?? 1) - 1]} ${routine.year}${routine.position ? ` · ${routine.position}` : ""}${routine.notes ? ` · ${routine.notes}` : ""}`}
+            to="/atleta/gym"
+            cta="Ver rutina"
+          />
+        )}
+
+        {appt && (
+          <TodayCard
+            icon={<Stethoscope className="h-5 w-5" />}
+            title={`${typeIcon(appt.appointment_type)} ${typeLabel(appt.appointment_type)}`}
+            text={`${appt.appointment_date}${appt.appointment_time ? ` · ${String(appt.appointment_time).slice(0,5)} h` : ""} · ${appt.status}`}
+            to="/atleta/fisio"
+            cta="Ver turno"
+          />
+        )}
+
+        {nothingPending && (
+          <div className="border-2 border-black p-8 text-center">
+            <CheckCircle2 className="h-10 w-10 mx-auto mb-3" />
+            <h2 className="text-2xl mb-1">Todo al día</h2>
+            <p className="text-sm text-muted-foreground">
+              No tenés nada pendiente por hoy. Buen trabajo.
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 mb-8">
-        <FormCard
-          to="/atleta/recuperacion"
-          icon={<Sparkles className="h-5 w-5" />}
-          title="Recuperación"
-          subtitle="Tildeá lo que cumpliste hoy"
-          done={false}
-          doneLabel=""
-          pendingLabel="Sumá puntos a tu score"
-        />
-        <FormCard
-          to="/atleta/calendario"
-          icon={<CalendarIcon className="h-5 w-5" />}
-          title="Calendario"
-          subtitle="Entrenamientos y partidos"
-          done={false}
-          doneLabel=""
-          pendingLabel="Ver agenda del equipo"
-        />
+      <div className="mt-8">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Accesos</p>
+        <div className="grid grid-cols-2 gap-3">
+          <QuickLink to="/atleta/calendario" icon={<CalendarIcon className="h-4 w-4" />} label="Calendario" />
+          <QuickLink to="/atleta/biblioteca" icon={<BookOpen className="h-4 w-4" />} label="Biblioteca" />
+        </div>
       </div>
 
       <Dialog open={showWeightModal} onOpenChange={setShowWeightModal}>
@@ -154,18 +202,30 @@ function AthleteHome() {
   );
 }
 
-function FormCard({ to, icon, title, subtitle, done, doneLabel, pendingLabel }: any) {
+function TodayCard({
+  icon, title, text, to, cta, highlight,
+}: { icon: React.ReactNode; title: string; text: string; to: string; cta: string; highlight?: boolean }) {
   return (
-    <Link to={to} className="block border border-border p-6 hover:bg-accent transition">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          {icon}
-          <h2 className="text-2xl">{title}</h2>
-        </div>
-        {done ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5 text-muted-foreground" />}
+    <div className={"p-5 " + (highlight ? "border-2 border-black bg-foreground text-background" : "border border-border")}>
+      <div className="flex items-center gap-2 mb-2">
+        {icon}
+        <h2 className="text-xl leading-tight">{title}</h2>
       </div>
-      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{subtitle}</p>
-      <p className="text-sm">{done ? doneLabel : pendingLabel}</p>
+      <p className={"text-sm mb-4 " + (highlight ? "opacity-80" : "text-muted-foreground")}>{text}</p>
+      <Link to={to}>
+        <Button size="sm" variant={highlight ? "secondary" : "default"}>
+          {cta} <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
+      </Link>
+    </div>
+  );
+}
+
+function QuickLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+  return (
+    <Link to={to} className="flex items-center gap-2 border border-border p-3 text-sm font-semibold hover:bg-accent transition">
+      {icon}
+      {label}
     </Link>
   );
 }
