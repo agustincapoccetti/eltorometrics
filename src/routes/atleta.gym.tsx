@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, HISTORIAL_TABS, ENTRENO_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,7 @@ function Page() {
 
   return (
     <Shell title="Gimnasio">
+      <SubTabs tabs={ENTRENO_TABS} />
       <p className="text-sm text-muted-foreground mb-6">Tus rutinas mensuales. Anotá peso, repeticiones y la semana en la que completaste cada ejercicio.</p>
 
       {routines.length === 0 && <p className="text-sm text-muted-foreground">Todavía no hay rutinas publicadas para tu posición.</p>}
