@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, HISTORIAL_TABS, ENTRENO_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -110,6 +111,7 @@ function Recuperacion() {
 
   return (
     <Shell title="Recuperación">
+      <SubTabs tabs={HISTORIAL_TABS} />
       <p className="text-sm text-muted-foreground mb-4">Este formulario se completa <strong>los domingos</strong>, al cerrar la semana. Marca las estrategias que cumpliste. Cada una suma puntos a tu score.</p>
 
       <WeekStrip

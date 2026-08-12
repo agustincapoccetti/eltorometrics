@@ -29,13 +29,18 @@ type NavItem = { to: string; label: string; icon: LucideIcon };
 
 const ATLETA_NAV: NavItem[] = [
   { to: "/atleta", label: "Hoy", icon: Home },
-  { to: "/atleta/gym", label: "Gym", icon: Dumbbell },
-  { to: "/atleta/calendario", label: "Agenda", icon: Calendar },
-  { to: "/atleta/recuperacion", label: "Recup.", icon: HeartPulse },
-  { to: "/atleta/fisio", label: "Fisio", icon: Stethoscope },
-  { to: "/atleta/biblioteca", label: "Biblio", icon: BookOpen },
+  { to: "/atleta/wellness", label: "Historial", icon: HeartPulse },
+  { to: "/atleta/gym", label: "Fisio y Gym", icon: Dumbbell },
   { to: "/atleta/perfil", label: "Perfil", icon: UserCircle },
 ];
+
+// Rutas agrupadas dentro de cada ítem del dock (pestañas internas)
+const ATLETA_GROUPS: Record<string, string[]> = {
+  "/atleta/wellness": ["/atleta/wellness", "/atleta/rpe", "/atleta/recuperacion"],
+  "/atleta/gym": ["/atleta/gym", "/atleta/fisio"],
+  "/atleta/perfil": ["/atleta/perfil", "/atleta/calendario", "/atleta/biblioteca"],
+};
+
 
 const COACH_NAV: NavItem[] = [
   { to: "/coach", label: "Panel", icon: LayoutDashboard },
@@ -126,9 +131,12 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
         : [];
 
   const isActive = (to: string) => {
+    const group = role === "atleta" ? ATLETA_GROUPS[to] : undefined;
+    if (group) return group.some((g) => pathname === g || pathname.startsWith(g + "/"));
     if (to === "/atleta" || to === "/coach") return pathname === to;
     return pathname === to || pathname.startsWith(to + "/");
   };
+
 
   const hasNav = items.length > 0;
 

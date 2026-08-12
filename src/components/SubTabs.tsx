@@ -1,0 +1,32 @@
+import { Link } from "@tanstack/react-router";
+
+export type SubTab = { to: string; label: string };
+
+export const HISTORIAL_TABS: SubTab[] = [
+  { to: "/atleta/wellness", label: "Bienestar" },
+  { to: "/atleta/rpe", label: "RPE" },
+  { to: "/atleta/recuperacion", label: "Recuperación" },
+];
+
+export const ENTRENO_TABS: SubTab[] = [
+  { to: "/atleta/gym", label: "Gym" },
+  { to: "/atleta/fisio", label: "Fisio" },
+];
+
+export function SubTabs({ tabs }: { tabs: SubTab[] }) {
+  return (
+    <nav className="mb-6 flex gap-1 border-2 border-black p-1 bg-white rounded-xl w-full overflow-x-auto no-scrollbar">
+      {tabs.map((t) => (
+        <Link
+          key={t.to}
+          to={t.to}
+          activeProps={{ className: "bg-black text-white" }}
+          inactiveProps={{ className: "text-black hover:bg-black hover:text-white" }}
+          className="flex-1 text-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide transition-colors"
+        >
+          {t.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}

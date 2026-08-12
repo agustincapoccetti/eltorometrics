@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, HISTORIAL_TABS, ENTRENO_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,6 +188,7 @@ function AthletePhysio() {
 
   return (
     <Shell title="Fisioterapia">
+      <SubTabs tabs={ENTRENO_TABS} />
       <p className="text-sm text-muted-foreground mb-6">
         Reserva un turno disponible esta semana o solicita una cita futura.
       </p>
