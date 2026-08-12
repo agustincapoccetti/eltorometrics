@@ -1,16 +1,13 @@
 // Canonical lists so everyone selects the same values (filterable, no typos).
 
 export const POSITIONS = [
-  "Pilar",
-  "Hooker",
+  "Primera Línea",
   "Segunda Línea",
-  "Ala",
-  "Octavo",
+  "Tercera Línea",
   "Medio Scrum",
   "Apertura",
   "Centro",
-  "Wing",
-  "Fullback",
+  "Wings y Fullbacks",
 ] as const;
 
 export type Position = (typeof POSITIONS)[number];
