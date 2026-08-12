@@ -163,7 +163,7 @@ function CoachPlayers() {
         <div className="border border-border">
           {sorted.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin jugadores.</p>}
           {sorted.map((p: any) => {
-            const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false };
+            const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false, autoToday: false };
             return (
               <div key={p.id} className="flex gap-3 items-center px-3 py-2.5 border-b border-border last:border-0">
                 <div className="w-9 h-9 shrink-0 border border-border bg-secondary overflow-hidden">
@@ -177,7 +177,10 @@ function CoachPlayers() {
                     {p.position ?? "—"} · Sem {s.week} · Mes {s.month} · Año {s.year} · {matchMinutes[p.id] ?? 0}'
                   </p>
                 </div>
-                <Checkbox checked={s.today} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="h-5 w-5" />
+                <div className="flex flex-col items-center gap-0.5">
+                  <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="h-5 w-5 data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
+                  {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}
+                </div>
               </div>
             );
           })}
@@ -198,7 +201,7 @@ function CoachPlayers() {
         </div>
         {sorted.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin jugadores.</p>}
         {sorted.map((p: any) => {
-          const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false };
+          const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false, autoToday: false };
           return (
             <div key={p.id} className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_60px] gap-2 px-3 py-2 border-b border-border last:border-b-0 items-center text-xs min-w-[720px]">
               <div className="w-8 h-8 border border-border bg-secondary overflow-hidden">
@@ -212,15 +215,16 @@ function CoachPlayers() {
               <div className="text-center font-medium">{s.month}</div>
               <div className="text-center font-medium">{s.year}</div>
               <div className="text-center">{matchMinutes[p.id] ?? 0}'</div>
-              <div className="flex justify-center">
-                <Checkbox checked={s.today} onCheckedChange={(v) => togglePresent(p.id, !!v)} />
+              <div className="flex flex-col items-center justify-center gap-0.5">
+                <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
+                {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}
               </div>
             </div>
           );
         })}
       </div>
 
-      <p className="text-[11px] text-muted-foreground mt-3">El presentismo se marca con el checkbox de la columna "Hoy" para la fecha seleccionada. Los conteos por semana, mes y año se actualizan al instante.</p>
+      <p className="text-[11px] text-muted-foreground mt-3">El presentismo se marca con el checkbox de la columna "Hoy" para la fecha seleccionada. Si el jugador ya respondió el RPE de ese día, su presente se marca automáticamente y queda bloqueado (etiqueta "RPE"). Los conteos por semana, mes y año se actualizan al instante.</p>
     </Shell>
   );
 }
