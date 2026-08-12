@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.mark_attendance_from_rpe() FROM PUBLIC, anon, authenticated;
