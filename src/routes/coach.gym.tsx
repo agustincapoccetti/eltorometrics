@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Trash2, FileText, Upload } from "lucide-react";
 import { notifyAllAthletes } from "@/lib/notifications";
 
-const POSITIONS = ["Todos","Pilar","Hooker","Segunda Línea","Ala","Octavo","Medio Scrum","Apertura","Centro","Wing","Fullback"];
+const POSITIONS = ["Todos","Primera Línea","Segunda Línea","Tercera Línea","Medio Scrum","Apertura","Centro","Wings y Fullbacks"];
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
 export const Route = createFileRoute("/coach/gym")({

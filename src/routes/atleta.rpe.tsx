@@ -88,7 +88,7 @@ function RpeForm() {
 
   return (
     <Shell title="RPE">
-      <p className="text-sm text-muted-foreground mb-4">Escala de Esfuerzo Percibido — post entrenamiento</p>
+      <p className="text-sm text-muted-foreground mb-4">Escala de Esfuerzo Percibido — post entrenamiento. Al enviarlo, tu presente de ese día queda marcado automáticamente.</p>
 
       <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevWeekCompleted} />
 
