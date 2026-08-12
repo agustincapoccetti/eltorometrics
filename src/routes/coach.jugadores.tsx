@@ -69,14 +69,17 @@ function CoachPlayers() {
   const yStart = isoDate(startOfYear());
 
   const stats = useMemo(() => {
-    const map: Record<string, { week: number; month: number; year: number; today: boolean }> = {};
+    const map: Record<string, { week: number; month: number; year: number; today: boolean; autoToday: boolean }> = {};
     attendance.forEach((a) => {
+      const e = (map[a.user_id] ??= { week: 0, month: 0, year: 0, today: false, autoToday: false });
+      if (a.attendance_date === selectedDate) {
+        e.today = !!a.present;
+        e.autoToday = a.source === "rpe" && !!a.present;
+      }
       if (!a.present) return;
-      const e = (map[a.user_id] ??= { week: 0, month: 0, year: 0, today: false });
       if (a.attendance_date >= yStart) e.year++;
       if (a.attendance_date >= mStart) e.month++;
       if (a.attendance_date >= wStart) e.week++;
-      if (a.attendance_date === selectedDate) e.today = true;
     });
     return map;
   }, [attendance, selectedDate, wStart, mStart, yStart]);
