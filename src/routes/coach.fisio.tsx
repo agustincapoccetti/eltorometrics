@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, FISIO_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -204,6 +205,7 @@ function CoachPhysio() {
 
   return (
     <Shell title="Fisioterapia">
+      <SubTabs tabs={FISIO_TABS} />
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <p className="text-sm text-muted-foreground">Asigna citas y abre bloques de turnos para que los atletas reserven.</p>
         <div className="flex gap-2 flex-wrap">

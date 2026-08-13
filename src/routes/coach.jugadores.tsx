@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, PLANTEL_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -125,6 +126,7 @@ function CoachPlayers() {
 
   return (
     <Shell title="Lista de jugadores">
+      <SubTabs tabs={PLANTEL_TABS} />
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
         <Select value={positionFilter} onValueChange={setPositionFilter}>
           <SelectTrigger className="h-9 w-full sm:w-[160px] text-xs"><SelectValue /></SelectTrigger>

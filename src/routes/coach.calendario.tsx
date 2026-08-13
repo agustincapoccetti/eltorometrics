@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, PLANIFICACION_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +98,7 @@ function CoachCalendar() {
 
   return (
     <Shell title="Calendario">
+      <SubTabs tabs={PLANIFICACION_TABS} />
       <div className="flex items-center justify-between gap-2 mb-6 flex-wrap">
         <p className="text-sm text-muted-foreground">Toca un día para crear o editar un entrenamiento o partido.</p>
         <Button variant="outline" onClick={() => setRecOpen(true)}><Repeat className="h-4 w-4 mr-2" />Repetir cada semana</Button>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, PLANIFICACION_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +98,7 @@ function CoachMatches() {
 
   return (
     <Shell title="Partidos">
+      <SubTabs tabs={PLANIFICACION_TABS} />
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-muted-foreground">Convocá jugadores, registrá minutos jugados y lesiones por partido.</p>
         <Button onClick={() => setOpenNew(true)}><Plus className="h-4 w-4 mr-2" />Nuevo partido</Button>

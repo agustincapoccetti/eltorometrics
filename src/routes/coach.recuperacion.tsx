@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, FISIO_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
@@ -76,6 +77,7 @@ function CoachRecovery() {
 
   return (
     <Shell title="Recuperación">
+      <SubTabs tabs={FISIO_TABS} />
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         <p className="text-xs uppercase tracking-wider text-muted-foreground">Período</p>
         {[7, 14, 30].map((d) => (

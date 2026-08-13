@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell } from "@/components/Shell";
+import { SubTabs, ADMIN_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ function Page() {
   if (!isAdmin) {
     return (
       <Shell title="Usuarios">
+      <SubTabs tabs={ADMIN_TABS} />
         <p className="text-sm text-muted-foreground">Solo el administrador puede gestionar usuarios.</p>
       </Shell>
     );
@@ -157,6 +159,7 @@ function Page() {
 
   return (
     <Shell title="Gestión de usuarios">
+      <SubTabs tabs={ADMIN_TABS} />
       <p className="text-sm text-muted-foreground mb-5">
         Añade atletas por email, cambia su categoría (atleta ⇄ cuerpo técnico) o elimina usuarios.
       </p>
