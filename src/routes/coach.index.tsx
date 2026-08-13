@@ -95,9 +95,13 @@ interface Row {
   avgFatigue: number | null;
 }
 
+type PanelTab = "resumen" | "semaforo" | "carga" | "informes";
+
 function CoachDash() {
+  const [tab, setTab] = useState<PanelTab>("resumen");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [period, setPeriod] = useState<Period>("week");
   const [positionFilter, setPositionFilter] = useState("all");
 
@@ -378,18 +382,39 @@ function CoachDash() {
     });
   }
 
+  const TABS: { k: PanelTab; label: string }[] = [
+    { k: "resumen", label: "Resumen" },
+    { k: "semaforo", label: "Semáforo" },
+    { k: "carga", label: "Carga" },
+    { k: "informes", label: "Informes" },
+  ];
+
   return (
     <Shell title="Panel del preparador">
-      <PanelSummary />
-      <section className="mb-10">
+      <nav className="mb-6 flex gap-1 border-2 border-black p-1 bg-white rounded-xl w-full overflow-x-auto no-scrollbar">
+        {TABS.map((t) => (
+          <button
+            key={t.k}
+            onClick={() => setTab(t.k)}
+            className={`flex-1 text-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${tab === t.k ? "bg-black text-white" : "text-black hover:bg-black hover:text-white"}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-          Semáforo de riesgo
-        </h2>
+      {tab === "resumen" && <PanelSummary />}
+
+      {tab === "semaforo" && (
+      <section className="mb-10">
         <SemaforoView />
       </section>
+      )}
 
+      {tab === "carga" && (
+      <>
       <div className="mb-8">
+
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -584,7 +609,13 @@ function CoachDash() {
         </div>
       </div>
 
+      </>
+
+      )}
+
+      {tab === "informes" && (
       <div className="grid md:grid-cols-2 gap-4">
+
         <div className="border border-border p-6">
           <h2 className="text-xl mb-1">Exportar datos</h2>
           <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
@@ -661,6 +692,8 @@ function CoachDash() {
           </div>
         </div>
       </div>
+      )}
+
 
       <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
         <DialogContent>
