@@ -64,6 +64,9 @@ function CoachLibrary() {
   const [preview, setPreview] = useState<LibraryItem | null>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LibraryItem | null>(null);
+  const [mode, setMode] = useState<"link" | "file">("link");
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -85,11 +88,15 @@ function CoachLibrary() {
 
   function openNew() {
     setEditing(null);
+    setMode("link");
+    setFile(null);
     setForm({ title: "", description: "", url: "", category: "gym", thumbnail_url: "" });
     setOpen(true);
   }
   function openEdit(it: LibraryItem) {
     setEditing(it);
+    setMode(isFileResource(it.url) ? "file" : "link");
+    setFile(null);
     setForm({
       title: it.title,
       description: it.description ?? "",
@@ -99,35 +106,67 @@ function CoachLibrary() {
     });
     setOpen(true);
   }
+
+  async function uploadFile(f: File) {
+    const safe = f.name.replace(/[^\w.\-]+/g, "_");
+    const path = `${user!.id}/${Date.now()}-${safe}`;
+    const { error } = await supabase.storage
+      .from(LIBRARY_BUCKET)
+      .upload(path, f, { contentType: f.type || undefined, upsert: false });
+    if (error) throw new Error(error.message);
+    return `${FILE_URL_PREFIX}${path}`;
+  }
+
   async function save() {
-    if (!form.title || !form.url) {
-      toast.error("Título y enlace son obligatorios");
+    if (!form.title) {
+      toast.error("El título es obligatorio");
       return;
     }
-    if (editing) {
-      const { error } = await supabase.from("library_items").update(form).eq("id", editing.id);
+    setSaving(true);
+    try {
+      let url = form.url;
+      if (mode === "file") {
+        if (file) url = await uploadFile(file);
+        else if (!isFileResource(url)) {
+          toast.error("Selecciona un archivo");
+          return;
+        }
+      } else if (!url || isFileResource(url)) {
+        toast.error("Ingresa un enlace válido");
+        return;
+      }
+
+      const payload = {
+        ...form,
+        url,
+        thumbnail_url: mode === "file" ? form.thumbnail_url || null : form.thumbnail_url,
+      };
+      const { error } = editing
+        ? await supabase.from("library_items").update(payload).eq("id", editing.id)
+        : await supabase.from("library_items").insert({ ...payload, created_by: user!.id });
       if (error) {
         toast.error(error.message);
         return;
       }
-    } else {
-      const { error } = await supabase
-        .from("library_items")
-        .insert({ ...form, created_by: user!.id });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+      toast.success("Guardado");
+      setOpen(false);
+      setFile(null);
+      load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo guardar");
+    } finally {
+      setSaving(false);
     }
-    toast.success("Guardado");
-    setOpen(false);
-    load();
   }
   async function remove(id: string) {
     if (!confirm("¿Eliminar este recurso?")) return;
+    const item = items.find((i) => i.id === id);
     await supabase.from("library_items").delete().eq("id", id);
+    const path = item ? filePathOf(item.url) : null;
+    if (path) await supabase.storage.from(LIBRARY_BUCKET).remove([path]);
     load();
   }
+
 
   const term = q.trim().toLowerCase();
   const filtered = items
