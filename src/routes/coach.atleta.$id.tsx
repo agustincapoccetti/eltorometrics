@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, PLANTEL_TABS } from "@/components/SubTabs";
 import { BodyMap } from "@/components/BodyMap";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +87,7 @@ function AthleteDetail() {
 
   return (
     <Shell>
+      <SubTabs tabs={PLANTEL_TABS} />
       <div className="flex items-center justify-between mb-4">
         <Link to="/coach" className="inline-flex items-center gap-1 text-xs uppercase tracking-wider hover:underline">
           <ArrowLeft className="h-3 w-3" /> Volver

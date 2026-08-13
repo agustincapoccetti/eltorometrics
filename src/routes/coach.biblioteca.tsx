@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, ADMIN_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,6 +139,7 @@ function CoachLibrary() {
 
   return (
     <Shell title="Biblioteca">
+      <SubTabs tabs={ADMIN_TABS} />
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <p className="text-sm text-muted-foreground">
           Comparte videos y enlaces para que los atletas consulten.

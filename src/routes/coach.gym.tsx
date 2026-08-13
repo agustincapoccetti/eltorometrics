@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, PLANIFICACION_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,6 +85,7 @@ function Page() {
 
   return (
     <Shell title="Gimnasio">
+      <SubTabs tabs={PLANIFICACION_TABS} />
       <p className="text-sm text-muted-foreground mb-6">Subí la rutina mensual en PDF. Los atletas pueden registrar peso, repeticiones y observaciones.</p>
 
       <div className="border border-border p-6 mb-8">

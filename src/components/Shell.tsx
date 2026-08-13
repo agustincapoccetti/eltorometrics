@@ -16,7 +16,6 @@ import {
   TrafficCone,
   ClipboardList,
   ShieldCheck,
-  UserCog,
   BellRing,
   type LucideIcon,
 } from "lucide-react";
@@ -45,17 +44,22 @@ const ATLETA_GROUPS: Record<string, string[]> = {
 
 const COACH_NAV: NavItem[] = [
   { to: "/coach", label: "Panel", icon: LayoutDashboard },
-  { to: "/coach/semaforo", label: "Semáforo", icon: TrafficCone },
-  { to: "/coach/cuestionarios", label: "Cuestion.", icon: ClipboardList },
-  { to: "/coach/jugadores", label: "Jugadores", icon: Users },
-  { to: "/coach/partidos", label: "Partidos", icon: Trophy },
-  { to: "/coach/gym", label: "Gym", icon: Dumbbell },
-  { to: "/coach/calendario", label: "Agenda", icon: Calendar },
-  { to: "/coach/recuperacion", label: "Recup.", icon: HeartPulse },
+  { to: "/coach/jugadores", label: "Plantel", icon: Users },
+  { to: "/coach/gym", label: "Planific.", icon: ClipboardList },
   { to: "/coach/fisio", label: "Fisio", icon: Stethoscope },
-  { to: "/coach/biblioteca", label: "Biblio", icon: BookOpen },
   { to: "/coach/notificaciones", label: "Avisos", icon: BellRing },
 ];
+
+// Rutas agrupadas dentro de cada ítem del dock (pestañas internas)
+const COACH_GROUPS: Record<string, string[]> = {
+  "/coach": ["/coach", "/coach/semaforo"],
+  "/coach/jugadores": ["/coach/jugadores", "/coach/cuestionarios", "/coach/atleta"],
+  "/coach/gym": ["/coach/gym", "/coach/calendario", "/coach/partidos"],
+  "/coach/fisio": ["/coach/fisio", "/coach/recuperacion"],
+};
+
+// Administración: acceso secundario (ícono en la cabecera)
+const COACH_ADMIN_ROUTES = ["/coach/usuarios", "/coach/coaches", "/coach/biblioteca"];
 
 function NavDock({
   items,
@@ -120,21 +124,19 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const items: NavItem[] =
-    role === "atleta"
-      ? ATLETA_NAV
-      : role === "coach"
-        ? [
-            ...COACH_NAV,
-            ...(isAdmin ? [
-              { to: "/coach/usuarios", label: "Usuarios", icon: UserCog },
-              { to: "/coach/coaches", label: "Cuerpo T.", icon: ShieldCheck },
-            ] : []),
-          ]
-        : [];
+    role === "atleta" ? ATLETA_NAV : role === "coach" ? COACH_NAV : [];
+
+  const adminHref = isAdmin ? "/coach/usuarios" : "/coach/biblioteca";
+  const adminActive = COACH_ADMIN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
   const isActive = (to: string) => {
-    const group = role === "atleta" ? ATLETA_GROUPS[to] : undefined;
-    if (group) return group.some((g) => pathname === g || pathname.startsWith(g + "/"));
+    const group = role === "atleta" ? ATLETA_GROUPS[to] : role === "coach" ? COACH_GROUPS[to] : undefined;
+    if (group)
+      return group.some((g) =>
+        g === "/atleta" || g === "/coach"
+          ? pathname === g
+          : pathname === g || pathname.startsWith(g + "/"),
+      );
     if (to === "/atleta" || to === "/coach") return pathname === to;
     return pathname === to || pathname.startsWith(to + "/");
   };
@@ -158,6 +160,19 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
           )}
 
           <div className="flex items-center gap-1 shrink-0">
+            {role === "coach" && (
+              <Link
+                to={adminHref}
+                aria-label="Administración"
+                title="Administración"
+                className={
+                  "inline-flex items-center justify-center rounded-lg border-2 border-black h-9 w-9 transition-colors " +
+                  (adminActive ? "bg-black text-white" : "bg-white text-black hover:bg-black hover:text-white")
+                }
+              >
+                <ShieldCheck className="h-4 w-4" />
+              </Link>
+            )}
             {user && <NotificationBell />}
             {user && (
               <Button

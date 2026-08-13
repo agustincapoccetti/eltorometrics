@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, PLANTEL_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ function Page() {
 
   return (
     <Shell title="Cargar cuestionarios">
+      <SubTabs tabs={PLANTEL_TABS} />
       <p className="text-sm text-muted-foreground mb-5">
         Registra o corrige el RPE y el cuestionario de bienestar de cualquier jugador cuando no lo haya completado.
       </p>

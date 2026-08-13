@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell } from "@/components/Shell";
+import { SubTabs, ADMIN_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ function Page() {
   if (!isAdmin) {
     return (
       <Shell title="Coaches">
+      <SubTabs tabs={ADMIN_TABS} />
         <p className="text-sm text-muted-foreground">Solo el administrador puede validar coaches.</p>
       </Shell>
     );
@@ -75,6 +77,7 @@ function Page() {
 
   return (
     <Shell title="Validación de coaches">
+      <SubTabs tabs={ADMIN_TABS} />
       <p className="text-sm text-muted-foreground mb-6">
         Cualquier persona puede registrarse como coach, pero su perfil queda pendiente hasta que tú lo valides.
         Categorías disponibles: preparador físico, fisio y entrenador.
