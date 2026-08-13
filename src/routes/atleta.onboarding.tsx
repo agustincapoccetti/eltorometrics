@@ -43,6 +43,8 @@ function Onboarding() {
           height: data.height?.toString() ?? "",
         });
         if (data.photo_url) setPhotoPreview(data.photo_url);
+      } else {
+        setForm((f) => ({ ...f, full_name: meta.full_name || "", last_name: meta.last_name || "" }));
       }
       setLoadingProfile(false);
     })();
