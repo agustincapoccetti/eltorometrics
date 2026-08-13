@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { SemaforoView } from "@/components/SemaforoView";
+import { PanelSummary } from "@/components/PanelSummary";
+
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -378,7 +380,9 @@ function CoachDash() {
 
   return (
     <Shell title="Panel del preparador">
+      <PanelSummary />
       <section className="mb-10">
+
         <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
           Semáforo de riesgo
         </h2>
