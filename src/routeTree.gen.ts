@@ -20,6 +20,7 @@ import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
 import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
 import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
 import { Route as CoachPartidosRouteImport } from './routes/coach.partidos'
+import { Route as CoachNotificacionesRouteImport } from './routes/coach.notificaciones'
 import { Route as CoachJugadoresRouteImport } from './routes/coach.jugadores'
 import { Route as CoachGymRouteImport } from './routes/coach.gym'
 import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
@@ -92,6 +93,11 @@ const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
 const CoachPartidosRoute = CoachPartidosRouteImport.update({
   id: '/coach/partidos',
   path: '/coach/partidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachNotificacionesRoute = CoachNotificacionesRouteImport.update({
+  id: '/coach/notificaciones',
+  path: '/coach/notificaciones',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachJugadoresRoute = CoachJugadoresRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
   '/coach/jugadores': typeof CoachJugadoresRoute
+  '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
   '/coach/jugadores': typeof CoachJugadoresRoute
+  '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
   '/coach/jugadores': typeof CoachJugadoresRoute
+  '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/coach/fisio'
     | '/coach/gym'
     | '/coach/jugadores'
+    | '/coach/notificaciones'
     | '/coach/partidos'
     | '/coach/recuperacion'
     | '/coach/semaforo'
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/coach/fisio'
     | '/coach/gym'
     | '/coach/jugadores'
+    | '/coach/notificaciones'
     | '/coach/partidos'
     | '/coach/recuperacion'
     | '/coach/semaforo'
@@ -366,6 +377,7 @@ export interface FileRouteTypes {
     | '/coach/fisio'
     | '/coach/gym'
     | '/coach/jugadores'
+    | '/coach/notificaciones'
     | '/coach/partidos'
     | '/coach/recuperacion'
     | '/coach/semaforo'
@@ -398,6 +410,7 @@ export interface RootRouteChildren {
   CoachFisioRoute: typeof CoachFisioRoute
   CoachGymRoute: typeof CoachGymRoute
   CoachJugadoresRoute: typeof CoachJugadoresRoute
+  CoachNotificacionesRoute: typeof CoachNotificacionesRoute
   CoachPartidosRoute: typeof CoachPartidosRoute
   CoachRecuperacionRoute: typeof CoachRecuperacionRoute
   CoachSemaforoRoute: typeof CoachSemaforoRoute
@@ -485,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/coach/partidos'
       fullPath: '/coach/partidos'
       preLoaderRoute: typeof CoachPartidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/notificaciones': {
+      id: '/coach/notificaciones'
+      path: '/coach/notificaciones'
+      fullPath: '/coach/notificaciones'
+      preLoaderRoute: typeof CoachNotificacionesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/jugadores': {
@@ -638,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachFisioRoute: CoachFisioRoute,
   CoachGymRoute: CoachGymRoute,
   CoachJugadoresRoute: CoachJugadoresRoute,
+  CoachNotificacionesRoute: CoachNotificacionesRoute,
   CoachPartidosRoute: CoachPartidosRoute,
   CoachRecuperacionRoute: CoachRecuperacionRoute,
   CoachSemaforoRoute: CoachSemaforoRoute,

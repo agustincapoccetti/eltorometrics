@@ -64,14 +64,15 @@ export const sendPushToTargets = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { sendPushToUsers, userIdsByRole } = await import("@/lib/push.server");
     let ids = data.userIds ?? [];
-    if (data.role) {
+    const targetsOthers = data.role != null || ids.some((id) => id !== context.userId);
+    if (targetsOthers) {
       const { data: isCoach } = await context.supabase.rpc("has_role", {
         _user_id: context.userId,
         _role: "coach",
       });
-      if (!isCoach) throw new Error("Solo el cuerpo técnico puede enviar avisos masivos");
-      ids = await userIdsByRole(data.role);
+      if (!isCoach) throw new Error("Solo el cuerpo técnico puede enviar avisos a otros usuarios");
     }
+    if (data.role) ids = await userIdsByRole(data.role);
     if (!ids.length) return { sent: 0, removed: 0 };
     return sendPushToUsers(ids, {
       title: data.title,
