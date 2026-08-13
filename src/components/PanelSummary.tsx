@@ -150,3 +150,32 @@ function Card({ title, subtitle, children }: { title: string; subtitle?: string;
 function Empty({ children }: { children: React.ReactNode }) {
   return <p className="text-xs text-muted-foreground">{children}</p>;
 }
+
+function MissingChips({ list }: { list: Athlete[] }) {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? list : list.slice(0, 3);
+  const rest = list.length - 3;
+  return (
+    <div className="mt-1 flex flex-wrap gap-1">
+      {visible.map((a) => (
+        <Link
+          key={a.id}
+          to="/coach/atleta/$id"
+          params={{ id: a.id }}
+          className="border border-border px-2 py-0.5 text-[11px] leading-tight hover:bg-foreground hover:text-background"
+        >
+          {a.name}
+        </Link>
+      ))}
+      {rest > 0 && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="border border-dashed border-border px-2 py-0.5 text-[11px] leading-tight text-muted-foreground hover:bg-foreground hover:text-background"
+        >
+          {expanded ? "Ver menos" : `+${rest} más`}
+        </button>
+      )}
+    </div>
+  );
+}
