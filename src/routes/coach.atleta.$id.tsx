@@ -92,8 +92,87 @@ function AthleteDetail() {
         <Link to="/coach" className="inline-flex items-center gap-1 text-xs uppercase tracking-wider hover:underline">
           <ArrowLeft className="h-3 w-3" /> Volver
         </Link>
-        {profile && <Button size="sm" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-1" />PDF</Button>}
+        <div className="flex items-center gap-2">
+          {profile && isAdmin && (
+            <Button size="sm" variant="outline" onClick={() => {
+              setEditForm({
+                full_name: profile.full_name ?? "",
+                last_name: profile.last_name ?? "",
+                position: profile.position ?? "",
+                weight: profile.weight != null ? String(profile.weight) : "",
+                height: profile.height != null ? String(profile.height) : "",
+                age: profile.age != null ? String(profile.age) : "",
+              });
+              setEditOpen(true);
+            }}><Pencil className="h-4 w-4 mr-1" />Editar perfil</Button>
+          )}
+          {profile && <Button size="sm" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-1" />PDF</Button>}
+        </div>
       </div>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar perfil del jugador</DialogTitle>
+            <DialogDescription>Solo el administrador puede modificar estos datos.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Nombre</Label>
+                <Input value={editForm.full_name} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Apellido</Label>
+                <Input value={editForm.last_name} onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Puesto</Label>
+              <Select value={editForm.position || undefined} onValueChange={(v) => setEditForm({ ...editForm, position: v })}>
+                <SelectTrigger><SelectValue placeholder="Seleccionar puesto" /></SelectTrigger>
+                <SelectContent>
+                  {POSITIONS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label className="text-xs">Peso (kg)</Label>
+                <Input type="number" step="0.1" value={editForm.weight} onChange={(e) => setEditForm({ ...editForm, weight: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Altura (cm)</Label>
+                <Input type="number" step="0.1" value={editForm.height} onChange={(e) => setEditForm({ ...editForm, height: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Edad</Label>
+                <Input type="number" value={editForm.age} onChange={(e) => setEditForm({ ...editForm, age: e.target.value })} />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">La foto se cambia tocando la imagen del perfil.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditOpen(false)}>Cancelar</Button>
+            <Button onClick={async () => {
+              const payload: any = {
+                full_name: editForm.full_name.trim(),
+                last_name: editForm.last_name.trim() || null,
+                position: editForm.position || null,
+                weight: editForm.weight === "" ? null : Number(editForm.weight),
+                height: editForm.height === "" ? null : Number(editForm.height),
+                age: editForm.age === "" ? null : Number(editForm.age),
+              };
+              const { error } = await supabase.from("profiles").update(payload).eq("id", id);
+              if (error) { toast.error(error.message); return; }
+              setProfile({ ...profile, ...payload });
+              setEditOpen(false);
+              toast.success("Perfil actualizado");
+            }}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {profile && (
         <>
           <div className="mb-8 flex items-start gap-4">
