@@ -131,7 +131,12 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
 
   const isActive = (to: string) => {
     const group = role === "atleta" ? ATLETA_GROUPS[to] : role === "coach" ? COACH_GROUPS[to] : undefined;
-    if (group) return group.some((g) => pathname === g || pathname.startsWith(g + "/"));
+    if (group)
+      return group.some((g) =>
+        g === "/atleta" || g === "/coach"
+          ? pathname === g
+          : pathname === g || pathname.startsWith(g + "/"),
+      );
     if (to === "/atleta" || to === "/coach") return pathname === to;
     return pathname === to || pathname.startsWith(to + "/");
   };
