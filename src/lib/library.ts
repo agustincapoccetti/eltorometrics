@@ -71,3 +71,61 @@ export function getEmbedUrl(url: string): string | null {
   }
   return null;
 }
+
+/* ---------- Archivos subidos (PDF / documentos) ---------- */
+
+export const LIBRARY_BUCKET = "library-files";
+export const FILE_URL_PREFIX = `storage://${LIBRARY_BUCKET}/`;
+
+export function isFileResource(url: string) {
+  return !!url && url.startsWith(FILE_URL_PREFIX);
+}
+
+export function filePathOf(url: string) {
+  return isFileResource(url) ? url.slice(FILE_URL_PREFIX.length) : null;
+}
+
+export function fileNameOf(url: string) {
+  const path = filePathOf(url);
+  if (!path) return null;
+  const raw = path.split("/").pop() ?? path;
+  return raw.replace(/^\d+-/, "");
+}
+
+export function fileIcon(url: string) {
+  const name = (fileNameOf(url) ?? "").toLowerCase();
+  if (name.endsWith(".pdf")) return "📄";
+  if (/\.(doc|docx|odt|txt|rtf)$/.test(name)) return "📝";
+  if (/\.(xls|xlsx|csv|ods)$/.test(name)) return "📊";
+  if (/\.(ppt|pptx|odp)$/.test(name)) return "📽️";
+  if (/\.(png|jpe?g|webp|gif|heic)$/.test(name)) return "🖼️";
+  if (/\.(mp4|mov|webm|m4v)$/.test(name)) return "🎬";
+  if (/\.(zip|rar|7z)$/.test(name)) return "🗂️";
+  return "📎";
+}
+
+/** Devuelve una URL abrible (firmada si es un archivo del bucket privado). */
+export async function resolveResourceUrl(url: string): Promise<string | null> {
+  const path = filePathOf(url);
+  if (!path) return url || null;
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data, error } = await supabase.storage
+    .from(LIBRARY_BUCKET)
+    .createSignedUrl(path, 60 * 60);
+  if (error) return null;
+  return data?.signedUrl ?? null;
+}
+
+/** Abre el recurso en una pestaña nueva (compatible con móvil). */
+export async function openResource(item: { url: string; title?: string }) {
+  const win = window.open("", "_blank");
+  const resolved = await resolveResourceUrl(item.url);
+  if (!resolved) {
+    win?.close();
+    const { toast } = await import("sonner");
+    toast.error("No se pudo abrir el recurso");
+    return;
+  }
+  if (win) win.location.href = resolved;
+  else window.location.href = resolved;
+}

@@ -32,7 +32,15 @@ import {
   getThumbnail,
   deriveThumbnail,
   getEmbedUrl,
+  openResource,
+  isFileResource,
+  fileIcon,
+  fileNameOf,
+  filePathOf,
+  LIBRARY_BUCKET,
+  FILE_URL_PREFIX,
 } from "@/lib/library";
+
 
 type LibraryItem = {
   id: string;
@@ -60,6 +68,9 @@ function CoachLibrary() {
   const [preview, setPreview] = useState<LibraryItem | null>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LibraryItem | null>(null);
+  const [mode, setMode] = useState<"link" | "file">("link");
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -81,11 +92,15 @@ function CoachLibrary() {
 
   function openNew() {
     setEditing(null);
+    setMode("link");
+    setFile(null);
     setForm({ title: "", description: "", url: "", category: "gym", thumbnail_url: "" });
     setOpen(true);
   }
   function openEdit(it: LibraryItem) {
     setEditing(it);
+    setMode(isFileResource(it.url) ? "file" : "link");
+    setFile(null);
     setForm({
       title: it.title,
       description: it.description ?? "",
@@ -95,35 +110,67 @@ function CoachLibrary() {
     });
     setOpen(true);
   }
+
+  async function uploadFile(f: File) {
+    const safe = f.name.replace(/[^\w.\-]+/g, "_");
+    const path = `${user!.id}/${Date.now()}-${safe}`;
+    const { error } = await supabase.storage
+      .from(LIBRARY_BUCKET)
+      .upload(path, f, { contentType: f.type || undefined, upsert: false });
+    if (error) throw new Error(error.message);
+    return `${FILE_URL_PREFIX}${path}`;
+  }
+
   async function save() {
-    if (!form.title || !form.url) {
-      toast.error("Título y enlace son obligatorios");
+    if (!form.title) {
+      toast.error("El título es obligatorio");
       return;
     }
-    if (editing) {
-      const { error } = await supabase.from("library_items").update(form).eq("id", editing.id);
+    setSaving(true);
+    try {
+      let url = form.url;
+      if (mode === "file") {
+        if (file) url = await uploadFile(file);
+        else if (!isFileResource(url)) {
+          toast.error("Selecciona un archivo");
+          return;
+        }
+      } else if (!url || isFileResource(url)) {
+        toast.error("Ingresa un enlace válido");
+        return;
+      }
+
+      const payload = {
+        ...form,
+        url,
+        thumbnail_url: mode === "file" ? form.thumbnail_url || null : form.thumbnail_url,
+      };
+      const { error } = editing
+        ? await supabase.from("library_items").update(payload).eq("id", editing.id)
+        : await supabase.from("library_items").insert({ ...payload, created_by: user!.id });
       if (error) {
         toast.error(error.message);
         return;
       }
-    } else {
-      const { error } = await supabase
-        .from("library_items")
-        .insert({ ...form, created_by: user!.id });
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+      toast.success("Guardado");
+      setOpen(false);
+      setFile(null);
+      load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "No se pudo guardar");
+    } finally {
+      setSaving(false);
     }
-    toast.success("Guardado");
-    setOpen(false);
-    load();
   }
   async function remove(id: string) {
     if (!confirm("¿Eliminar este recurso?")) return;
+    const item = items.find((i) => i.id === id);
     await supabase.from("library_items").delete().eq("id", id);
+    const path = item ? filePathOf(item.url) : null;
+    if (path) await supabase.storage.from(LIBRARY_BUCKET).remove([path]);
     load();
   }
+
 
   const term = q.trim().toLowerCase();
   const filtered = items
@@ -203,7 +250,7 @@ function CoachLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="relative block aspect-video bg-muted overflow-hidden group text-left"
                   >
@@ -222,11 +269,16 @@ function CoachLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
-                    className="aspect-video bg-muted flex items-center justify-center text-2xl"
+                    className="aspect-video bg-muted flex flex-col items-center justify-center gap-1 text-2xl"
                   >
-                    {categoryIcon(it.category)}
+                    {isFileResource(it.url) ? fileIcon(it.url) : categoryIcon(it.category)}
+                    {isFileResource(it.url) && (
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 truncate max-w-full">
+                        {fileNameOf(it.url)}
+                      </span>
+                    )}
                   </button>
                 )}
                 <div className="p-3 flex flex-col flex-1">
@@ -260,12 +312,12 @@ function CoachLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="text-xs text-primary mt-2 inline-flex items-center gap-1 hover:underline text-left"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    Abrir
+                    {isFileResource(it.url) ? "Abrir archivo" : "Abrir"}
                   </button>
                 </div>
               </div>
@@ -306,19 +358,62 @@ function CoachLibrary() {
               </Select>
             </div>
             <div>
-              <Label>Enlace (video o web)</Label>
-              <Input
-                value={form.url}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    url: e.target.value,
-                    thumbnail_url: form.thumbnail_url || deriveThumbnail(e.target.value) || "",
-                  })
-                }
-                placeholder="https://..."
-              />
+              <Label>Tipo de recurso</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {(
+                  [
+                    { v: "link", l: "🔗 Enlace / video" },
+                    { v: "file", l: "📄 Archivo / PDF" },
+                  ] as const
+                ).map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => setMode(o.v)}
+                    className={`px-3 py-2 text-xs uppercase tracking-wider border ${mode === o.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}
+                  >
+                    {o.l}
+                  </button>
+                ))}
+              </div>
             </div>
+            {mode === "link" ? (
+              <div>
+                <Label>Enlace (video o web)</Label>
+                <Input
+                  value={isFileResource(form.url) ? "" : form.url}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      url: e.target.value,
+                      thumbnail_url: form.thumbnail_url || deriveThumbnail(e.target.value) || "",
+                    })
+                  }
+                  placeholder="https://..."
+                />
+              </div>
+            ) : (
+              <div>
+                <Label>Archivo (PDF, Word, Excel, imagen…)</Label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,image/*,video/*"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  className="text-xs"
+                />
+                {file ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {file.name} · {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                ) : isFileResource(form.url) ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Actual: {fileIcon(form.url)} {fileNameOf(form.url)} — elige otro archivo para
+                    reemplazarlo.
+                  </p>
+                ) : null}
+              </div>
+            )}
+
             <div>
               <Label>Miniatura (opcional)</Label>
               <Input
@@ -347,7 +442,10 @@ function CoachLibrary() {
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={save}>{editing ? "Actualizar" : "Guardar"}</Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "Guardando…" : editing ? "Actualizar" : "Guardar"}
+            </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

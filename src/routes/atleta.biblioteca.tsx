@@ -19,6 +19,10 @@ import {
   categoryIcon,
   getThumbnail,
   getEmbedUrl,
+  openResource,
+  isFileResource,
+  fileIcon,
+  fileNameOf,
 } from "@/lib/library";
 
 type LibraryItem = {
@@ -129,7 +133,7 @@ function AthleteLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="relative aspect-video bg-muted overflow-hidden text-left"
                   >
@@ -148,11 +152,16 @@ function AthleteLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
-                    className="aspect-video bg-muted flex items-center justify-center text-2xl"
+                    className="aspect-video bg-muted flex flex-col items-center justify-center gap-1 text-2xl"
                   >
-                    {categoryIcon(it.category)}
+                    {isFileResource(it.url) ? fileIcon(it.url) : categoryIcon(it.category)}
+                    {isFileResource(it.url) && (
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 truncate max-w-full">
+                        {fileNameOf(it.url)}
+                      </span>
+                    )}
                   </button>
                 )}
                 <div className="p-3">
@@ -166,12 +175,12 @@ function AthleteLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="text-xs text-primary mt-2 inline-flex items-center gap-1 hover:underline text-left"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    Abrir
+                    {isFileResource(it.url) ? "Abrir archivo" : "Abrir"}
                   </button>
                 </div>
               </div>
