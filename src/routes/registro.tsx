@@ -34,6 +34,7 @@ function RegistroPage() {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
           full_name: form.full_name,
+          last_name: form.last_name,
           role,
           coach_type: role === "coach" ? coachType : null,
           position: role === "atleta" ? form.position : null,
