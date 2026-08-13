@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { SemaforoView } from "@/components/SemaforoView";
+import { PanelSummary } from "@/components/PanelSummary";
+
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
