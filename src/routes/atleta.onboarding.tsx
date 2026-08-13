@@ -121,11 +121,24 @@ function Onboarding() {
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Foto de perfil</p>
           </div>
 
-          <div className="border border-border p-3">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Jugador</p>
-            <p className="font-display text-lg mt-1">{`${form.full_name} ${form.last_name}`.trim() || "—"}</p>
-            <p className="text-xs text-muted-foreground mt-1">Podés cambiar tu nombre más adelante desde tu perfil.</p>
-          </div>
+          {form.full_name && form.last_name ? (
+            <div className="border border-border p-3">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Jugador</p>
+              <p className="font-display text-lg mt-1">{`${form.full_name} ${form.last_name}`}</p>
+              <p className="text-xs text-muted-foreground mt-1">Podés cambiar tu nombre más adelante desde tu perfil.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="fn">Nombre</Label>
+                <Input id="fn" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+              </div>
+              <div>
+                <Label htmlFor="ln">Apellido</Label>
+                <Input id="ln" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-3">
             <div>
