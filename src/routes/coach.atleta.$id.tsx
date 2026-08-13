@@ -28,6 +28,11 @@ function AthleteDetail() {
   const [profile, setProfile] = useState<any>(null);
   const [editName, setEditName] = useState(false);
   const [nameForm, setNameForm] = useState({ full_name: "", last_name: "" });
+  const { user } = useAuth();
+  const isAdmin = (user?.email ?? "").toLowerCase() === "agustincapoccetti@hotmail.com";
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ full_name: "", last_name: "", position: "", weight: "", height: "", age: "" });
+
 
   const [rpe, setRpe] = useState<any[]>([]);
   const [wellness, setWellness] = useState<any[]>([]);
