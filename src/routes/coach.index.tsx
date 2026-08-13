@@ -605,7 +605,8 @@ function CoachDash() {
         </div>
       </div>
 
-      </div>
+      </>
+
       )}
 
       {tab === "informes" && (
