@@ -90,7 +90,14 @@ async function run() {
       if (already === dateKey) continue;
     }
 
-    const ids = await userIdsByRole((s.target_role ?? "atleta") as "atleta" | "coach");
+    const role = (s.target_role ?? "atleta") as "atleta" | "coach";
+    const allIds = await userIdsByRole(role);
+    const ids = role === "atleta" ? await filterPending(kindOf(s), allIds) : allIds;
+    if (!ids.length) {
+      await supabaseAdmin.from("push_schedules").update({ last_sent_at: new Date().toISOString() }).eq("id", s.id);
+      results.push({ id: s.id, sent: 0 });
+      continue;
+    }
     const res = await sendPushToUsers(ids, {
       title: s.title,
       body: s.body,
