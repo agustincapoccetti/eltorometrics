@@ -18,7 +18,7 @@ function RegistroPage() {
   const [role, setRole] = useState<"atleta" | "coach">("atleta");
   const [coachType, setCoachType] = useState<string>("preparador_fisico");
   const [form, setForm] = useState({
-    email: "", password: "", full_name: "", position: "", weight: "", height: "",
+    email: "", password: "", full_name: "", last_name: "", position: "", weight: "", height: "",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -34,6 +34,7 @@ function RegistroPage() {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
           full_name: form.full_name,
+          last_name: form.last_name,
           role,
           coach_type: role === "coach" ? coachType : null,
           position: role === "atleta" ? form.position : null,
@@ -89,9 +90,15 @@ function RegistroPage() {
             )}
           </div>
 
-          <div>
-            <Label htmlFor="full_name">Nombre completo</Label>
-            <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="full_name">Nombre</Label>
+              <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Apellido</Label>
+              <Input id="last_name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
+            </div>
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
