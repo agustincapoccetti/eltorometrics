@@ -17,6 +17,7 @@ import {
   ClipboardList,
   ShieldCheck,
   UserCog,
+  BellRing,
   type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
