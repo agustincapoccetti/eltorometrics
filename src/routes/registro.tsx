@@ -90,9 +90,15 @@ function RegistroPage() {
             )}
           </div>
 
-          <div>
-            <Label htmlFor="full_name">Nombre completo</Label>
-            <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="full_name">Nombre</Label>
+              <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Apellido</Label>
+              <Input id="last_name" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
+            </div>
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
