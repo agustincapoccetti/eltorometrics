@@ -11,10 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
+import { Lock, Clock, HeartPulse } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { WeekStrip } from "@/components/WeekStrip";
-import { isCurrentWeek, startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
+import { isCurrentWeek, startOfWeek, isoDate, weekDays, withinHoursAfter, isTodayOrPast } from "@/lib/week-utils";
 
 export const Route = createFileRoute("/atleta/recuperacion")({
   component: () => <Protected requireRole="atleta"><Recuperacion /></Protected>,
@@ -74,7 +74,9 @@ function Recuperacion() {
     return new Set(entries.filter((e) => e.entry_date >= start && e.entry_date <= end).map((e) => e.entry_date));
   }, [entries]);
 
-  const editable = isCurrentWeek(date) && date === sunday;
+  const isDay = isTodayOrPast(sunday);
+  const inWindow = withinHoursAfter(sunday, 24);
+  const editable = isCurrentWeek(date) && date === sunday && isDay && inWindow;
 
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
@@ -82,7 +84,7 @@ function Recuperacion() {
 
   async function save() {
     if (!user) return;
-    if (!editable) { toast.error("La recuperación solo se completa los domingos"); return; }
+    if (!editable) { toast.error(!isDay ? "Esperá al domingo para completar la recuperación" : "El plazo de 24 hs ya venció"); return; }
     setSaving(true);
     let id = entryId;
     if (!id) {
@@ -120,8 +122,26 @@ function Recuperacion() {
         onSelect={setDate}
         allowedIndices={[6]}
         hideDisabled
+        compact
         label="Domingo de cierre · única fecha habilitada"
       />
+
+      {!editable && (
+        <div className="border border-border p-4 mb-6 flex items-start gap-3">
+          <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium">
+              {!isDay
+                ? `Todavía no es el día. La recuperación se completa el domingo ${sunday}.`
+                : "El plazo venció: solo se puede cargar el domingo o hasta 24 hs después."}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
+              <HeartPulse className="h-3 w-3 mt-0.5" />
+              Aprovechá la semana para recuperarte: sueño, hidratación, movilidad y buena alimentación. Cada estrategia cuenta.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="border border-border p-6 mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">

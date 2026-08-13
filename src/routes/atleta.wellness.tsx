@@ -11,9 +11,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock } from "lucide-react";
+import { Lock, Clock, HeartPulse } from "lucide-react";
 import { WeekStrip } from "@/components/WeekStrip";
-import { isCurrentWeek, startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
+import { isCurrentWeek, startOfWeek, isoDate, weekDays, withinHoursAfter, isTodayOrPast } from "@/lib/week-utils";
 import { wellnessColor } from "@/lib/score-colors";
 
 export const Route = createFileRoute("/atleta/wellness")({ component: () => <Protected requireRole="atleta"><WellnessForm /></Protected> });
@@ -66,10 +66,12 @@ function WellnessForm() {
     return new Set(entries.filter((e) => e.entry_date >= start && e.entry_date <= end).map((e) => e.entry_date));
   }, [entries]);
 
-  const editable = isCurrentWeek(date) && date === monday;
+  const isDay = isTodayOrPast(monday);
+  const inWindow = withinHoursAfter(monday, 24);
+  const editable = isCurrentWeek(date) && date === monday && isDay && inWindow;
 
   async function submit() {
-    if (!editable) { toast.error("El bienestar solo se completa los lunes"); return; }
+    if (!editable) { toast.error(!isDay ? "Esperá al lunes para completar el bienestar" : "El plazo de 24 hs ya venció"); return; }
     if (Q.some((q) => !v[q.key])) { toast.error("Completá todas las preguntas"); return; }
     if (hasPain && !pain.trim()) { toast.error("Describí la molestia"); return; }
     setSaving(true);
@@ -86,7 +88,7 @@ function WellnessForm() {
   }
 
   async function removeEntry() {
-    if (!editable) { toast.error("El bienestar solo se completa los lunes"); return; }
+    if (!editable) { toast.error(!isDay ? "Esperá al lunes para completar el bienestar" : "El plazo de 24 hs ya venció"); return; }
     if (!confirm("¿Eliminar el registro de este día?")) return;
     const { error } = await supabase.from("wellness_entries").delete().eq("user_id", user!.id).eq("entry_date", date);
     if (error) { toast.error(error.message); return; }
@@ -112,14 +114,31 @@ function WellnessForm() {
         })}
       </div>
 
-      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevCompleted} allowedIndices={[0]} hideDisabled />
+      <WeekStrip completed={completed} selected={date} onSelect={setDate} allowedIndices={[0]} hideDisabled compact label="Lunes · única fecha habilitada" />
+
+      {!editable && (
+        <div className="border border-border p-4 mb-6 flex items-start gap-3">
+          <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium">
+              {!isDay
+                ? `Todavía no es el día. El bienestar se completa el lunes ${monday}.`
+                : "El plazo venció: solo se puede cargar el lunes o hasta 24 hs después."}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
+              <HeartPulse className="h-3 w-3 mt-0.5" />
+              Mientras tanto, hacé todo para recuperarte: dormí 8 hs, hidratate, comé bien y estirá. Tu cuerpo te lo va a agradecer el lunes.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="border border-border p-4 mb-6 flex flex-col sm:flex-row sm:items-end gap-3">
         <div className="flex-1 min-w-[160px]">
           <Label htmlFor="wd">Fecha</Label>
           <Input id="wd" type="date" value={date} readOnly disabled />
         </div>
-        {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo lunes de la semana actual</span>}
+        {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo el lunes (hasta 24 hs después)</span>}
         <Button variant="outline" size="sm" disabled={!editable} onClick={removeEntry}>Eliminar registro</Button>
       </div>
 
