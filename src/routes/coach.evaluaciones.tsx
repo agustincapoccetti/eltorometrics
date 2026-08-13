@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
-import { Plus, Trash2, FileDown, ClipboardList } from "lucide-react";
+import { Plus, Trash2, FileDown, ClipboardList, ChevronDown, ChevronRight, Pencil, BarChart3 } from "lucide-react";
 import { exportPdf } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/coach/evaluaciones")({
@@ -21,19 +21,42 @@ export const Route = createFileRoute("/coach/evaluaciones")({
 
 function fullName(p: any) { return p ? `${p.full_name}${p.last_name ? " " + p.last_name : ""}` : "—"; }
 
+/** Unidades de medida disponibles para los tests físicos. */
+const UNITS: { value: string; label: string }[] = [
+  { value: "seg", label: "Segundos (seg)" },
+  { value: "min", label: "Minutos (min)" },
+  { value: "m", label: "Metros (m)" },
+  { value: "cm", label: "Centímetros (cm)" },
+  { value: "km", label: "Kilómetros (km)" },
+  { value: "kg", label: "Kilogramos (kg)" },
+  { value: "reps", label: "Repeticiones (reps)" },
+  { value: "m/s", label: "Velocidad (m/s)" },
+  { value: "km/h", label: "Velocidad (km/h)" },
+  { value: "W", label: "Potencia (W)" },
+  { value: "ml/kg/min", label: "VO2máx (ml/kg/min)" },
+  { value: "nivel", label: "Nivel / etapa" },
+  { value: "%", label: "Porcentaje (%)" },
+  { value: "puntos", label: "Puntos" },
+];
+
+const CHART_COLORS = ["#000000", "#666666", "#999999", "#333333", "#bbbbbb", "#4d4d4d"];
+
 function Page() {
   const { user } = useAuth();
   const [tests, setTests] = useState<any[]>([]);
   const [athletes, setAthletes] = useState<any[]>([]);
   const [results, setResults] = useState<any[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const [expanded, setExpanded] = useState<string>("");
+  const [editing, setEditing] = useState<string>("");
   const [values, setValues] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [compare, setCompare] = useState<string[]>([]);
   const posChartRef = useRef<HTMLDivElement>(null);
   const evoChartRef = useRef<HTMLDivElement>(null);
+  const cmpChartRef = useRef<HTMLDivElement>(null);
 
-  const [form, setForm] = useState({ name: "", description: "", eval_date: new Date().toISOString().slice(0, 10), unit: "", higher_is_better: "true" });
+  const [form, setForm] = useState({ name: "", description: "", eval_date: new Date().toISOString().slice(0, 10), unit: "seg", customUnit: "", higher_is_better: "true" });
 
   async function load() {
     const { data: t } = await supabase.from("evaluations").select("*").order("eval_date", { ascending: false });
@@ -48,35 +71,36 @@ function Page() {
     }
   }
   useEffect(() => { load(); }, []);
-  useEffect(() => { if (!selected && tests.length) setSelected(tests[0].id); }, [tests]);
 
-  const test = useMemo(() => tests.find((t) => t.id === selected), [tests, selected]);
+  const test = useMemo(() => tests.find((t) => t.id === expanded), [tests, expanded]);
 
-  // Precargar valores existentes del test elegido
+  // Precargar valores existentes del test abierto
   useEffect(() => {
     const v: Record<string, string> = {}; const n: Record<string, string> = {};
-    results.filter((r) => r.evaluation_id === selected).forEach((r) => { v[r.user_id] = String(r.value); n[r.user_id] = r.notes ?? ""; });
+    results.filter((r) => r.evaluation_id === expanded).forEach((r) => { v[r.user_id] = String(r.value); n[r.user_id] = r.notes ?? ""; });
     setValues(v); setNotes(n);
-  }, [selected, results]);
+  }, [expanded, results]);
 
   async function createTest() {
     if (!form.name.trim()) { toast.error("Poné un nombre al test"); return; }
+    const unit = (form.unit === "otra" ? form.customUnit : form.unit).trim();
     const { data, error } = await supabase.from("evaluations").insert({
       name: form.name.trim(), description: form.description || null, eval_date: form.eval_date,
-      unit: form.unit.trim(), higher_is_better: form.higher_is_better === "true", created_by: user!.id,
+      unit, higher_is_better: form.higher_is_better === "true", created_by: user!.id,
     }).select("id").single();
     if (error) { toast.error(error.message); return; }
     toast.success("Test creado");
     setForm({ ...form, name: "", description: "" });
     await load();
-    if (data?.id) setSelected(data.id);
+    if (data?.id) { setExpanded(data.id); setEditing(data.id); }
   }
 
   async function removeTest(id: string) {
     if (!confirm("¿Eliminar el test y todos sus resultados?")) return;
     const { error } = await supabase.from("evaluations").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
-    setSelected("");
+    setExpanded(""); setEditing("");
+    setCompare((c) => c.filter((x) => x !== id));
     load();
   }
 
@@ -95,11 +119,12 @@ function Page() {
       if (error) { setSaving(false); toast.error(error.message); return; }
     }
     setSaving(false);
+    setEditing("");
     toast.success("Resultados guardados");
     load();
   }
 
-  const testResults = useMemo(() => results.filter((r) => r.evaluation_id === selected), [results, selected]);
+  const testResults = useMemo(() => results.filter((r) => r.evaluation_id === expanded), [results, expanded]);
 
   const byPosition = useMemo(() => {
     const m: Record<string, { position: string; sum: number; n: number }> = {};
@@ -133,6 +158,40 @@ function Page() {
     [testResults, athletes, test],
   );
 
+  // ---- Comparación de tests seleccionados ----
+  const cmpTests = useMemo(
+    () => compare.map((id) => tests.find((t) => t.id === id)).filter(Boolean).sort((a, b) => a.eval_date.localeCompare(b.eval_date)),
+    [compare, tests],
+  );
+  const cmpLabel = (t: any) => `${t.name} · ${t.eval_date}`;
+
+  const cmpAthleteRows = useMemo(() => {
+    return athletes
+      .map((a) => {
+        const row: any = { name: fullName(a), position: a.position ?? "—", id: a.id };
+        let any = false;
+        cmpTests.forEach((t) => {
+          const r = results.find((x) => x.evaluation_id === t.id && x.user_id === a.id);
+          row[t.id] = r ? Number(r.value) : null;
+          if (r) any = true;
+        });
+        return any ? row : null;
+      })
+      .filter(Boolean) as any[];
+  }, [athletes, cmpTests, results]);
+
+  const cmpByPosition = useMemo(() => {
+    const positions = Array.from(new Set(cmpAthleteRows.map((r) => r.position)));
+    return positions.map((pos) => {
+      const row: any = { position: pos };
+      cmpTests.forEach((t) => {
+        const vals = cmpAthleteRows.filter((r) => r.position === pos && r[t.id] != null).map((r) => r[t.id] as number);
+        row[t.id] = vals.length ? Math.round((vals.reduce((s, v) => s + v, 0) / vals.length) * 100) / 100 : null;
+      });
+      return row;
+    });
+  }, [cmpAthleteRows, cmpTests]);
+
   function exportCsv() {
     if (!test) return;
     const head = ["Test", "Fecha", "Unidad", "Atleta", "Puesto", "Valor", "Notas"];
@@ -159,6 +218,39 @@ function Page() {
     });
   }
 
+  async function downloadComparePdf() {
+    if (!cmpTests.length) return;
+    await exportPdf({
+      title: cmpTests.length > 1 ? "Comparación de tests" : `Resultados · ${cmpTests[0].name}`,
+      subtitle: cmpTests.map(cmpLabel).join("  |  "),
+      chartEls: [cmpChartRef.current].filter(Boolean) as HTMLElement[],
+      tables: [
+        {
+          title: "Por jugador",
+          head: ["Atleta", "Puesto", ...cmpTests.map((t) => `${t.name} (${t.unit || "-"})`)],
+          rows: cmpAthleteRows.map((r) => [r.name, r.position, ...cmpTests.map((t) => (r[t.id] ?? "—"))]),
+        },
+        {
+          title: "Promedio por puesto",
+          head: ["Puesto", ...cmpTests.map((t) => t.name)],
+          rows: cmpByPosition.map((r) => [r.position, ...cmpTests.map((t) => (r[t.id] ?? "—"))]),
+        },
+      ],
+      filename: "comparacion_tests.pdf",
+    });
+  }
+
+  function exportCompareCsv() {
+    if (!cmpTests.length) return;
+    const head = ["Atleta", "Puesto", ...cmpTests.map((t) => `${t.name} ${t.eval_date} (${t.unit || "-"})`)];
+    const lines = [head.join(","), ...cmpAthleteRows.map((r) => [r.name, r.position, ...cmpTests.map((t) => r[t.id] ?? "")].join(","))];
+    const blob = new Blob([`\uFEFF${lines.join("\n")}`], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "comparacion_tests.csv";
+    a.click();
+  }
+
   return (
     <Shell title="Evaluaciones">
       <SubTabs tabs={PLANIFICACION_TABS} />
@@ -176,8 +268,17 @@ function Page() {
             <Input id="d" type="date" value={form.eval_date} onChange={(e) => setForm({ ...form, eval_date: e.target.value })} />
           </div>
           <div>
-            <Label htmlFor="u">Unidad</Label>
-            <Input id="u" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} placeholder="seg, kg, m, reps..." />
+            <Label>Unidad de medida</Label>
+            <Select value={form.unit} onValueChange={(v) => setForm({ ...form, unit: v })}>
+              <SelectTrigger><SelectValue placeholder="Elegí la unidad" /></SelectTrigger>
+              <SelectContent>
+                {UNITS.map((u) => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}
+                <SelectItem value="otra">Otra (escribir)</SelectItem>
+              </SelectContent>
+            </Select>
+            {form.unit === "otra" && (
+              <Input className="mt-2" value={form.customUnit} onChange={(e) => setForm({ ...form, customUnit: e.target.value })} placeholder="Escribí la unidad" />
+            )}
           </div>
           <div>
             <Label>¿Qué es mejor?</Label>
@@ -201,101 +302,203 @@ function Page() {
         <p className="text-sm text-muted-foreground">Todavía no hay tests cargados.</p>
       ) : (
         <>
-          <div className="flex items-end gap-2 mb-4 flex-wrap">
-            <div className="flex-1 min-w-[220px]">
-              <Label>Test</Label>
-              <Select value={selected} onValueChange={setSelected}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {tests.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} · {t.eval_date}</SelectItem>)}
-                </SelectContent>
-              </Select>
+          <h2 className="text-xl mb-3">Tests cargados</h2>
+          <div className="space-y-2 mb-8">
+            {tests.map((t) => {
+              const open = expanded === t.id;
+              const count = results.filter((r) => r.evaluation_id === t.id).length;
+              return (
+                <div key={t.id} className="border border-border">
+                  <button
+                    type="button"
+                    onClick={() => { setExpanded(open ? "" : t.id); setEditing(""); }}
+                    className={`w-full flex items-center gap-2 p-3 text-left transition-colors ${open ? "bg-black text-white" : "hover:bg-secondary"}`}
+                  >
+                    {open ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                    <span className="font-semibold uppercase tracking-wide text-sm flex-1">{t.name}</span>
+                    <span className="text-xs opacity-70">{t.eval_date}</span>
+                    <span className="text-xs opacity-70">· {count} jug.</span>
+                    {t.unit && <span className="text-xs opacity-70">· {t.unit}</span>}
+                  </button>
+
+                  {open && (
+                    <div className="p-4 border-t border-border">
+                      {t.description && <p className="text-xs text-muted-foreground mb-4 border border-border p-3">{t.description}</p>}
+
+                      <div className="flex items-center gap-2 mb-4 flex-wrap">
+                        {editing === t.id ? (
+                          <Button onClick={saveResults} disabled={saving}>{saving ? "Guardando..." : "Guardar resultados"}</Button>
+                        ) : (
+                          <Button variant="outline" onClick={() => setEditing(t.id)}><Pencil className="h-4 w-4 mr-2" />Editar resultados</Button>
+                        )}
+                        <Button variant="outline" onClick={exportCsv}><FileDown className="h-4 w-4 mr-2" />CSV</Button>
+                        <Button variant="outline" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-2" />PDF</Button>
+                        <Button variant="ghost" onClick={() => removeTest(t.id)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+
+                      {editing === t.id ? (
+                        <div className="border border-border mb-2 overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead className="bg-secondary text-xs uppercase tracking-wider">
+                              <tr>
+                                <th className="p-2 text-left">Jugador</th>
+                                <th className="p-2 text-left">Puesto</th>
+                                <th className="p-2 text-left w-32">Valor {t.unit ? `(${t.unit})` : ""}</th>
+                                <th className="p-2 text-left">Notas</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {athletes.map((a) => (
+                                <tr key={a.id} className="border-t border-border">
+                                  <td className="p-2"><Link to="/coach/atleta/$id" params={{ id: a.id }} className="hover:underline">{fullName(a)}</Link></td>
+                                  <td className="p-2 text-xs text-muted-foreground">{a.position ?? "—"}</td>
+                                  <td className="p-2">
+                                    <Input type="number" step="0.01" value={values[a.id] ?? ""} onChange={(e) => setValues({ ...values, [a.id]: e.target.value })} placeholder="—" />
+                                  </td>
+                                  <td className="p-2">
+                                    <Input value={notes[a.id] ?? ""} onChange={(e) => setNotes({ ...notes, [a.id]: e.target.value })} placeholder="Opcional" />
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="border border-border overflow-x-auto mb-4">
+                          <table className="w-full text-sm">
+                            <thead className="bg-secondary text-xs uppercase tracking-wider">
+                              <tr><th className="p-2 text-left">#</th><th className="p-2 text-left">Jugador</th><th className="p-2">Puesto</th><th className="p-2">Valor</th><th className="p-2 text-left">Notas</th></tr>
+                            </thead>
+                            <tbody>
+                              {detailRows.length === 0 ? (
+                                <tr><td colSpan={5} className="p-3 text-sm text-muted-foreground">Sin resultados cargados. Tocá “Editar resultados”.</td></tr>
+                              ) : detailRows.map((r, i) => (
+                                <tr key={r.user_id} className="border-t border-border">
+                                  <td className="p-2 font-display">{i + 1}</td>
+                                  <td className="p-2">{r.name}</td>
+                                  <td className="p-2 text-center text-xs text-muted-foreground">{r.position}</td>
+                                  <td className="p-2 text-center font-display">{r.value} {t.unit}</td>
+                                  <td className="p-2 text-xs text-muted-foreground">{r.notes}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+
+                      <div ref={posChartRef} className="border border-border p-4 mb-4 bg-background">
+                        <h3 className="text-lg mb-1">Comparación por puesto</h3>
+                        {byPosition.length === 0 ? <p className="text-sm text-muted-foreground">Sin resultados cargados.</p> : (
+                          <ResponsiveContainer width="100%" height={260}>
+                            <BarChart data={byPosition}>
+                              <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
+                              <XAxis dataKey="position" stroke="#000" fontSize={10} />
+                              <YAxis stroke="#000" fontSize={11} />
+                              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
+                              <Legend />
+                              <Bar dataKey="promedio" fill="#000" name={`Promedio ${t.unit ?? ""}`} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )}
+                      </div>
+
+                      <div ref={evoChartRef} className="border border-border p-4 bg-background">
+                        <h3 className="text-lg mb-1">Evolución del test</h3>
+                        <p className="text-xs uppercase tracking-wider text-muted-foreground mb-3">Promedio del plantel cada vez que se repitió “{t.name}”</p>
+                        {evolution.length < 2 ? <p className="text-sm text-muted-foreground">Repetí el test con el mismo nombre para ver la evolución.</p> : (
+                          <ResponsiveContainer width="100%" height={240}>
+                            <LineChart data={evolution}>
+                              <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
+                              <XAxis dataKey="date" stroke="#000" fontSize={11} />
+                              <YAxis stroke="#000" fontSize={11} />
+                              <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
+                              <Line type="monotone" dataKey="promedio" stroke="#000" strokeWidth={2} dot={{ r: 3, fill: "#000" }} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ---- Hoja de comparación ---- */}
+          <div className="border border-border p-4 sm:p-6 mb-8">
+            <h2 className="text-xl mb-1 flex items-center gap-2"><BarChart3 className="h-4 w-4" />Hoja de comparación</h2>
+            <p className="text-xs text-muted-foreground mb-4">Elegí uno o más tests. Con uno solo ves los resultados por jugador; con dos o más se comparan entre sí.</p>
+
+            <div className="grid sm:grid-cols-2 gap-1 mb-4 max-h-56 overflow-y-auto border border-border p-2">
+              {tests.map((t) => {
+                const on = compare.includes(t.id);
+                return (
+                  <label key={t.id} className={`flex items-center gap-2 p-2 text-sm cursor-pointer ${on ? "bg-black text-white" : "hover:bg-secondary"}`}>
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={() => setCompare((c) => (on ? c.filter((x) => x !== t.id) : [...c, t.id]))}
+                      className="accent-black"
+                    />
+                    <span className="flex-1">{t.name}</span>
+                    <span className="text-xs opacity-70">{t.eval_date}</span>
+                  </label>
+                );
+              })}
             </div>
-            <Button variant="outline" onClick={exportCsv}><FileDown className="h-4 w-4 mr-2" />CSV</Button>
-            <Button variant="outline" onClick={downloadPdf}><FileDown className="h-4 w-4 mr-2" />PDF</Button>
-            {test && <Button variant="ghost" onClick={() => removeTest(test.id)}><Trash2 className="h-4 w-4" /></Button>}
-          </div>
 
-          {test?.description && <p className="text-xs text-muted-foreground mb-4 border border-border p-3">{test.description}</p>}
+            {cmpTests.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Seleccioná al menos un test.</p>
+            ) : (
+              <>
+                <div className="flex gap-2 mb-4 flex-wrap">
+                  <Button variant="outline" onClick={exportCompareCsv}><FileDown className="h-4 w-4 mr-2" />CSV</Button>
+                  <Button variant="outline" onClick={downloadComparePdf}><FileDown className="h-4 w-4 mr-2" />PDF</Button>
+                  <Button variant="ghost" onClick={() => setCompare([])}>Limpiar selección</Button>
+                </div>
 
-          <div className="border border-border mb-8 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="p-2 text-left">Jugador</th>
-                  <th className="p-2 text-left">Puesto</th>
-                  <th className="p-2 text-left w-32">Valor {test?.unit ? `(${test.unit})` : ""}</th>
-                  <th className="p-2 text-left">Notas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {athletes.map((a) => (
-                  <tr key={a.id} className="border-t border-border">
-                    <td className="p-2"><Link to="/coach/atleta/$id" params={{ id: a.id }} className="hover:underline">{fullName(a)}</Link></td>
-                    <td className="p-2 text-xs text-muted-foreground">{a.position ?? "—"}</td>
-                    <td className="p-2">
-                      <Input type="number" step="0.01" value={values[a.id] ?? ""} onChange={(e) => setValues({ ...values, [a.id]: e.target.value })} placeholder="—" />
-                    </td>
-                    <td className="p-2">
-                      <Input value={notes[a.id] ?? ""} onChange={(e) => setNotes({ ...notes, [a.id]: e.target.value })} placeholder="Opcional" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <Button onClick={saveResults} disabled={saving} className="w-full mb-8" size="lg">{saving ? "Guardando..." : "Guardar resultados"}</Button>
+                <div ref={cmpChartRef} className="border border-border p-4 mb-4 bg-background">
+                  <h3 className="text-lg mb-3">Promedio por puesto</h3>
+                  {cmpByPosition.length === 0 ? <p className="text-sm text-muted-foreground">Sin resultados en los tests elegidos.</p> : (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={cmpByPosition}>
+                        <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
+                        <XAxis dataKey="position" stroke="#000" fontSize={10} />
+                        <YAxis stroke="#000" fontSize={11} />
+                        <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
+                        <Legend />
+                        {cmpTests.map((t, i) => (
+                          <Bar key={t.id} dataKey={t.id} name={cmpLabel(t)} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
 
-          <div ref={posChartRef} className="border border-border p-6 mb-4 bg-background">
-            <h2 className="text-xl mb-1">Comparación por puesto</h2>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">Promedio del test seleccionado</p>
-            {byPosition.length === 0 ? <p className="text-sm text-muted-foreground">Sin resultados cargados.</p> : (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={byPosition}>
-                  <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
-                  <XAxis dataKey="position" stroke="#000" fontSize={10} />
-                  <YAxis stroke="#000" fontSize={11} />
-                  <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
-                  <Legend />
-                  <Bar dataKey="promedio" fill="#000" name={`Promedio ${test?.unit ?? ""}`} />
-                </BarChart>
-              </ResponsiveContainer>
+                <div className="border border-border overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-secondary text-xs uppercase tracking-wider">
+                      <tr>
+                        <th className="p-2 text-left">Jugador</th>
+                        <th className="p-2">Puesto</th>
+                        {cmpTests.map((t) => <th key={t.id} className="p-2 whitespace-nowrap">{t.name}<span className="block font-normal normal-case opacity-70">{t.eval_date} {t.unit ? `(${t.unit})` : ""}</span></th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cmpAthleteRows.length === 0 ? (
+                        <tr><td colSpan={cmpTests.length + 2} className="p-3 text-sm text-muted-foreground">Sin resultados cargados.</td></tr>
+                      ) : cmpAthleteRows.map((r) => (
+                        <tr key={r.id} className="border-t border-border">
+                          <td className="p-2"><Link to="/coach/atleta/$id" params={{ id: r.id }} className="hover:underline">{r.name}</Link></td>
+                          <td className="p-2 text-center text-xs text-muted-foreground">{r.position}</td>
+                          {cmpTests.map((t) => <td key={t.id} className="p-2 text-center font-display">{r[t.id] ?? "—"}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
-          </div>
-
-          <div ref={evoChartRef} className="border border-border p-6 mb-8 bg-background">
-            <h2 className="text-xl mb-1">Evolución del test</h2>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">Promedio del plantel cada vez que se repitió “{test?.name}”</p>
-            {evolution.length < 2 ? <p className="text-sm text-muted-foreground">Repetí el test con el mismo nombre para ver la evolución.</p> : (
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={evolution}>
-                  <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" stroke="#000" fontSize={11} />
-                  <YAxis stroke="#000" fontSize={11} />
-                  <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
-                  <Line type="monotone" dataKey="promedio" stroke="#000" strokeWidth={2} dot={{ r: 3, fill: "#000" }} />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          <h2 className="text-xl mb-3">Ranking del test</h2>
-          <div className="border border-border overflow-x-auto mb-8">
-            <table className="w-full text-sm">
-              <thead className="bg-secondary text-xs uppercase tracking-wider">
-                <tr><th className="p-2 text-left">#</th><th className="p-2 text-left">Jugador</th><th className="p-2">Puesto</th><th className="p-2">Valor</th></tr>
-              </thead>
-              <tbody>
-                {detailRows.map((r, i) => (
-                  <tr key={r.user_id} className="border-t border-border">
-                    <td className="p-2 font-display">{i + 1}</td>
-                    <td className="p-2">{r.name}</td>
-                    <td className="p-2 text-center text-xs text-muted-foreground">{r.position}</td>
-                    <td className="p-2 text-center font-display">{r.value} {test?.unit}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </>
       )}
