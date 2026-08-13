@@ -666,6 +666,8 @@ function CoachDash() {
           </div>
         </div>
       </div>
+      )}
+
 
       <Dialog open={reminderOpen} onOpenChange={setReminderOpen}>
         <DialogContent>
