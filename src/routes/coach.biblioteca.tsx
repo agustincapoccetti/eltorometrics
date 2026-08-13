@@ -36,7 +36,11 @@ import {
   isFileResource,
   fileIcon,
   fileNameOf,
+  filePathOf,
+  LIBRARY_BUCKET,
+  FILE_URL_PREFIX,
 } from "@/lib/library";
+
 
 type LibraryItem = {
   id: string;
