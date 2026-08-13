@@ -18,7 +18,7 @@ function RegistroPage() {
   const [role, setRole] = useState<"atleta" | "coach">("atleta");
   const [coachType, setCoachType] = useState<string>("preparador_fisico");
   const [form, setForm] = useState({
-    email: "", password: "", full_name: "", position: "", weight: "", height: "",
+    email: "", password: "", full_name: "", last_name: "", position: "", weight: "", height: "",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
