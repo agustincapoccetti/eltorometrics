@@ -32,10 +32,11 @@ function Onboarding() {
     (async () => {
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (data?.onboarded) { navigate({ to: "/atleta" }); return; }
+      const meta = (user.user_metadata ?? {}) as Record<string, string>;
       if (data) {
         setForm({
-          full_name: data.full_name ?? "",
-          last_name: data.last_name ?? "",
+          full_name: data.full_name || meta.full_name || "",
+          last_name: data.last_name || meta.last_name || "",
           age: data.age?.toString() ?? "",
           position: data.position ?? "",
           weight: data.weight?.toString() ?? "",
