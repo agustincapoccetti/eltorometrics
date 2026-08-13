@@ -155,6 +155,83 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluation_results: {
+        Row: {
+          created_at: string
+          created_by: string
+          evaluation_id: string
+          id: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          evaluation_id: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          evaluation_id?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_results_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluations: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          eval_date: string
+          higher_is_better: boolean
+          id: string
+          name: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          eval_date?: string
+          higher_is_better?: boolean
+          id?: string
+          name: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          eval_date?: string
+          higher_is_better?: boolean
+          id?: string
+          name?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gym_observations: {
         Row: {
           created_at: string

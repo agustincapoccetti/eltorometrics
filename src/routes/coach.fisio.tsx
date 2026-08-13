@@ -169,8 +169,17 @@ function CoachPhysio() {
   }
   async function remove(id: string) {
     if (!confirm("¿Eliminar esta cita?")) return;
+    const appt = appointments.find((a) => a.id === id);
     const { error } = await supabase.from("physio_appointments").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
+    if (appt) {
+      await createNotifications({
+        user_ids: [appt.user_id],
+        title: "Cita de fisio eliminada",
+        body: `${typeLabel(appt.appointment_type)} · ${appt.appointment_date}${appt.appointment_time ? ` ${appt.appointment_time.slice(0, 5)}` : ""} ya no está agendada`,
+        link: "/atleta/fisio", kind: "fisio", created_by: user!.id,
+      });
+    }
     load();
   }
 
@@ -179,6 +188,14 @@ function CoachPhysio() {
     if (error) { toast.error(error.message); return; }
     setAppointments((cur) => cur.map((x) => x.id === a.id ? { ...x, status } : x));
     toast.success("Estado actualizado");
+    if (status === "cancelled") {
+      await createNotifications({
+        user_ids: [a.user_id],
+        title: "Cita de fisio cancelada",
+        body: `${typeLabel(a.appointment_type)} · ${a.appointment_date}${a.appointment_time ? ` ${a.appointment_time.slice(0, 5)}` : ""}`,
+        link: "/atleta/fisio", kind: "fisio", created_by: user!.id,
+      });
+    }
   }
 
   async function downloadPdf() {

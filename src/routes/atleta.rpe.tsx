@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { Shell } from "@/components/Shell";
-import { SubTabs, HISTORIAL_TABS, ENTRENO_TABS } from "@/components/SubTabs";
+import { SubTabs, HISTORIAL_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, Lock } from "lucide-react";
+import { Trash2, Lock, CalendarOff, Clock } from "lucide-react";
 import { WeekStrip } from "@/components/WeekStrip";
-import { isCurrentWeek, startOfWeek, isoDate } from "@/lib/week-utils";
+import { isCurrentWeek, isoDate, weekDays, withinHoursAfter, isTodayOrPast } from "@/lib/week-utils";
 import { rpeColor } from "@/lib/score-colors";
 
 export const Route = createFileRoute("/atleta/rpe")({ component: () => <Protected requireRole="atleta"><RpeForm /></Protected> });
@@ -25,39 +25,75 @@ function RpeForm() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [score, setScore] = useState<number | null>(null);
-  const [date, setDate] = useState(isoDate(new Date()));
   const [label, setLabel] = useState("");
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [recent, setRecent] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
+
+  const week = useMemo(() => weekDays(), []);
+  const [date, setDate] = useState<string>(isoDate(new Date()));
 
   async function loadRecent() {
     if (!user) return;
-    const prev = new Date(); prev.setDate(prev.getDate() - 14);
-    const { data } = await supabase.from("rpe_entries").select("*").eq("user_id", user.id).gte("session_date", isoDate(prev)).order("session_date", { ascending: false });
+    const { data } = await supabase.from("rpe_entries").select("*").eq("user_id", user.id).gte("session_date", week[0]!).lte("session_date", week[6]!).order("session_date", { ascending: false });
     setRecent(data ?? []);
   }
-  useEffect(() => { loadRecent(); }, [user]);
+
+  // Entrenamientos programados por el coach en la semana en curso
+  async function loadSessions() {
+    const { data } = await supabase.from("calendar_events")
+      .select("event_date, event_time, name, type")
+      .eq("type", "training")
+      .gte("event_date", week[0]!).lte("event_date", week[6]!)
+      .order("event_date");
+    setSessions(data ?? []);
+  }
+
+  useEffect(() => { loadRecent(); loadSessions(); }, [user]);
+
+  const trainingDates = useMemo(() => new Set(sessions.map((s) => s.event_date)), [sessions]);
+  const allowedIndices = useMemo(() => week.map((iso, i) => ({ iso, i })).filter(({ iso }) => trainingDates.has(iso)).map(({ i }) => i), [week, trainingDates]);
+
+  // Al cargar, elegí el primer entrenamiento pendiente aún puntuable
+  useEffect(() => {
+    if (!trainingDates.size) return;
+    if (trainingDates.has(date)) return;
+    const candidates = week.filter((d) => trainingDates.has(d) && isTodayOrPast(d) && withinHoursAfter(d, 48));
+    setDate(candidates[candidates.length - 1] ?? Array.from(trainingDates).sort().reverse()[0] ?? date);
+  }, [trainingDates]);
 
   // Sync form with date selection (load existing entry for that date)
   useEffect(() => {
     const e = recent.find((x) => x.session_date === date);
     if (e) { setEditingId(e.id); setScore(e.rpe_score); setLabel(e.session_label ?? ""); }
-    else { setEditingId(null); setScore(null); setLabel(""); }
-  }, [date, recent]);
+    else {
+      setEditingId(null); setScore(null);
+      setLabel(sessions.find((s) => s.event_date === date)?.name ?? "");
+    }
+  }, [date, recent, sessions]);
 
   const completed = useMemo(() => new Set(recent.map((r) => r.session_date)), [recent]);
-  const prev = (() => { const d = new Date(); d.setDate(d.getDate() - 7); return d; })();
-  const prevWeekCompleted = useMemo(() => {
-    const start = isoDate(startOfWeek(prev));
-    const end = (() => { const e = new Date(startOfWeek(prev)); e.setDate(e.getDate() + 6); return isoDate(e); })();
-    return new Set(recent.filter((r) => r.session_date >= start && r.session_date <= end).map((r) => r.session_date));
-  }, [recent]);
+  const lockedDates = useMemo(
+    () => new Set(week.filter((d) => trainingDates.has(d) && (!isTodayOrPast(d) || !withinHoursAfter(d, 48)))),
+    [week, trainingDates],
+  );
 
-  const editable = isCurrentWeek(date);
+  const isTraining = trainingDates.has(date);
+  const expired = isTodayOrPast(date) && !withinHoursAfter(date, 48);
+  const future = !isTodayOrPast(date);
+  const editable = isCurrentWeek(date) && isTraining && !expired && !future;
+
+  const blockedMsg = !isTraining
+    ? "Ese día no hay entrenamiento programado."
+    : future
+      ? "Ese entrenamiento todavía no ocurrió. Podrás puntuarlo cuando termine."
+      : expired
+        ? "Pasaron más de 48 hs desde el entrenamiento: la carga quedó cerrada."
+        : null;
 
   async function submit() {
-    if (!editable) { toast.error("Solo podés editar la semana actual"); return; }
+    if (!editable) { toast.error(blockedMsg ?? "No podés puntuar ese día"); return; }
     if (score === null) { toast.error("Seleccioná un valor"); return; }
     setSaving(true);
     if (editingId) {
@@ -73,13 +109,13 @@ function RpeForm() {
       });
       setSaving(false);
       if (error) { toast.error(error.message); return; }
-      toast.success("RPE registrado");
+      toast.success("RPE registrado · quedaste presente en ese entrenamiento");
     }
     loadRecent();
   }
 
   async function removeEntry(id: string, entryDate: string) {
-    if (!isCurrentWeek(entryDate)) { toast.error("Solo podés borrar la semana actual"); return; }
+    if (!isCurrentWeek(entryDate) || !withinHoursAfter(entryDate, 48)) { toast.error("El plazo de 48 hs ya venció"); return; }
     if (!confirm("¿Eliminar este registro?")) return;
     const { error } = await supabase.from("rpe_entries").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
@@ -90,15 +126,38 @@ function RpeForm() {
   return (
     <Shell title="RPE">
       <SubTabs tabs={HISTORIAL_TABS} />
-      <p className="text-sm text-muted-foreground mb-4">Escala de Esfuerzo Percibido — post entrenamiento. Al enviarlo, tu presente de ese día queda marcado automáticamente.</p>
+      <p className="text-sm text-muted-foreground mb-2">
+        Escala de Esfuerzo Percibido · <strong>semana en curso</strong>. Al enviarlo, tu presente de ese entrenamiento queda marcado automáticamente.
+      </p>
+      <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
+        <Clock className="h-3 w-3" /> Tenés <strong>48 hs</strong> para puntuar cada entrenamiento. Los días en gris oscuro no tienen entrenamiento programado.
+      </p>
 
-      <WeekStrip completed={completed} selected={date} onSelect={setDate} showPreviousWeek previousCompleted={prevWeekCompleted} />
+      {allowedIndices.length === 0 ? (
+        <div className="border border-border p-6 mb-6 text-center">
+          <CalendarOff className="h-6 w-6 mx-auto mb-2" />
+          <p className="text-sm font-medium">Esta semana no hay entrenamientos programados</p>
+          <p className="text-xs text-muted-foreground mt-1">Cuando el coach cargue las sesiones en el calendario, vas a poder puntuarlas acá.</p>
+        </div>
+      ) : (
+        <WeekStrip
+          completed={completed}
+          selected={date}
+          onSelect={setDate}
+          allowedIndices={allowedIndices}
+          lockedDates={lockedDates}
+          label="Semana en curso · blanco = entrenamiento · gris oscuro = sin entreno"
+        />
+      )}
 
       <div className="border border-border p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl">{editingId ? "Editar registro" : "¿Qué tan duro fue hoy?"}</h2>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h2 className="text-xl">{editingId ? "Editar registro" : "¿Qué tan duro fue el entrenamiento?"}</h2>
           {!editable && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Lock className="h-3 w-3" />Solo lectura</span>}
         </div>
+        {blockedMsg && (
+          <p className="text-xs mb-4 border border-border bg-secondary p-2 uppercase tracking-wider">{blockedMsg}</p>
+        )}
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
           0 reposo · 3 moderado · 5 duro · 7 muy duro · 10 máximo
         </p>
@@ -128,13 +187,12 @@ function RpeForm() {
             {LABELS[score]} · {rpeColor(score).label}
           </p>
         )}
-
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <div>
-          <Label htmlFor="d">Fecha</Label>
-          <Input id="d" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Label>Fecha del entrenamiento</Label>
+          <Input value={date} readOnly disabled />
         </div>
         <div>
           <Label htmlFor="l">Sesión (opcional)</Label>
@@ -149,10 +207,10 @@ function RpeForm() {
 
       {recent.length > 0 && (
         <>
-          <h3 className="text-lg mb-3">Mis registros recientes</h3>
+          <h3 className="text-lg mb-3">Mis registros de esta semana</h3>
           <div className="border border-border">
             {recent.map((e) => {
-              const canEdit = isCurrentWeek(e.session_date);
+              const canEdit = isCurrentWeek(e.session_date) && withinHoursAfter(e.session_date, 48);
               return (
                 <div key={e.id} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center px-3 py-2 border-b border-border last:border-0">
                   <span className="font-display text-xl w-8 text-center">{e.rpe_score}</span>

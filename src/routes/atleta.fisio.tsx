@@ -328,7 +328,7 @@ function Section({ title, items, onEdit, onDelete }: any) {
         {items.map((a: any) => (
           <div
             key={a.id}
-            className="flex items-start gap-3 p-3 border-b border-border last:border-b-0"
+            className={`flex items-start gap-3 p-3 border-b border-border last:border-b-0 ${a.status === "cancelled" ? "bg-red-50 border-l-4 border-l-red-600" : ""}`}
           >
             <span className="text-xl mt-0.5 flex-shrink-0" aria-hidden>
               {typeIcon(a.appointment_type)}
@@ -341,11 +341,11 @@ function Section({ title, items, onEdit, onDelete }: any) {
                   month: "short",
                 })}
                 {a.appointment_time && ` · ${a.appointment_time.slice(0, 5)}`}
-                <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span className={`ml-2 text-[10px] uppercase tracking-wider ${a.status === "cancelled" ? "text-red-600 font-bold" : "text-muted-foreground"}`}>
                   {a.status === "attended"
                     ? "Asistida"
                     : a.status === "cancelled"
-                      ? "Cancelada"
+                      ? "Cancelada · no asististe"
                       : a.status === "requested"
                         ? "Solicitada"
                         : "Programada"}
