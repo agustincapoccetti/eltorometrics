@@ -98,9 +98,7 @@ export function PanelSummary() {
         <div className="space-y-3">
           <div>
             <p className="text-xs uppercase tracking-wider">Bienestar hoy · <span className="font-display">{pct(missingWellness.length)}%</span></p>
-            {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : (
-              <p className="text-xs text-muted-foreground mt-1">Faltan: {missingWellness.map((a) => a.name).join(", ")}</p>
-            )}
+            {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : <MissingChips list={missingWellness} />}
           </div>
           <div>
             <p className="text-xs uppercase tracking-wider">
@@ -108,7 +106,7 @@ export function PanelSummary() {
             </p>
             {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
               : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
-              : <p className="text-xs text-muted-foreground mt-1">Faltan: {missingRpe.map((a) => a.name).join(", ")}</p>}
+              : <MissingChips list={missingRpe} />}
           </div>
         </div>
       </Card>
