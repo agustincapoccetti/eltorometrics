@@ -95,9 +95,13 @@ interface Row {
   avgFatigue: number | null;
 }
 
+type PanelTab = "resumen" | "semaforo" | "carga" | "informes";
+
 function CoachDash() {
+  const [tab, setTab] = useState<PanelTab>("resumen");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [period, setPeriod] = useState<Period>("week");
   const [positionFilter, setPositionFilter] = useState("all");
 
