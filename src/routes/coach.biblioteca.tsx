@@ -442,7 +442,10 @@ function CoachLibrary() {
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={save}>{editing ? "Actualizar" : "Guardar"}</Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "Guardando…" : editing ? "Actualizar" : "Guardar"}
+            </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>
