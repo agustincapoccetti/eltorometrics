@@ -354,19 +354,62 @@ function CoachLibrary() {
               </Select>
             </div>
             <div>
-              <Label>Enlace (video o web)</Label>
-              <Input
-                value={form.url}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    url: e.target.value,
-                    thumbnail_url: form.thumbnail_url || deriveThumbnail(e.target.value) || "",
-                  })
-                }
-                placeholder="https://..."
-              />
+              <Label>Tipo de recurso</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {(
+                  [
+                    { v: "link", l: "🔗 Enlace / video" },
+                    { v: "file", l: "📄 Archivo / PDF" },
+                  ] as const
+                ).map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => setMode(o.v)}
+                    className={`px-3 py-2 text-xs uppercase tracking-wider border ${mode === o.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}
+                  >
+                    {o.l}
+                  </button>
+                ))}
+              </div>
             </div>
+            {mode === "link" ? (
+              <div>
+                <Label>Enlace (video o web)</Label>
+                <Input
+                  value={isFileResource(form.url) ? "" : form.url}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      url: e.target.value,
+                      thumbnail_url: form.thumbnail_url || deriveThumbnail(e.target.value) || "",
+                    })
+                  }
+                  placeholder="https://..."
+                />
+              </div>
+            ) : (
+              <div>
+                <Label>Archivo (PDF, Word, Excel, imagen…)</Label>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.txt,image/*,video/*"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  className="text-xs"
+                />
+                {file ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {file.name} · {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                ) : isFileResource(form.url) ? (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Actual: {fileIcon(form.url)} {fileNameOf(form.url)} — elige otro archivo para
+                    reemplazarlo.
+                  </p>
+                ) : null}
+              </div>
+            )}
+
             <div>
               <Label>Miniatura (opcional)</Label>
               <Input
