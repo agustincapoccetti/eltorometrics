@@ -33,3 +33,16 @@ export function weekDays(d = new Date()): string[] {
   });
 }
 export const DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
+
+/** true si `iso` ya pasó y la ventana de carga (en horas desde el fin de ese día) sigue abierta */
+export function withinHoursAfter(iso: string, hours: number): boolean {
+  const end = new Date(`${iso}T00:00:00`);
+  end.setDate(end.getDate() + 1); // fin del día
+  const deadline = end.getTime() + hours * 3600 * 1000;
+  return Date.now() <= deadline;
+}
+
+/** true si `iso` es hoy o ya pasó (no se puede puntuar el futuro) */
+export function isTodayOrPast(iso: string): boolean {
+  return iso <= isoDate(new Date());
+}
