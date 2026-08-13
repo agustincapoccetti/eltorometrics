@@ -17,6 +17,7 @@ import {
   ClipboardList,
   ShieldCheck,
   UserCog,
+  BellRing,
   type LucideIcon,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
@@ -53,6 +54,7 @@ const COACH_NAV: NavItem[] = [
   { to: "/coach/recuperacion", label: "Recup.", icon: HeartPulse },
   { to: "/coach/fisio", label: "Fisio", icon: Stethoscope },
   { to: "/coach/biblioteca", label: "Biblio", icon: BookOpen },
+  { to: "/coach/notificaciones", label: "Avisos", icon: BellRing },
 ];
 
 function NavDock({

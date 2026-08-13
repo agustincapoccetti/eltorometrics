@@ -22,6 +22,21 @@ export async function createNotifications(input: CreateNotifInput) {
     created_by: input.created_by ?? null,
   }));
   await supabase.from("notifications").insert(rows);
+
+  // Además del aviso in-app, enviamos push real a los dispositivos suscritos.
+  try {
+    const { sendPushToTargets } = await import("@/lib/push.functions");
+    await sendPushToTargets({
+      data: {
+        userIds: input.user_ids,
+        title: input.title,
+        body: input.body,
+        link: input.link ?? "/",
+      },
+    });
+  } catch (e) {
+    console.warn("[push] no se pudo enviar la notificación push", e);
+  }
 }
 
 export async function notifyAllAthletes(input: Omit<CreateNotifInput, "user_ids">) {

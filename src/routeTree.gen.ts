@@ -20,6 +20,7 @@ import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
 import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
 import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
 import { Route as CoachPartidosRouteImport } from './routes/coach.partidos'
+import { Route as CoachNotificacionesRouteImport } from './routes/coach.notificaciones'
 import { Route as CoachJugadoresRouteImport } from './routes/coach.jugadores'
 import { Route as CoachGymRouteImport } from './routes/coach.gym'
 import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
@@ -37,6 +38,7 @@ import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
 import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
 import { Route as AtletaBibliotecaRouteImport } from './routes/atleta.biblioteca'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
+import { Route as ApiPublicHooksPushRemindersRouteImport } from './routes/api/public/hooks/push-reminders'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -91,6 +93,11 @@ const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
 const CoachPartidosRoute = CoachPartidosRouteImport.update({
   id: '/coach/partidos',
   path: '/coach/partidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachNotificacionesRoute = CoachNotificacionesRouteImport.update({
+  id: '/coach/notificaciones',
+  path: '/coach/notificaciones',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachJugadoresRoute = CoachJugadoresRouteImport.update({
@@ -178,6 +185,12 @@ const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
   path: '/coach/atleta/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksPushRemindersRoute =
+  ApiPublicHooksPushRemindersRouteImport.update({
+    id: '/api/public/hooks/push-reminders',
+    path: '/api/public/hooks/push-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -201,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
   '/coach/jugadores': typeof CoachJugadoresRoute
+  '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
@@ -208,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
+  '/api/public/hooks/push-reminders': typeof ApiPublicHooksPushRemindersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -231,6 +246,7 @@ export interface FileRoutesByTo {
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
   '/coach/jugadores': typeof CoachJugadoresRoute
+  '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
@@ -238,6 +254,7 @@ export interface FileRoutesByTo {
   '/atleta': typeof AtletaIndexRoute
   '/coach': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
+  '/api/public/hooks/push-reminders': typeof ApiPublicHooksPushRemindersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -262,6 +279,7 @@ export interface FileRoutesById {
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
   '/coach/jugadores': typeof CoachJugadoresRoute
+  '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
@@ -269,6 +287,7 @@ export interface FileRoutesById {
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
+  '/api/public/hooks/push-reminders': typeof ApiPublicHooksPushRemindersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -294,6 +313,7 @@ export interface FileRouteTypes {
     | '/coach/fisio'
     | '/coach/gym'
     | '/coach/jugadores'
+    | '/coach/notificaciones'
     | '/coach/partidos'
     | '/coach/recuperacion'
     | '/coach/semaforo'
@@ -301,6 +321,7 @@ export interface FileRouteTypes {
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
+    | '/api/public/hooks/push-reminders'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -324,6 +345,7 @@ export interface FileRouteTypes {
     | '/coach/fisio'
     | '/coach/gym'
     | '/coach/jugadores'
+    | '/coach/notificaciones'
     | '/coach/partidos'
     | '/coach/recuperacion'
     | '/coach/semaforo'
@@ -331,6 +353,7 @@ export interface FileRouteTypes {
     | '/atleta'
     | '/coach'
     | '/coach/atleta/$id'
+    | '/api/public/hooks/push-reminders'
   id:
     | '__root__'
     | '/'
@@ -354,6 +377,7 @@ export interface FileRouteTypes {
     | '/coach/fisio'
     | '/coach/gym'
     | '/coach/jugadores'
+    | '/coach/notificaciones'
     | '/coach/partidos'
     | '/coach/recuperacion'
     | '/coach/semaforo'
@@ -361,6 +385,7 @@ export interface FileRouteTypes {
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
+    | '/api/public/hooks/push-reminders'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -385,6 +410,7 @@ export interface RootRouteChildren {
   CoachFisioRoute: typeof CoachFisioRoute
   CoachGymRoute: typeof CoachGymRoute
   CoachJugadoresRoute: typeof CoachJugadoresRoute
+  CoachNotificacionesRoute: typeof CoachNotificacionesRoute
   CoachPartidosRoute: typeof CoachPartidosRoute
   CoachRecuperacionRoute: typeof CoachRecuperacionRoute
   CoachSemaforoRoute: typeof CoachSemaforoRoute
@@ -392,6 +418,7 @@ export interface RootRouteChildren {
   AtletaIndexRoute: typeof AtletaIndexRoute
   CoachIndexRoute: typeof CoachIndexRoute
   CoachAtletaIdRoute: typeof CoachAtletaIdRoute
+  ApiPublicHooksPushRemindersRoute: typeof ApiPublicHooksPushRemindersRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -471,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/coach/partidos'
       fullPath: '/coach/partidos'
       preLoaderRoute: typeof CoachPartidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/notificaciones': {
+      id: '/coach/notificaciones'
+      path: '/coach/notificaciones'
+      fullPath: '/coach/notificaciones'
+      preLoaderRoute: typeof CoachNotificacionesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/jugadores': {
@@ -592,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoachAtletaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/push-reminders': {
+      id: '/api/public/hooks/push-reminders'
+      path: '/api/public/hooks/push-reminders'
+      fullPath: '/api/public/hooks/push-reminders'
+      preLoaderRoute: typeof ApiPublicHooksPushRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -617,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachFisioRoute: CoachFisioRoute,
   CoachGymRoute: CoachGymRoute,
   CoachJugadoresRoute: CoachJugadoresRoute,
+  CoachNotificacionesRoute: CoachNotificacionesRoute,
   CoachPartidosRoute: CoachPartidosRoute,
   CoachRecuperacionRoute: CoachRecuperacionRoute,
   CoachSemaforoRoute: CoachSemaforoRoute,
@@ -624,6 +666,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaIndexRoute: AtletaIndexRoute,
   CoachIndexRoute: CoachIndexRoute,
   CoachAtletaIdRoute: CoachAtletaIdRoute,
+  ApiPublicHooksPushRemindersRoute: ApiPublicHooksPushRemindersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
