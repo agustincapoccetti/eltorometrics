@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { EvaluationsPanel } from "@/components/EvaluationsPanel";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -174,6 +175,7 @@ function Perfil() {
           )}
         </>
       )}
+    {user && <EvaluationsPanel userId={user.id} />}
     </Shell>
   );
 }

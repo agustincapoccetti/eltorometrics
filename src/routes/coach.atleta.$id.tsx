@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { SubTabs, PLANTEL_TABS } from "@/components/SubTabs";
 import { BodyMap } from "@/components/BodyMap";
+import { EvaluationsPanel } from "@/components/EvaluationsPanel";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -287,13 +288,17 @@ function AthleteDetail() {
             title="Zonas de dolor del atleta"
           />
 
+          <div className="mt-4">
+            <EvaluationsPanel userId={id} />
+          </div>
+
           {physio.length > 0 && (
             <div className="border border-border p-6 mt-4">
               <h3 className="text-lg mb-4">Citas con fisio ({physio.length})</h3>
               <div className="space-y-2">
                 {physio.slice(0, 8).map((a) => (
-                  <div key={a.id} className="border-l-2 border-primary pl-3">
-                    <p className="text-xs uppercase tracking-wider font-display">{a.appointment_date} · {a.status}</p>
+                  <div key={a.id} className={`border-l-2 pl-3 ${a.status === "cancelled" ? "border-red-600" : "border-primary"}`}>
+                    <p className={`text-xs uppercase tracking-wider font-display ${a.status === "cancelled" ? "text-red-600" : ""}`}>{a.appointment_date} · {a.status === "cancelled" ? "cancelada · no asistió" : a.status}</p>
                     <p className="text-sm">{(a.reasons ?? []).join(" · ")}</p>
                     {a.notes && <p className="text-xs italic text-muted-foreground">{a.notes}</p>}
                   </div>
