@@ -32,6 +32,10 @@ import {
   getThumbnail,
   deriveThumbnail,
   getEmbedUrl,
+  openResource,
+  isFileResource,
+  fileIcon,
+  fileNameOf,
 } from "@/lib/library";
 
 type LibraryItem = {
@@ -203,7 +207,7 @@ function CoachLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="relative block aspect-video bg-muted overflow-hidden group text-left"
                   >
@@ -222,7 +226,7 @@ function CoachLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="aspect-video bg-muted flex items-center justify-center text-2xl"
                   >
@@ -260,7 +264,7 @@ function CoachLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="text-xs text-primary mt-2 inline-flex items-center gap-1 hover:underline text-left"
                   >

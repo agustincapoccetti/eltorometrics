@@ -19,6 +19,10 @@ import {
   categoryIcon,
   getThumbnail,
   getEmbedUrl,
+  openResource,
+  isFileResource,
+  fileIcon,
+  fileNameOf,
 } from "@/lib/library";
 
 type LibraryItem = {
@@ -129,7 +133,7 @@ function AthleteLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="relative aspect-video bg-muted overflow-hidden text-left"
                   >
@@ -148,7 +152,7 @@ function AthleteLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="aspect-video bg-muted flex items-center justify-center text-2xl"
                   >
@@ -166,7 +170,7 @@ function AthleteLibrary() {
                   <button
                     type="button"
                     onClick={() =>
-                      embed ? setPreview(it) : window.open(it.url, "_blank", "noopener,noreferrer")
+                      embed ? setPreview(it) : openResource(it)
                     }
                     className="text-xs text-primary mt-2 inline-flex items-center gap-1 hover:underline text-left"
                   >
