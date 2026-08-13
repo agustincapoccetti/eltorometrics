@@ -378,18 +378,39 @@ function CoachDash() {
     });
   }
 
+  const TABS: { k: PanelTab; label: string }[] = [
+    { k: "resumen", label: "Resumen" },
+    { k: "semaforo", label: "Semáforo" },
+    { k: "carga", label: "Carga" },
+    { k: "informes", label: "Informes" },
+  ];
+
   return (
     <Shell title="Panel del preparador">
-      <PanelSummary />
-      <section className="mb-10">
+      <nav className="mb-6 flex gap-1 border-2 border-black p-1 bg-white rounded-xl w-full overflow-x-auto no-scrollbar">
+        {TABS.map((t) => (
+          <button
+            key={t.k}
+            onClick={() => setTab(t.k)}
+            className={`flex-1 text-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${tab === t.k ? "bg-black text-white" : "text-black hover:bg-black hover:text-white"}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-          Semáforo de riesgo
-        </h2>
+      {tab === "resumen" && <PanelSummary />}
+
+      {tab === "semaforo" && (
+      <section className="mb-10">
         <SemaforoView />
       </section>
+      )}
 
+      {tab === "carga" && (
+      <>
       <div className="mb-8">
+
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <div>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">
