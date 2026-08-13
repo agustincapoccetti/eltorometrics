@@ -378,7 +378,9 @@ function CoachDash() {
 
   return (
     <Shell title="Panel del preparador">
+      <PanelSummary />
       <section className="mb-10">
+
         <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
           Semáforo de riesgo
         </h2>
