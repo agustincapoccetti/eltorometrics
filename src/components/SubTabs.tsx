@@ -13,6 +13,29 @@ export const ENTRENO_TABS: SubTab[] = [
   { to: "/atleta/fisio", label: "Fisio" },
 ];
 
+// ---- Coach ----
+export const PLANTEL_TABS: SubTab[] = [
+  { to: "/coach/jugadores", label: "Jugadores" },
+  { to: "/coach/cuestionarios", label: "Cuestionarios" },
+];
+
+export const PLANIFICACION_TABS: SubTab[] = [
+  { to: "/coach/gym", label: "Gym" },
+  { to: "/coach/calendario", label: "Calendario" },
+  { to: "/coach/partidos", label: "Partidos" },
+];
+
+export const FISIO_TABS: SubTab[] = [
+  { to: "/coach/fisio", label: "Fisio" },
+  { to: "/coach/recuperacion", label: "Recuperación" },
+];
+
+export const ADMIN_TABS: SubTab[] = [
+  { to: "/coach/usuarios", label: "Usuarios" },
+  { to: "/coach/coaches", label: "Cuerpo técnico" },
+  { to: "/coach/biblioteca", label: "Biblioteca" },
+];
+
 export function SubTabs({ tabs }: { tabs: SubTab[] }) {
   return (
     <nav className="mb-6 flex gap-1 border-2 border-black p-1 bg-white rounded-xl w-full overflow-x-auto no-scrollbar">
