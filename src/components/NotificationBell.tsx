@@ -40,13 +40,21 @@ export function NotificationBell() {
   }, [user]);
 
   async function enablePush() {
-    const p = await requestPushPermission();
-    setPerm(p);
-    if (p === "granted") {
-      toast.success("Notificaciones activadas");
-      tryShowPush("El Toro Rugby", "Notificaciones activadas correctamente", "/");
-    } else if (p === "denied") {
-      toast.error("Permiso denegado. Activalo desde la configuración del navegador.");
+    const { enableWebPush, testWebPush } = await import("@/lib/push-client");
+    const res = await enableWebPush();
+    setPerm(getPushPermission());
+    if (res.ok) {
+      toast.success("Notificaciones activadas en este dispositivo");
+      try { await testWebPush(); } catch { tryShowPush("El Toro Rugby", "Notificaciones activadas", "/"); }
+      return;
+    }
+    if (res.reason === "denied") {
+      toast.error("Permiso denegado. Actívalo desde la configuración del navegador.");
+    } else if (res.reason === "unsupported") {
+      toast.error("Este navegador no admite notificaciones push.");
+    } else {
+      const p = await requestPushPermission();
+      setPerm(p);
     }
   }
 
