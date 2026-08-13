@@ -584,7 +584,12 @@ function CoachDash() {
         </div>
       </div>
 
+      </div>
+      )}
+
+      {tab === "informes" && (
       <div className="grid md:grid-cols-2 gap-4">
+
         <div className="border border-border p-6">
           <h2 className="text-xl mb-1">Exportar datos</h2>
           <p className="text-xs uppercase tracking-wider text-muted-foreground mb-4">
