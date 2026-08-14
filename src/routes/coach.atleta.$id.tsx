@@ -18,6 +18,16 @@ import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { exportPdf } from "@/lib/pdf-export";
+import { fmtDateLong } from "@/lib/format-date";
+
+type FichaTab = "carga" | "bienestar" | "fisio" | "partidos" | "tests";
+const FICHA_TABS: { key: FichaTab; label: string }[] = [
+  { key: "carga", label: "Carga" },
+  { key: "bienestar", label: "Bienestar" },
+  { key: "fisio", label: "Fisio" },
+  { key: "partidos", label: "Partidos" },
+  { key: "tests", label: "Tests" },
+];
 
 
 export const Route = createFileRoute("/coach/atleta/$id")({
@@ -26,6 +36,7 @@ export const Route = createFileRoute("/coach/atleta/$id")({
 
 function AthleteDetail() {
   const { id } = Route.useParams();
+  const [tab, setTab] = useState<FichaTab>("carga");
   const [profile, setProfile] = useState<any>(null);
   const [editName, setEditName] = useState(false);
   const [nameForm, setNameForm] = useState({ full_name: "", last_name: "" });
