@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calendar as CalendarIcon, ArrowRight } from "lucide-react";
+import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calendar as CalendarIcon, ArrowRight, ChevronDown } from "lucide-react";
 import { isoDate } from "@/lib/week-utils";
+import { fmtDateLong, fmtRelative, fmtTime } from "@/lib/format-date";
 import { typeLabel, typeIcon } from "@/lib/appointment-types";
 
 export const Route = createFileRoute("/atleta/")({
@@ -102,7 +103,58 @@ function AthleteToday() {
     setProfile({ ...profile, weight: w, last_weight_update: new Date().toISOString() });
   }
 
-  const nothingPending = loaded && wellnessDone && !pendingRpe && !routine && !appt;
+  type CardData = {
+    key: string;
+    icon: React.ReactNode;
+    title: string;
+    text: string;
+    to: string;
+    cta: string;
+    highlight?: boolean;
+  };
+
+  const pendingCards: CardData[] = [];
+  if (!wellnessDone)
+    pendingCards.push({
+      key: "wellness",
+      highlight: true,
+      icon: <Heart className="h-5 w-5" />,
+      title: "Completa tu bienestar de hoy",
+      text: "Sueño, estrés, fatiga y dolor muscular. Toma menos de un minuto.",
+      to: "/atleta/wellness",
+      cta: "Ir al formulario",
+    });
+  if (pendingRpe)
+    pendingCards.push({
+      key: "rpe",
+      icon: <Activity className="h-5 w-5" />,
+      title: `Carga tu RPE de ${pendingRpe.name}`,
+      text: `Sesión del ${fmtDateLong(pendingRpe.event_date)}${pendingRpe.event_time ? ` · ${fmtTime(pendingRpe.event_time)}` : ""}`,
+      to: "/atleta/rpe",
+      cta: "Cargar RPE",
+    });
+  if (appt)
+    pendingCards.push({
+      key: "appt",
+      icon: <Stethoscope className="h-5 w-5" />,
+      title: `${typeIcon(appt.appointment_type)} ${typeLabel(appt.appointment_type)}`,
+      text: `${fmtRelative(appt.appointment_date)}${appt.appointment_time ? ` · ${fmtTime(appt.appointment_time)} h` : ""} · ${appt.status}`,
+      to: "/atleta/fisio",
+      cta: "Ver turno",
+    });
+
+  const infoCards: CardData[] = [];
+  if (routine)
+    infoCards.push({
+      key: "routine",
+      icon: <Dumbbell className="h-5 w-5" />,
+      title: routine.title,
+      text: `Rutina de ${MONTHS[(routine.month ?? 1) - 1]} ${routine.year}${routine.position ? ` · ${routine.position}` : ""}${routine.notes ? ` · ${routine.notes}` : ""}`,
+      to: "/atleta/gym",
+      cta: "Ver rutina",
+    });
+
+  const nothingPending = loaded && pendingCards.length === 0;
 
   return (
     <Shell>
