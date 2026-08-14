@@ -38,6 +38,7 @@ function AthleteToday() {
   const [routine, setRoutine] = useState<any | null>(null);
   const [appt, setAppt] = useState<any | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
 
