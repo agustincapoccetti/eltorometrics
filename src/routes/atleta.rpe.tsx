@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { Shell } from "@/components/Shell";
 import { SubTabs, HISTORIAL_TABS } from "@/components/SubTabs";
+import { HistorialStrip } from "@/components/HistorialStrip";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,6 +127,7 @@ function RpeForm() {
   return (
     <Shell title="RPE">
       <SubTabs tabs={HISTORIAL_TABS} />
+      <HistorialStrip />
       <p className="text-sm text-muted-foreground mb-2">
         Escala de Esfuerzo Percibido · <strong>semana en curso</strong>. Al enviarlo, tu presente de ese entrenamiento queda marcado automáticamente.
       </p>

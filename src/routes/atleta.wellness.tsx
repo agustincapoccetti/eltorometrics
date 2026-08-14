@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Shell } from "@/components/Shell";
 import { SubTabs, HISTORIAL_TABS, ENTRENO_TABS } from "@/components/SubTabs";
+import { HistorialStrip } from "@/components/HistorialStrip";
 import { Protected } from "@/lib/protected";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +101,7 @@ function WellnessForm() {
   return (
     <Shell title="Bienestar">
       <SubTabs tabs={HISTORIAL_TABS} />
+      <HistorialStrip />
       <p className="text-sm text-muted-foreground mb-3">
         Cuestionario matutino · se completa <strong>los lunes</strong> · <strong>1 = MUY BUENO</strong> (estás bien) → <strong>5 = MUY MALO</strong> (peor estado)
       </p>

@@ -9,8 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calendar as CalendarIcon, ArrowRight } from "lucide-react";
+import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calendar as CalendarIcon, ArrowRight, ChevronDown } from "lucide-react";
 import { isoDate } from "@/lib/week-utils";
+import { fmtDateLong, fmtRelative, fmtTime } from "@/lib/format-date";
 import { typeLabel, typeIcon } from "@/lib/appointment-types";
 
 export const Route = createFileRoute("/atleta/")({
@@ -37,6 +38,7 @@ function AthleteToday() {
   const [routine, setRoutine] = useState<any | null>(null);
   const [appt, setAppt] = useState<any | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
 
@@ -102,7 +104,58 @@ function AthleteToday() {
     setProfile({ ...profile, weight: w, last_weight_update: new Date().toISOString() });
   }
 
-  const nothingPending = loaded && wellnessDone && !pendingRpe && !routine && !appt;
+  type CardData = {
+    key: string;
+    icon: React.ReactNode;
+    title: string;
+    text: string;
+    to: string;
+    cta: string;
+    highlight?: boolean;
+  };
+
+  const pendingCards: CardData[] = [];
+  if (!wellnessDone)
+    pendingCards.push({
+      key: "wellness",
+      highlight: true,
+      icon: <Heart className="h-5 w-5" />,
+      title: "Completa tu bienestar de hoy",
+      text: "Sueño, estrés, fatiga y dolor muscular. Toma menos de un minuto.",
+      to: "/atleta/wellness",
+      cta: "Ir al formulario",
+    });
+  if (pendingRpe)
+    pendingCards.push({
+      key: "rpe",
+      icon: <Activity className="h-5 w-5" />,
+      title: `Carga tu RPE de ${pendingRpe.name}`,
+      text: `Sesión del ${fmtDateLong(pendingRpe.event_date)}${pendingRpe.event_time ? ` · ${fmtTime(pendingRpe.event_time)}` : ""}`,
+      to: "/atleta/rpe",
+      cta: "Cargar RPE",
+    });
+  if (appt)
+    pendingCards.push({
+      key: "appt",
+      icon: <Stethoscope className="h-5 w-5" />,
+      title: `${typeIcon(appt.appointment_type)} ${typeLabel(appt.appointment_type)}`,
+      text: `${fmtRelative(appt.appointment_date)}${appt.appointment_time ? ` · ${fmtTime(appt.appointment_time)} h` : ""} · ${appt.status}`,
+      to: "/atleta/fisio",
+      cta: "Ver turno",
+    });
+
+  const infoCards: CardData[] = [];
+  if (routine)
+    infoCards.push({
+      key: "routine",
+      icon: <Dumbbell className="h-5 w-5" />,
+      title: routine.title,
+      text: `Rutina de ${MONTHS[(routine.month ?? 1) - 1]} ${routine.year}${routine.position ? ` · ${routine.position}` : ""}${routine.notes ? ` · ${routine.notes}` : ""}`,
+      to: "/atleta/gym",
+      cta: "Ver rutina",
+    });
+
+  const nothingPending = loaded && pendingCards.length === 0;
 
   return (
     <Shell>
@@ -120,57 +173,39 @@ function AthleteToday() {
       </div>
 
       <div className="space-y-4">
-        {!wellnessDone && (
-          <TodayCard
-            highlight
-            icon={<Heart className="h-5 w-5" />}
-            title="Completá tu bienestar de hoy"
-            text="Sueño, estrés, fatiga y dolor muscular. Toma menos de un minuto."
-            to="/atleta/wellness"
-            cta="Ir al formulario"
-          />
-        )}
-
-        {pendingRpe && (
-          <TodayCard
-            icon={<Activity className="h-5 w-5" />}
-            title={`Cargá tu RPE de ${pendingRpe.name}`}
-            text={`Sesión del ${pendingRpe.event_date}${pendingRpe.event_time ? ` · ${String(pendingRpe.event_time).slice(0,5)}` : ""}`}
-            to="/atleta/rpe"
-            cta="Cargar RPE"
-          />
-        )}
-
-        {routine && (
-          <TodayCard
-            icon={<Dumbbell className="h-5 w-5" />}
-            title={routine.title}
-            text={`Rutina de ${MONTHS[(routine.month ?? 1) - 1]} ${routine.year}${routine.position ? ` · ${routine.position}` : ""}${routine.notes ? ` · ${routine.notes}` : ""}`}
-            to="/atleta/gym"
-            cta="Ver rutina"
-          />
-        )}
-
-        {appt && (
-          <TodayCard
-            icon={<Stethoscope className="h-5 w-5" />}
-            title={`${typeIcon(appt.appointment_type)} ${typeLabel(appt.appointment_type)}`}
-            text={`${appt.appointment_date}${appt.appointment_time ? ` · ${String(appt.appointment_time).slice(0,5)} h` : ""} · ${appt.status}`}
-            to="/atleta/fisio"
-            cta="Ver turno"
-          />
-        )}
+        {pendingCards.slice(0, 3).map(({ key, ...c }) => (
+          <TodayCard key={key} {...c} />
+        ))}
 
         {nothingPending && (
           <div className="border-2 border-black p-8 text-center">
             <CheckCircle2 className="h-10 w-10 mx-auto mb-3" />
             <h2 className="text-2xl mb-1">Todo al día</h2>
             <p className="text-sm text-muted-foreground">
-              No tenés nada pendiente por hoy. Buen trabajo.
+              No tienes nada pendiente por hoy. Buen trabajo.
             </p>
           </div>
         )}
       </div>
+
+      {infoCards.length > 0 && (
+        <div className="mt-6 border border-border">
+          <button
+            onClick={() => setShowMore((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold uppercase tracking-wide hover:bg-accent transition"
+          >
+            <span>Más adelante ({infoCards.length})</span>
+            <ChevronDown className={"h-4 w-4 transition-transform " + (showMore ? "rotate-180" : "")} />
+          </button>
+          {showMore && (
+            <div className="p-3 pt-0 space-y-3">
+              {infoCards.map(({ key, ...c }) => (
+                <TodayCard key={key} {...c} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="mt-8">
         <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Accesos</p>

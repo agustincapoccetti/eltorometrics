@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useSort, sortIndicator } from "@/lib/sort";
+import { useStickyState } from "@/lib/sticky-state";
 
 export const Route = createFileRoute("/coach/jugadores")({
   component: () => <Protected requireRole="coach"><CoachPlayers /></Protected>,
@@ -31,7 +32,7 @@ function CoachPlayers() {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [attendance, setAttendance] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(isoDate(new Date()));
-  const [positionFilter, setPositionFilter] = useState("all");
+  const [positionFilter, setPositionFilter] = useStickyState("position", "all");
   const [q, setQ] = useState("");
   const [matchMinutes, setMatchMinutes] = useState<Record<string, number>>({});
 
