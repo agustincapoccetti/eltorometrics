@@ -174,7 +174,7 @@ function AthleteToday() {
 
       <div className="space-y-4">
         {pendingCards.slice(0, 3).map((c) => (
-          <TodayCard key={c.key} {...c} />
+          <TodayCard {...c} />
         ))}
 
         {nothingPending && (
@@ -200,7 +200,7 @@ function AthleteToday() {
           {showMore && (
             <div className="p-3 pt-0 space-y-3">
               {infoCards.map((c) => (
-                <TodayCard key={c.key} {...c} />
+                <TodayCard {...c} />
               ))}
             </div>
           )}
