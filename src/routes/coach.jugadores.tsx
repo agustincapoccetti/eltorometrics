@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useSort, sortIndicator } from "@/lib/sort";
 import { useStickyState } from "@/lib/sticky-state";
-import { fmtDate } from "@/lib/format-date";
 
 export const Route = createFileRoute("/coach/jugadores")({
   component: () => <Protected requireRole="coach"><CoachPlayers /></Protected>,
