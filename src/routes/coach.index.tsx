@@ -51,6 +51,7 @@ import {
 import { toPng } from "html-to-image";
 import { acwrColor, fatigueColor } from "@/lib/score-colors";
 import { exportPdf } from "@/lib/pdf-export";
+import { useStickyState } from "@/lib/sticky-state";
 
 export const Route = createFileRoute("/coach/")({
   component: () => (
@@ -102,8 +103,8 @@ function CoachDash() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [period, setPeriod] = useState<Period>("week");
-  const [positionFilter, setPositionFilter] = useState("all");
+  const [period, setPeriod] = useStickyState<Period>("period", "week");
+  const [positionFilter, setPositionFilter] = useStickyState("position", "all");
 
   const [exportType, setExportType] = useState<"rpe" | "wellness">("rpe");
   const [exportAthlete, setExportAthlete] = useState<string>("all");
