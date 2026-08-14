@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { NotificationBell } from "@/components/NotificationBell";
+import { AthleteSearch } from "@/components/AthleteSearch";
 import type { ReactNode } from "react";
 
 const ADMIN_EMAIL = "agustincapoccetti@hotmail.com";
@@ -160,6 +161,7 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
           )}
 
           <div className="flex items-center gap-1 shrink-0">
+            {role === "coach" && <AthleteSearch />}
             {role === "coach" && (
               <Link
                 to={adminHref}
