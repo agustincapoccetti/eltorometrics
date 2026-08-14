@@ -233,79 +233,104 @@ function AthleteDetail() {
           </div>
 
 
-          <div ref={rpeChartRef} className="bg-background">
-            <Chart title="RPE" data={rpe} keys={[{ key: "value", name: "RPE" }]} domain={[0, 10]} />
-          </div>
+          <nav className="mb-4 flex gap-1 border-2 border-black p-1 bg-white rounded-xl w-full overflow-x-auto no-scrollbar">
+            {FICHA_TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={
+                  "flex-1 text-center whitespace-nowrap rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold uppercase tracking-wide transition-colors " +
+                  (tab === t.key ? "bg-black text-white" : "text-black hover:bg-black hover:text-white")
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
 
-          <ScoreList title="Últimos RPE" items={rpe.slice(-12).reverse()} kind="rpe" />
-
-          <div ref={wellChartRef} className="bg-background">
-            <Chart title="Bienestar (1 mejor · 5 peor)" data={wellness} keys={[
-              { key: "sleep", name: "Sueño", stroke: "#000" },
-              { key: "stress", name: "Estrés", stroke: "#555" },
-              { key: "fatigue", name: "Fatiga", stroke: "#888" },
-              { key: "mood", name: "Ánimo", stroke: "#bbb" },
-            ]} domain={[1, 5]} />
-          </div>
-
-          <ScoreList title="Últimos Bienestar" items={wellness.slice(-12).reverse()} kind="wellness" />
-
-          <Chart title="Recuperación (%)" data={recovery} keys={[{ key: "pct", name: "Score %" }]} domain={[0, 100]} />
-          {weights.length > 1 && <Chart title="Peso" data={weights} keys={[{ key: "weight", name: "kg" }]} />}
-
-          <SectionList title="Últimas molestias" items={
-            wellness.filter((w: any) => w.has_pain).slice(-5).reverse()
-              .map((w: any) => ({ date: w.date, text: w.pain_description ?? "—" }))
-          } />
-
-          <div className="border border-border p-6 mt-4">
-            <h3 className="text-lg mb-3">Presentismo y partidos</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 text-center">
-              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Entrenos (año)</p><p className="text-xl font-medium">{attendance.length}</p></div>
-              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Partidos jugados</p><p className="text-xl font-medium">{matchStats.matches}</p></div>
-              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Minutos totales</p><p className="text-xl font-medium">{matchStats.totalMinutes}'</p></div>
-              <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Lesiones</p><p className="text-xl font-medium">{matchStats.injuries}</p></div>
-            </div>
-            {matchStats.rows.length > 0 && (
-              <div className="space-y-1.5">
-                {matchStats.rows.slice(0, 8).map((r: any, idx: number) => (
-                  <div key={idx} className="text-xs border-l-2 border-primary pl-3">
-                    <p className="font-display uppercase tracking-wider">{r.match?.match_date ?? "—"} · {r.match?.opponent ?? "Sin rival"}</p>
-                    <p>{r.minutes_played ?? 0}' {r.convoked ? "· convocado" : ""} {r.injury ? `· lesión${r.injury_note ? ": " + r.injury_note : ""}` : ""}</p>
-                  </div>
-                ))}
+          {tab === "carga" && (
+            <>
+              <div ref={rpeChartRef} className="bg-background">
+                <Chart title="RPE" data={rpe} keys={[{ key: "value", name: "RPE" }]} domain={[0, 10]} />
               </div>
-            )}
-          </div>
+              <ScoreList title="Últimos RPE" items={rpe.slice(-12).reverse()} kind="rpe" />
+              {weights.length > 1 && <Chart title="Peso" data={weights} keys={[{ key: "weight", name: "kg" }]} />}
+            </>
+          )}
 
-
-          <BodyMap
-            entries={[
-              ...physio.flatMap((a: any) => ((a.reasons ?? []) as string[]).map((r) => ({ text: r, date: a.appointment_date }))),
-              ...physio.filter((a: any) => a.notes).map((a: any) => ({ text: a.notes as string, date: a.appointment_date })),
-              ...wellness.filter((w: any) => w.has_pain && w.pain_description).map((w: any) => ({ text: w.pain_description as string, date: w.date })),
-            ]}
-            title="Zonas de dolor del atleta"
-          />
-
-          <div className="mt-4">
-            <EvaluationsPanel userId={id} />
-          </div>
-
-          {physio.length > 0 && (
-            <div className="border border-border p-6 mt-4">
-              <h3 className="text-lg mb-4">Citas con fisio ({physio.length})</h3>
-              <div className="space-y-2">
-                {physio.slice(0, 8).map((a) => (
-                  <div key={a.id} className={`border-l-2 pl-3 ${a.status === "cancelled" ? "border-red-600" : "border-primary"}`}>
-                    <p className={`text-xs uppercase tracking-wider font-display ${a.status === "cancelled" ? "text-red-600" : ""}`}>{a.appointment_date} · {a.status === "cancelled" ? "cancelada · no asistió" : a.status}</p>
-                    <p className="text-sm">{(a.reasons ?? []).join(" · ")}</p>
-                    {a.notes && <p className="text-xs italic text-muted-foreground">{a.notes}</p>}
-                  </div>
-                ))}
+          {tab === "bienestar" && (
+            <>
+              <div ref={wellChartRef} className="bg-background">
+                <Chart title="Bienestar (1 mejor · 5 peor)" data={wellness} keys={[
+                  { key: "sleep", name: "Sueño", stroke: "#000" },
+                  { key: "stress", name: "Estrés", stroke: "#555" },
+                  { key: "fatigue", name: "Fatiga", stroke: "#888" },
+                  { key: "mood", name: "Ánimo", stroke: "#bbb" },
+                ]} domain={[1, 5]} />
               </div>
+              <ScoreList title="Últimos Bienestar" items={wellness.slice(-12).reverse()} kind="wellness" />
+              <Chart title="Recuperación (%)" data={recovery} keys={[{ key: "pct", name: "Score %" }]} domain={[0, 100]} />
+              <SectionList title="Últimas molestias" items={
+                wellness.filter((w: any) => w.has_pain).slice(-5).reverse()
+                  .map((w: any) => ({ date: w.date, text: w.pain_description ?? "—" }))
+              } />
+            </>
+          )}
+
+          {tab === "fisio" && (
+            <>
+              <BodyMap
+                entries={[
+                  ...physio.flatMap((a: any) => ((a.reasons ?? []) as string[]).map((r) => ({ text: r, date: a.appointment_date }))),
+                  ...physio.filter((a: any) => a.notes).map((a: any) => ({ text: a.notes as string, date: a.appointment_date })),
+                  ...wellness.filter((w: any) => w.has_pain && w.pain_description).map((w: any) => ({ text: w.pain_description as string, date: w.date })),
+                ]}
+                title="Zonas de dolor del atleta"
+              />
+              {physio.length === 0 ? (
+                <p className="text-sm text-muted-foreground mt-4">Sin citas registradas.</p>
+              ) : (
+                <div className="border border-border p-6 mt-4">
+                  <h3 className="text-lg mb-4">Citas con fisio ({physio.length})</h3>
+                  <div className="space-y-2">
+                    {physio.slice(0, 8).map((a) => (
+                      <div key={a.id} className={`border-l-2 pl-3 ${a.status === "cancelled" ? "border-red-600" : "border-primary"}`}>
+                        <p className={`text-xs uppercase tracking-wider font-display ${a.status === "cancelled" ? "text-red-600" : ""}`}>{fmtDateLong(a.appointment_date)} · {a.status === "cancelled" ? "cancelada · no asistió" : a.status}</p>
+                        <p className="text-sm">{(a.reasons ?? []).join(" · ")}</p>
+                        {a.notes && <p className="text-xs italic text-muted-foreground">{a.notes}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {tab === "partidos" && (
+            <div className="border border-border p-6">
+              <h3 className="text-lg mb-3">Presentismo y partidos</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 text-center">
+                <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Entrenos (año)</p><p className="text-xl font-medium">{attendance.length}</p></div>
+                <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Partidos jugados</p><p className="text-xl font-medium">{matchStats.matches}</p></div>
+                <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Minutos totales</p><p className="text-xl font-medium">{matchStats.totalMinutes}'</p></div>
+                <div className="border border-border p-2"><p className="text-[10px] uppercase text-muted-foreground">Lesiones</p><p className="text-xl font-medium">{matchStats.injuries}</p></div>
+              </div>
+              {matchStats.rows.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Sin partidos registrados.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {matchStats.rows.slice(0, 8).map((r: any, idx: number) => (
+                    <div key={idx} className="text-xs border-l-2 border-primary pl-3">
+                      <p className="font-display uppercase tracking-wider">{fmtDateLong(r.match?.match_date)} · {r.match?.opponent ?? "Sin rival"}</p>
+                      <p>{r.minutes_played ?? 0}' {r.convoked ? "· convocado" : ""} {r.injury ? `· lesión${r.injury_note ? ": " + r.injury_note : ""}` : ""}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
+
+          {tab === "tests" && <EvaluationsPanel userId={id} />}
         </>
       )}
     </Shell>
