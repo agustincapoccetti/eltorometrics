@@ -220,7 +220,7 @@ function AthleteToday() {
       <div className="mt-8">
         <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Accesos</p>
         <div className="grid grid-cols-2 gap-3">
-          <QuickLink to="/atleta/calendario" icon={<CalendarIcon className="h-4 w-4" />} label="Calendario" />
+          <QuickLink to="/atleta/calendario" icon={<CalendarIcon className="h-4 w-4" />} label="Agenda" />
           <QuickLink to="/atleta/biblioteca" icon={<BookOpen className="h-4 w-4" />} label="Biblioteca" />
         </div>
       </div>
