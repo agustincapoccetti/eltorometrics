@@ -88,7 +88,7 @@ function CoachPlanning() {
     const payload = {
       event_date: selectedDate,
       name: form.name.trim(),
-      type: form.type,
+      type: form.type as "training" | "match",
       event_time: form.event_time || null,
       duration_minutes: form.duration_minutes ? parseInt(form.duration_minutes) : null,
       description: form.description.trim() || null,
