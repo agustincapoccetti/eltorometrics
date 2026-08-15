@@ -13,6 +13,8 @@ import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calenda
 import { isoDate } from "@/lib/week-utils";
 import { fmtDateLong, fmtRelative, fmtTime } from "@/lib/format-date";
 import { typeLabel, typeIcon } from "@/lib/appointment-types";
+import { AttendanceRace } from "@/components/AttendanceRace";
+
 
 export const Route = createFileRoute("/atleta/")({
   head: () => ({
@@ -187,6 +189,14 @@ function AthleteToday() {
           </div>
         )}
       </div>
+
+      {user && (
+        <div className="mt-6">
+          <AttendanceRace userId={user.id} />
+        </div>
+      )}
+
+
 
       {infoCards.length > 0 && (
         <div className="mt-6 border border-border">
