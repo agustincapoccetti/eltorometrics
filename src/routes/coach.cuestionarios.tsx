@@ -50,6 +50,46 @@ function Page() {
   const [wellExists, setWellExists] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const [hist, setHist] = useState<{ rpe: any[]; well: any[]; rec: any[]; weight: any[] }>({ rpe: [], well: [], rec: [], weight: [] });
+  const [histLoading, setHistLoading] = useState(false);
+
+  async function loadHistory(uid: string) {
+    if (!uid) { setHist({ rpe: [], well: [], rec: [], weight: [] }); return; }
+    setHistLoading(true);
+    const [r, w, rc, wh] = await Promise.all([
+      supabase.from("rpe_entries").select("id, session_date, session_label, rpe_score").eq("user_id", uid).order("session_date", { ascending: false }).limit(40),
+      supabase.from("wellness_entries").select("id, entry_date, sleep, stress, fatigue, mood, has_pain").eq("user_id", uid).order("entry_date", { ascending: false }).limit(40),
+      supabase.from("recovery_entries").select("id, entry_date, total_score, max_score").eq("user_id", uid).order("entry_date", { ascending: false }).limit(40),
+      supabase.from("weight_history").select("id, weight, recorded_at").eq("user_id", uid).order("recorded_at", { ascending: false }).limit(40),
+    ]);
+    setHist({ rpe: r.data ?? [], well: w.data ?? [], rec: rc.data ?? [], weight: wh.data ?? [] });
+    setHistLoading(false);
+  }
+
+  async function removeEntry(kind: "rpe" | "well" | "rec" | "weight", row: any) {
+    if (!confirm("¿Borrar este registro? Esta acción no se puede deshacer.")) return;
+    if (kind === "rpe") {
+      const { error } = await supabase.from("rpe_entries").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+      await supabase.from("attendance").delete().eq("user_id", athleteId).eq("attendance_date", row.session_date).eq("source", "rpe");
+      if (row.session_date === date) { setRpeId(null); setRpeScore(null); setSessionLabel(""); }
+    } else if (kind === "well") {
+      const { error } = await supabase.from("wellness_entries").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+      if (row.entry_date === date) setWellExists(false);
+    } else if (kind === "rec") {
+      await supabase.from("recovery_entry_items").delete().eq("entry_id", row.id);
+      const { error } = await supabase.from("recovery_entries").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { error } = await supabase.from("weight_history").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+    }
+    toast.success("Registro borrado");
+    loadHistory(athleteId);
+  }
+
+
   useEffect(() => {
     (async () => {
       const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "atleta");
