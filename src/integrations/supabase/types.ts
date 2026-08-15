@@ -966,6 +966,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attendance_leaderboard: {
+        Args: { _year?: number }
+        Returns: {
+          forms_count: number
+          full_name: string
+          last_name: string
+          photo_url: string
+          points: number
+          position: string
+          present_days: number
+          streak_weeks: number
+          user_id: string
+        }[]
+      }
       cancel_physio_slot: { Args: { _slot_id: string }; Returns: undefined }
       has_role: {
         Args: {
