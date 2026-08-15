@@ -132,6 +132,9 @@ function Page() {
     })();
   }, [athleteId, date]);
 
+  useEffect(() => { loadHistory(athleteId); /* eslint-disable-next-line */ }, [athleteId]);
+
+
   async function saveRpe() {
     if (!athleteId) { toast.error("Selecciona un jugador"); return; }
     if (rpeScore === null) { toast.error("Selecciona un valor de RPE"); return; }
