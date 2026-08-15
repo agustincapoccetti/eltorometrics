@@ -66,8 +66,22 @@ function AthleteToday() {
       const { data: evs } = await supabase
         .from("calendar_events").select("*").lte("event_date", today)
         .order("event_date", { ascending: false }).limit(5);
+      // Días con presente marcado por el entrenador (cuentan como sesión a puntuar)
+      const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+      const { data: atts } = await supabase
+        .from("attendance").select("attendance_date")
+        .eq("user_id", user.id).eq("present", true)
+        .gte("attendance_date", isoDate(weekAgo)).lte("attendance_date", today)
+        .order("attendance_date", { ascending: false });
+      const evDates = new Set((evs ?? []).map((e: any) => e.event_date));
+      const attEvents = (atts ?? [])
+        .filter((a: any) => !evDates.has(a.attendance_date))
+        .map((a: any) => ({ event_date: a.attendance_date, name: "Entrenamiento", type: "training" }));
+      const candidates = [...(evs ?? []), ...attEvents]
+        .sort((a: any, b: any) => b.event_date.localeCompare(a.event_date));
+
       let pending: any = null;
-      for (const ev of evs ?? []) {
+      for (const ev of candidates) {
         const { count } = await supabase
           .from("rpe_entries").select("id", { count: "exact", head: true })
           .eq("user_id", user.id).eq("session_date", ev.event_date);

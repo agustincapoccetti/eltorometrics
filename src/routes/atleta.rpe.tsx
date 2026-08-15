@@ -31,6 +31,7 @@ function RpeForm() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [recent, setRecent] = useState<any[]>([]);
   const [sessions, setSessions] = useState<any[]>([]);
+  const [presentDays, setPresentDays] = useState<string[]>([]);
 
   const week = useMemo(() => weekDays(), []);
   const [date, setDate] = useState<string>(isoDate(new Date()));
@@ -51,9 +52,22 @@ function RpeForm() {
     setSessions(data ?? []);
   }
 
-  useEffect(() => { loadRecent(); loadSessions(); }, [user]);
+  // Días en los que el entrenador marcó presente (aunque no haya evento en el calendario)
+  async function loadPresentDays() {
+    if (!user) return;
+    const { data } = await supabase.from("attendance")
+      .select("attendance_date")
+      .eq("user_id", user.id).eq("present", true)
+      .gte("attendance_date", week[0]!).lte("attendance_date", week[6]!);
+    setPresentDays((data ?? []).map((a: any) => a.attendance_date));
+  }
 
-  const trainingDates = useMemo(() => new Set(sessions.map((s) => s.event_date)), [sessions]);
+  useEffect(() => { loadRecent(); loadSessions(); loadPresentDays(); }, [user]);
+
+  const trainingDates = useMemo(
+    () => new Set([...sessions.map((s) => s.event_date), ...presentDays]),
+    [sessions, presentDays],
+  );
   const allowedIndices = useMemo(() => week.map((iso, i) => ({ iso, i })).filter(({ iso }) => trainingDates.has(iso)).map(({ i }) => i), [week, trainingDates]);
 
   // Al cargar, elegí el primer entrenamiento pendiente aún puntuable

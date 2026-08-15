@@ -109,11 +109,11 @@ function CoachPlayers() {
   async function togglePresent(uid: string, present: boolean) {
     const existing = attendance.find((a) => a.user_id === uid && a.attendance_date === selectedDate);
     if (existing) {
-      const { error } = await supabase.from("attendance").update({ present }).eq("id", existing.id);
+      const { error } = await supabase.from("attendance").update({ present, source: "manual" }).eq("id", existing.id);
       if (error) { toast.error(error.message); return; }
-      setAttendance((cur) => cur.map((a) => a.id === existing.id ? { ...a, present } : a));
+      setAttendance((cur) => cur.map((a) => a.id === existing.id ? { ...a, present, source: "manual" } : a));
     } else {
-      const { data, error } = await supabase.from("attendance").insert({ user_id: uid, attendance_date: selectedDate, present, created_by: user!.id }).select().single();
+      const { data, error } = await supabase.from("attendance").insert({ user_id: uid, attendance_date: selectedDate, present, source: "manual", created_by: user!.id }).select().single();
       if (error) { toast.error(error.message); return; }
       setAttendance((cur) => [...cur, data]);
     }
