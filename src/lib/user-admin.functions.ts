@@ -24,7 +24,10 @@ export const listUsers = createServerFn({ method: "GET" })
     ]);
 
     const pMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
-    const rMap = new Map((roles ?? []).map((r: any) => [r.user_id, r.role]));
+    const rMap = new Map<string, string[]>();
+    (roles ?? []).forEach((r: any) => {
+      rMap.set(r.user_id, [...(rMap.get(r.user_id) ?? []), r.role]);
+    });
 
     return authData.users
       .map((u) => ({
@@ -35,7 +38,8 @@ export const listUsers = createServerFn({ method: "GET" })
         last_sign_in_at: u.last_sign_in_at,
         full_name: (pMap.get(u.id) as any)?.full_name ?? "",
         position: (pMap.get(u.id) as any)?.position ?? "",
-        role: rMap.get(u.id) ?? null,
+        roles: rMap.get(u.id) ?? [],
+        role: (rMap.get(u.id) ?? []).includes("coach") ? "coach" : ((rMap.get(u.id) ?? [])[0] ?? null),
       }))
       .sort((a, b) => (a.full_name || a.email).localeCompare(b.full_name || b.email));
   });
@@ -127,5 +131,34 @@ export const setUserRole = createServerFn({ method: "POST" })
       await supabaseAdmin.from("coach_applications").delete().eq("user_id", data.userId);
     }
 
+    return { ok: true };
+  });
+
+/** Habilita o quita el rol de atleta a un miembro del cuerpo técnico (doble vista) */
+export const setDualRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { userId: string; alsoAthlete: boolean }) => {
+    if (!data?.userId) throw new Error("userId requerido");
+    return { userId: data.userId, alsoAthlete: !!data.alsoAthlete };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: existing } = await supabaseAdmin
+      .from("user_roles").select("role").eq("user_id", data.userId);
+    const roles = (existing ?? []).map((r: any) => r.role);
+    if (!roles.includes("coach")) throw new Error("Solo el cuerpo técnico puede tener doble vista.");
+
+    if (data.alsoAthlete) {
+      if (!roles.includes("atleta")) {
+        const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "atleta" });
+        if (error) throw new Error(error.message);
+      }
+    } else {
+      const { error } = await supabaseAdmin
+        .from("user_roles").delete().eq("user_id", data.userId).eq("role", "atleta");
+      if (error) throw new Error(error.message);
+    }
     return { ok: true };
   });

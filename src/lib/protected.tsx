@@ -10,7 +10,7 @@ import { coachTypeLabel } from "@/lib/positions";
 import { Clock, XCircle } from "lucide-react";
 
 export function Protected({ children, requireRole }: { children: ReactNode; requireRole?: "atleta" | "coach" }) {
-  const { user, role, loading, signOut } = useAuth();
+  const { user, role, roles, loading, signOut, setActiveRole } = useAuth();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [checking, setChecking] = useState(requireRole === "atleta");
@@ -28,6 +28,11 @@ export function Protected({ children, requireRole }: { children: ReactNode; requ
   useEffect(() => {
     if (loading) return;
     if (!user) { navigate({ to: "/login" }); return; }
+    // Doble rol: si entra a una sección del otro rol que también posee, cambiamos la vista
+    if (requireRole && role !== requireRole && roles.includes(requireRole)) {
+      setActiveRole(requireRole);
+      return;
+    }
     if (requireRole && role && role !== requireRole) {
       navigate({ to: role === "coach" ? "/coach" : "/atleta" });
       return;
@@ -41,7 +46,8 @@ export function Protected({ children, requireRole }: { children: ReactNode; requ
     } else {
       setChecking(false);
     }
-  }, [user, role, loading, requireRole, navigate, pathname]);
+  }, [user, role, roles, loading, requireRole, navigate, pathname, setActiveRole]);
+
 
   if (!loading && user && !role && application) {
     return <PendingScreen application={application} onSignOut={async () => { await signOut(); navigate({ to: "/login" }); }} />;

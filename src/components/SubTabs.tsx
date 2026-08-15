@@ -22,9 +22,11 @@ export const PLANTEL_TABS: SubTab[] = [
 export const PLANIFICACION_TABS: SubTab[] = [
   { to: "/coach/gym", label: "Gym" },
   { to: "/coach/calendario", label: "Calendario" },
+  { to: "/coach/planificacion", label: "Planific." },
   { to: "/coach/partidos", label: "Partidos" },
   { to: "/coach/evaluaciones", label: "Evaluaciones" },
 ];
+
 
 export const FISIO_TABS: SubTab[] = [
   { to: "/coach/fisio", label: "Fisio" },

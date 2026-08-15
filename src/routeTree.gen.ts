@@ -19,6 +19,7 @@ import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
 import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
 import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
 import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
+import { Route as CoachPlanificacionRouteImport } from './routes/coach.planificacion'
 import { Route as CoachPartidosRouteImport } from './routes/coach.partidos'
 import { Route as CoachNotificacionesRouteImport } from './routes/coach.notificaciones'
 import { Route as CoachJugadoresRouteImport } from './routes/coach.jugadores'
@@ -89,6 +90,11 @@ const CoachSemaforoRoute = CoachSemaforoRouteImport.update({
 const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
   id: '/coach/recuperacion',
   path: '/coach/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachPlanificacionRoute = CoachPlanificacionRouteImport.update({
+  id: '/coach/planificacion',
+  path: '/coach/planificacion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachPartidosRoute = CoachPartidosRouteImport.update({
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/coach/jugadores': typeof CoachJugadoresRoute
   '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
+  '/coach/planificacion': typeof CoachPlanificacionRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
@@ -256,6 +263,7 @@ export interface FileRoutesByTo {
   '/coach/jugadores': typeof CoachJugadoresRoute
   '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
+  '/coach/planificacion': typeof CoachPlanificacionRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
@@ -290,6 +298,7 @@ export interface FileRoutesById {
   '/coach/jugadores': typeof CoachJugadoresRoute
   '/coach/notificaciones': typeof CoachNotificacionesRoute
   '/coach/partidos': typeof CoachPartidosRoute
+  '/coach/planificacion': typeof CoachPlanificacionRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/coach/jugadores'
     | '/coach/notificaciones'
     | '/coach/partidos'
+    | '/coach/planificacion'
     | '/coach/recuperacion'
     | '/coach/semaforo'
     | '/coach/usuarios'
@@ -358,6 +368,7 @@ export interface FileRouteTypes {
     | '/coach/jugadores'
     | '/coach/notificaciones'
     | '/coach/partidos'
+    | '/coach/planificacion'
     | '/coach/recuperacion'
     | '/coach/semaforo'
     | '/coach/usuarios'
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/coach/jugadores'
     | '/coach/notificaciones'
     | '/coach/partidos'
+    | '/coach/planificacion'
     | '/coach/recuperacion'
     | '/coach/semaforo'
     | '/coach/usuarios'
@@ -425,6 +437,7 @@ export interface RootRouteChildren {
   CoachJugadoresRoute: typeof CoachJugadoresRoute
   CoachNotificacionesRoute: typeof CoachNotificacionesRoute
   CoachPartidosRoute: typeof CoachPartidosRoute
+  CoachPlanificacionRoute: typeof CoachPlanificacionRoute
   CoachRecuperacionRoute: typeof CoachRecuperacionRoute
   CoachSemaforoRoute: typeof CoachSemaforoRoute
   CoachUsuariosRoute: typeof CoachUsuariosRoute
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       path: '/coach/recuperacion'
       fullPath: '/coach/recuperacion'
       preLoaderRoute: typeof CoachRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/planificacion': {
+      id: '/coach/planificacion'
+      path: '/coach/planificacion'
+      fullPath: '/coach/planificacion'
+      preLoaderRoute: typeof CoachPlanificacionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/partidos': {
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachJugadoresRoute: CoachJugadoresRoute,
   CoachNotificacionesRoute: CoachNotificacionesRoute,
   CoachPartidosRoute: CoachPartidosRoute,
+  CoachPlanificacionRoute: CoachPlanificacionRoute,
   CoachRecuperacionRoute: CoachRecuperacionRoute,
   CoachSemaforoRoute: CoachSemaforoRoute,
   CoachUsuariosRoute: CoachUsuariosRoute,
