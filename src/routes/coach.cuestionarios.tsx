@@ -15,6 +15,7 @@ import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { isoDate } from "@/lib/week-utils";
+import { Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/coach/cuestionarios")({
   component: () => <Protected requireRole="coach"><Page /></Protected>,
@@ -33,6 +34,42 @@ const WELL_FIELDS = [
 ] as const;
 
 
+function HistBlock({ title, rows, dateKey, render, onDelete }: {
+  title: string; rows: any[]; dateKey: string;
+  render: (r: any) => string; onDelete: (r: any) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? rows : rows.slice(0, 5);
+  return (
+    <div className="border border-border">
+      <div className="px-3 py-2 border-b border-border bg-secondary flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wider font-semibold">{title}</span>
+        <span className="text-[11px] text-muted-foreground">{rows.length} registros</span>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-3 py-3 text-xs text-muted-foreground">Sin registros.</p>
+      ) : (
+        <>
+          {shown.map((r) => (
+            <div key={r.id} className="px-3 py-2 border-b border-border last:border-b-0 flex items-center gap-2">
+              <span className="text-xs font-medium w-[92px] shrink-0">{String(r[dateKey]).slice(0, 10)}</span>
+              <span className="text-xs text-muted-foreground flex-1 min-w-0 truncate">{render(r)}</span>
+              <Button size="sm" variant="ghost" onClick={() => onDelete(r)} aria-label="Borrar registro">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          {rows.length > 5 && (
+            <button onClick={() => setOpen((o) => !o)} className="w-full px-3 py-2 text-[11px] uppercase tracking-wider hover:bg-accent">
+              {open ? "Ver menos" : `Ver los ${rows.length}`}
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 function Page() {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +86,46 @@ function Page() {
   const [painDesc, setPainDesc] = useState("");
   const [wellExists, setWellExists] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const [hist, setHist] = useState<{ rpe: any[]; well: any[]; rec: any[]; weight: any[] }>({ rpe: [], well: [], rec: [], weight: [] });
+  const [histLoading, setHistLoading] = useState(false);
+
+  async function loadHistory(uid: string) {
+    if (!uid) { setHist({ rpe: [], well: [], rec: [], weight: [] }); return; }
+    setHistLoading(true);
+    const [r, w, rc, wh] = await Promise.all([
+      supabase.from("rpe_entries").select("id, session_date, session_label, rpe_score").eq("user_id", uid).order("session_date", { ascending: false }).limit(40),
+      supabase.from("wellness_entries").select("id, entry_date, sleep, stress, fatigue, mood, has_pain").eq("user_id", uid).order("entry_date", { ascending: false }).limit(40),
+      supabase.from("recovery_entries").select("id, entry_date, total_score, max_score").eq("user_id", uid).order("entry_date", { ascending: false }).limit(40),
+      supabase.from("weight_history").select("id, weight, recorded_at").eq("user_id", uid).order("recorded_at", { ascending: false }).limit(40),
+    ]);
+    setHist({ rpe: r.data ?? [], well: w.data ?? [], rec: rc.data ?? [], weight: wh.data ?? [] });
+    setHistLoading(false);
+  }
+
+  async function removeEntry(kind: "rpe" | "well" | "rec" | "weight", row: any) {
+    if (!confirm("¿Borrar este registro? Esta acción no se puede deshacer.")) return;
+    if (kind === "rpe") {
+      const { error } = await supabase.from("rpe_entries").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+      await supabase.from("attendance").delete().eq("user_id", athleteId).eq("attendance_date", row.session_date).eq("source", "rpe");
+      if (row.session_date === date) { setRpeId(null); setRpeScore(null); setSessionLabel(""); }
+    } else if (kind === "well") {
+      const { error } = await supabase.from("wellness_entries").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+      if (row.entry_date === date) setWellExists(false);
+    } else if (kind === "rec") {
+      await supabase.from("recovery_entry_items").delete().eq("entry_id", row.id);
+      const { error } = await supabase.from("recovery_entries").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const { error } = await supabase.from("weight_history").delete().eq("id", row.id);
+      if (error) { toast.error(error.message); return; }
+    }
+    toast.success("Registro borrado");
+    loadHistory(athleteId);
+  }
+
 
   useEffect(() => {
     (async () => {
@@ -92,6 +169,9 @@ function Page() {
     })();
   }, [athleteId, date]);
 
+  useEffect(() => { loadHistory(athleteId); /* eslint-disable-next-line */ }, [athleteId]);
+
+
   async function saveRpe() {
     if (!athleteId) { toast.error("Selecciona un jugador"); return; }
     if (rpeScore === null) { toast.error("Selecciona un valor de RPE"); return; }
@@ -105,6 +185,7 @@ function Page() {
     toast.success(rpeId ? "RPE actualizado" : "RPE registrado");
     const { data } = await supabase.from("rpe_entries").select("id").eq("user_id", athleteId).eq("session_date", date).maybeSingle();
     setRpeId(data?.id ?? null);
+    loadHistory(athleteId);
   }
 
   async function saveWellness() {
@@ -121,6 +202,7 @@ function Page() {
     if (error) { toast.error(error.message); return; }
     setWellExists(true);
     toast.success("Bienestar guardado");
+    loadHistory(athleteId);
   }
 
   return (
@@ -240,6 +322,49 @@ function Page() {
             </div>
             <p className="text-[11px] text-muted-foreground mt-3">Escala 1 = mejor · 5 = peor.</p>
           </div>
+
+          {athleteId && (
+            <div className="border border-border p-5 mt-6">
+              <h2 className="text-sm uppercase tracking-wider font-semibold mb-1">Formularios respondidos</h2>
+              <p className="text-xs text-muted-foreground mb-4">
+                Revisa y borra registros cargados por error o en días que el jugador no asistió.
+              </p>
+              {histLoading ? (
+                <div className="py-6 flex justify-center"><RugbyLoader /></div>
+              ) : (
+                <div className="space-y-5">
+                  <HistBlock
+                    title="RPE"
+                    rows={hist.rpe}
+                    dateKey="session_date"
+                    render={(r) => `RPE ${r.rpe_score}${r.session_label ? " · " + r.session_label : ""}`}
+                    onDelete={(r) => removeEntry("rpe", r)}
+                  />
+                  <HistBlock
+                    title="Bienestar"
+                    rows={hist.well}
+                    dateKey="entry_date"
+                    render={(r) => `Fatiga ${r.fatigue} · Sueño ${r.sleep} · Estrés ${r.stress} · Dolor musc. ${r.mood}${r.has_pain ? " · Reporta dolor" : ""}`}
+                    onDelete={(r) => removeEntry("well", r)}
+                  />
+                  <HistBlock
+                    title="Recuperación"
+                    rows={hist.rec}
+                    dateKey="entry_date"
+                    render={(r) => `${r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}% (${r.total_score}/${r.max_score})`}
+                    onDelete={(r) => removeEntry("rec", r)}
+                  />
+                  <HistBlock
+                    title="Peso corporal"
+                    rows={hist.weight}
+                    dateKey="recorded_at"
+                    render={(r) => `${r.weight} kg`}
+                    onDelete={(r) => removeEntry("weight", r)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
     </Shell>

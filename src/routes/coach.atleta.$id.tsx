@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { POSITIONS } from "@/lib/positions";
-import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { exportPdf } from "@/lib/pdf-export";
@@ -40,8 +39,6 @@ function AthleteDetail() {
   const [profile, setProfile] = useState<any>(null);
   const [editName, setEditName] = useState(false);
   const [nameForm, setNameForm] = useState({ full_name: "", last_name: "" });
-  const { user } = useAuth();
-  const isAdmin = (user?.email ?? "").toLowerCase() === "agustincapoccetti@hotmail.com";
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({ full_name: "", last_name: "", position: "", weight: "", height: "", age: "" });
 
@@ -115,7 +112,7 @@ function AthleteDetail() {
           <ArrowLeft className="h-3 w-3" /> Volver
         </Link>
         <div className="flex items-center gap-2">
-          {profile && isAdmin && (
+          {profile && (
             <Button size="sm" variant="outline" onClick={() => {
               setEditForm({
                 full_name: profile.full_name ?? "",
@@ -136,7 +133,7 @@ function AthleteDetail() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar perfil del jugador</DialogTitle>
-            <DialogDescription>Solo el administrador puede modificar estos datos.</DialogDescription>
+            <DialogDescription>El cuerpo técnico puede corregir estos datos del jugador.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             <div className="grid grid-cols-2 gap-3">
