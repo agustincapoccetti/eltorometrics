@@ -969,6 +969,7 @@ export type Database = {
       attendance_leaderboard: {
         Args: { _year?: number }
         Returns: {
+          convocations: number
           forms_count: number
           full_name: string
           last_name: string
@@ -977,6 +978,8 @@ export type Database = {
           position: string
           present_days: number
           streak_weeks: number
+          test_pos_top3_count: number
+          test_top5_count: number
           user_id: string
         }[]
       }
