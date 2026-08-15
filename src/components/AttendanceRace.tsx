@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Trophy, Flame, ChevronRight } from "lucide-react";
+import { Trophy, Flame, ChevronRight, ChevronDown, Medal, Users } from "lucide-react";
 
 type Row = {
   user_id: string;
@@ -12,8 +12,14 @@ type Row = {
   present_days: number;
   forms_count: number;
   streak_weeks: number;
+  convocations: number;
+  test_top5_count: number;
+  test_pos_top3_count: number;
   points: number;
 };
+
+/** Valores de puntos por concepto (deben coincidir con la función attendance_leaderboard). */
+const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3 };
 
 function name(r: Row) {
   return `${r.full_name ?? ""}${r.last_name ? ` ${r.last_name}` : ""}`.trim() || "Atleta";
@@ -26,6 +32,17 @@ function shortName(r: Row) {
 
 const MEDALS = ["1º", "2º", "3º"];
 
+function breakdown(r: Row) {
+  return [
+    { label: "Presentes", count: r.present_days, per: W.present },
+    { label: "Formularios", count: r.forms_count, per: W.form },
+    { label: "Semanas de racha", count: r.streak_weeks, per: W.streak },
+    { label: "Convocatorias", count: r.convocations, per: W.convo },
+    { label: "Top 5 del equipo en tests", count: r.test_top5_count, per: W.top5 },
+    { label: "Top 3 de tu puesto en tests", count: r.test_pos_top3_count, per: W.pos3 },
+  ].map((x) => ({ ...x, total: x.count * x.per }));
+}
+
 /** Frases motivadoras según la situación en la carrera del presentismo */
 function phrase(rank: number, total: number, gap: number, ahead: Row | null, streak: number): string {
   if (total <= 1) return "Cada presente que sumes empieza a construir tu temporada.";
@@ -37,9 +54,23 @@ function phrase(rank: number, total: number, gap: number, ahead: Row | null, str
   return `Te faltan ${gap} puntos para entrar en el top ${Math.max(3, rank - 1)}. Se recorta entrenando.`;
 }
 
+function Breakdown({ r, invert }: { r: Row; invert?: boolean }) {
+  return (
+    <div className={`mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] ${invert ? "text-white/80" : "text-muted-foreground"}`}>
+      {breakdown(r).map((b) => (
+        <div key={b.label} className="flex items-baseline justify-between gap-2">
+          <span className="truncate">{b.label} ×{b.count}</span>
+          <span className={`tabular-nums font-semibold ${invert ? "text-white" : "text-foreground"}`}>{b.total}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function AttendanceRace({ userId }: { userId: string }) {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -101,12 +132,22 @@ export function AttendanceRace({ userId }: { userId: string }) {
                     ))}
                   </div>
 
-                  <div className="mt-3 flex items-center gap-3 text-[11px] text-muted-foreground">
-                    <span>{me.present_days} presentes</span>
-                    <span>{me.forms_count} formularios</span>
+                  <Breakdown r={me} />
+
+                  <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                     {me.streak_weeks > 0 && (
                       <span className="inline-flex items-center gap-1 text-foreground">
                         <Flame className="h-3 w-3" />{me.streak_weeks} sem. de racha
+                      </span>
+                    )}
+                    {me.test_top5_count > 0 && (
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <Medal className="h-3 w-3" />{me.test_top5_count} top 5
+                      </span>
+                    )}
+                    {me.test_pos_top3_count > 0 && (
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <Users className="h-3 w-3" />{me.test_pos_top3_count} top 3 de puesto
                       </span>
                     )}
                   </div>
@@ -133,28 +174,47 @@ export function AttendanceRace({ userId }: { userId: string }) {
           <DialogHeader>
             <DialogTitle>Carrera del presentismo · Temporada</DialogTitle>
             <DialogDescription>
-              3 pts por presente · 1 pt por formulario completado · 2 pts por semana de racha.
+              {W.present} pts por presente · {W.form} pt por formulario · {W.streak} pts por semana de racha ·{" "}
+              {W.convo} pts por convocatoria · {W.top5} pts por entrar en el top 5 del equipo en un test ·{" "}
+              {W.pos3} pts por entrar en el top 3 de tu puesto. Toca a un jugador para ver de dónde salen sus puntos.
             </DialogDescription>
           </DialogHeader>
           <div className="border border-border divide-y divide-border">
-            {rows.map((r, i) => (
-              <div
-                key={r.user_id}
-                className={`flex items-center gap-3 px-3 py-2 text-sm ${r.user_id === userId ? "bg-black text-white" : ""}`}
-              >
-                <span className="w-7 font-display text-xs">{i + 1}º</span>
-                <span className="flex-1 min-w-0 truncate">
-                  {name(r)}
-                  {r.position && <span className={`ml-2 text-[10px] ${r.user_id === userId ? "text-white/70" : "text-muted-foreground"}`}>{r.position}</span>}
-                </span>
-                {r.streak_weeks > 0 && (
-                  <span className="inline-flex items-center gap-0.5 text-[10px]">
-                    <Flame className="h-3 w-3" />{r.streak_weeks}
-                  </span>
-                )}
-                <span className="font-display text-sm tabular-nums">{r.points}</span>
-              </div>
-            ))}
+            {rows.map((r, i) => {
+              const isMe = r.user_id === userId;
+              const isOpen = expanded === r.user_id;
+              return (
+                <div key={r.user_id} className={isMe ? "bg-black text-white" : ""}>
+                  <button
+                    type="button"
+                    onClick={() => setExpanded(isOpen ? null : r.user_id)}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-left"
+                  >
+                    <span className="w-7 font-display text-xs">{i + 1}º</span>
+                    <span className="flex-1 min-w-0 truncate">
+                      {name(r)}
+                      {r.position && (
+                        <span className={`ml-2 text-[10px] ${isMe ? "text-white/70" : "text-muted-foreground"}`}>
+                          {r.position}
+                        </span>
+                      )}
+                    </span>
+                    {r.streak_weeks > 0 && (
+                      <span className="inline-flex items-center gap-0.5 text-[10px]">
+                        <Flame className="h-3 w-3" />{r.streak_weeks}
+                      </span>
+                    )}
+                    <span className="font-display text-sm tabular-nums">{r.points}</span>
+                    <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="px-3 pb-3">
+                      <Breakdown r={r} invert={isMe} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>
