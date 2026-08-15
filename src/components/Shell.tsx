@@ -119,7 +119,7 @@ function NavDock({
 }
 
 export function Shell({ children, title }: { children: ReactNode; title?: string }) {
-  const { role, signOut, user } = useAuth();
+  const { role, roles, setActiveRole, signOut, user } = useAuth();
   const navigate = useNavigate();
   const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -161,7 +161,30 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
           )}
 
           <div className="flex items-center gap-1 shrink-0">
+            {roles.length > 1 && (
+              <div className="flex border-2 border-black rounded-lg overflow-hidden" role="group" aria-label="Cambiar vista">
+                {(["coach", "atleta"] as const).map((r) =>
+                  roles.includes(r) ? (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => {
+                        setActiveRole(r);
+                        navigate({ to: r === "coach" ? "/coach" : "/atleta" });
+                      }}
+                      className={
+                        "px-2 py-1 text-[10px] font-semibold uppercase tracking-wider transition-colors " +
+                        (role === r ? "bg-black text-white" : "bg-white text-black hover:bg-accent")
+                      }
+                    >
+                      {r === "coach" ? "Staff" : "Jugador"}
+                    </button>
+                  ) : null,
+                )}
+              </div>
+            )}
             {role === "coach" && <AthleteSearch />}
+
             {role === "coach" && (
               <Link
                 to={adminHref}
