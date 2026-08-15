@@ -136,7 +136,7 @@ function AthleteDetail() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar perfil del jugador</DialogTitle>
-            <DialogDescription>Solo el administrador puede modificar estos datos.</DialogDescription>
+            <DialogDescription>El cuerpo técnico puede corregir estos datos del jugador.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-3">
             <div className="grid grid-cols-2 gap-3">
