@@ -15,6 +15,7 @@ import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { isoDate } from "@/lib/week-utils";
+import { Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/coach/cuestionarios")({
   component: () => <Protected requireRole="coach"><Page /></Protected>,
@@ -32,6 +33,42 @@ const WELL_FIELDS = [
   { key: "mood", label: "Dolor muscular", scale: ["Sin dolor", "Leve", "Moderado", "Alto", "Muy alto"] },
 ] as const;
 
+
+function HistBlock({ title, rows, dateKey, render, onDelete }: {
+  title: string; rows: any[]; dateKey: string;
+  render: (r: any) => string; onDelete: (r: any) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? rows : rows.slice(0, 5);
+  return (
+    <div className="border border-border">
+      <div className="px-3 py-2 border-b border-border bg-secondary flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wider font-semibold">{title}</span>
+        <span className="text-[11px] text-muted-foreground">{rows.length} registros</span>
+      </div>
+      {rows.length === 0 ? (
+        <p className="px-3 py-3 text-xs text-muted-foreground">Sin registros.</p>
+      ) : (
+        <>
+          {shown.map((r) => (
+            <div key={r.id} className="px-3 py-2 border-b border-border last:border-b-0 flex items-center gap-2">
+              <span className="text-xs font-medium w-[92px] shrink-0">{String(r[dateKey]).slice(0, 10)}</span>
+              <span className="text-xs text-muted-foreground flex-1 min-w-0 truncate">{render(r)}</span>
+              <Button size="sm" variant="ghost" onClick={() => onDelete(r)} aria-label="Borrar registro">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          {rows.length > 5 && (
+            <button onClick={() => setOpen((o) => !o)} className="w-full px-3 py-2 text-[11px] uppercase tracking-wider hover:bg-accent">
+              {open ? "Ver menos" : `Ver los ${rows.length}`}
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
 
 function Page() {
   const [athletes, setAthletes] = useState<any[]>([]);
@@ -148,6 +185,7 @@ function Page() {
     toast.success(rpeId ? "RPE actualizado" : "RPE registrado");
     const { data } = await supabase.from("rpe_entries").select("id").eq("user_id", athleteId).eq("session_date", date).maybeSingle();
     setRpeId(data?.id ?? null);
+    loadHistory(athleteId);
   }
 
   async function saveWellness() {
@@ -164,6 +202,7 @@ function Page() {
     if (error) { toast.error(error.message); return; }
     setWellExists(true);
     toast.success("Bienestar guardado");
+    loadHistory(athleteId);
   }
 
   return (
@@ -283,6 +322,49 @@ function Page() {
             </div>
             <p className="text-[11px] text-muted-foreground mt-3">Escala 1 = mejor · 5 = peor.</p>
           </div>
+
+          {athleteId && (
+            <div className="border border-border p-5 mt-6">
+              <h2 className="text-sm uppercase tracking-wider font-semibold mb-1">Formularios respondidos</h2>
+              <p className="text-xs text-muted-foreground mb-4">
+                Revisa y borra registros cargados por error o en días que el jugador no asistió.
+              </p>
+              {histLoading ? (
+                <div className="py-6 flex justify-center"><RugbyLoader /></div>
+              ) : (
+                <div className="space-y-5">
+                  <HistBlock
+                    title="RPE"
+                    rows={hist.rpe}
+                    dateKey="session_date"
+                    render={(r) => `RPE ${r.rpe_score}${r.session_label ? " · " + r.session_label : ""}`}
+                    onDelete={(r) => removeEntry("rpe", r)}
+                  />
+                  <HistBlock
+                    title="Bienestar"
+                    rows={hist.well}
+                    dateKey="entry_date"
+                    render={(r) => `Fatiga ${r.fatigue} · Sueño ${r.sleep} · Estrés ${r.stress} · Dolor musc. ${r.mood}${r.has_pain ? " · Reporta dolor" : ""}`}
+                    onDelete={(r) => removeEntry("well", r)}
+                  />
+                  <HistBlock
+                    title="Recuperación"
+                    rows={hist.rec}
+                    dateKey="entry_date"
+                    render={(r) => `${r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}% (${r.total_score}/${r.max_score})`}
+                    onDelete={(r) => removeEntry("rec", r)}
+                  />
+                  <HistBlock
+                    title="Peso corporal"
+                    rows={hist.weight}
+                    dateKey="recorded_at"
+                    render={(r) => `${r.weight} kg`}
+                    onDelete={(r) => removeEntry("weight", r)}
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
     </Shell>
