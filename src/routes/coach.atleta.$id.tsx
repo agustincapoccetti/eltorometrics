@@ -115,7 +115,7 @@ function AthleteDetail() {
           <ArrowLeft className="h-3 w-3" /> Volver
         </Link>
         <div className="flex items-center gap-2">
-          {profile && isAdmin && (
+          {profile && (
             <Button size="sm" variant="outline" onClick={() => {
               setEditForm({
                 full_name: profile.full_name ?? "",
