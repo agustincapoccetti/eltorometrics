@@ -55,7 +55,7 @@ const COACH_NAV: NavItem[] = [
 const COACH_GROUPS: Record<string, string[]> = {
   "/coach": ["/coach", "/coach/semaforo"],
   "/coach/jugadores": ["/coach/jugadores", "/coach/cuestionarios", "/coach/atleta"],
-  "/coach/gym": ["/coach/gym", "/coach/calendario", "/coach/partidos"],
+  "/coach/gym": ["/coach/gym", "/coach/calendario", "/coach/planificacion", "/coach/partidos", "/coach/evaluaciones"],
   "/coach/fisio": ["/coach/fisio", "/coach/recuperacion"],
 };
 
