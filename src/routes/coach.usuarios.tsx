@@ -28,6 +28,8 @@ type Row = {
   full_name: string;
   position: string;
   role: string | null;
+  roles?: string[];
+
   confirmed: boolean;
   last_sign_in_at: string | null;
 };
