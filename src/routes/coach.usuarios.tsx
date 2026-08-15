@@ -13,7 +13,7 @@ import { POSITIONS, COACH_TYPES, coachTypeLabel } from "@/lib/positions";
 import { toast } from "sonner";
 import { Trash2, UserPlus, Mail, ShieldCheck, User } from "lucide-react";
 import { RugbyLoader } from "@/components/RugbyLoader";
-import { listUsers, inviteAthlete, deleteUser, setUserRole } from "@/lib/user-admin.functions";
+import { listUsers, inviteAthlete, deleteUser, setUserRole, setDualRole } from "@/lib/user-admin.functions";
 import { useSort, sortIndicator } from "@/lib/sort";
 
 const ADMIN_EMAIL = "agustincapoccetti@hotmail.com";
@@ -42,6 +42,21 @@ function Page() {
   const invite = useServerFn(inviteAthlete);
   const del = useServerFn(deleteUser);
   const changeRole = useServerFn(setUserRole);
+  const changeDual = useServerFn(setDualRole);
+
+  async function toggleDual(r: any) {
+    const on = !(r.roles ?? []).includes("atleta");
+    setBusyId(r.id);
+    try {
+      await changeDual({ data: { userId: r.id, alsoAthlete: on } });
+      toast.success(on ? "Ahora también puede usar la vista de jugador" : "Vista de jugador desactivada");
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Error");
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -262,6 +277,11 @@ function Page() {
                       <ShieldCheck className="h-3.5 w-3.5 mr-1" />A cuerpo técnico
                     </Button>
                   )}
+                  {r.role === "coach" && (
+                    <Button variant="outline" size="sm" className="flex-1" disabled={busyId === r.id} onClick={() => toggleDual(r)}>
+                      <User className="h-3.5 w-3.5 mr-1" />{(r.roles ?? []).includes("atleta") ? "Quitar jugador" : "También juega"}
+                    </Button>
+                  )}
                   <Button variant="ghost" size="sm" onClick={() => onDelete(r)} disabled={r.email.toLowerCase() === ADMIN_EMAIL}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -289,7 +309,7 @@ function Page() {
                   <tr key={r.id} className="border-t border-border">
                     <td className="px-4 py-3">{r.full_name || <span className="text-muted-foreground">—</span>}</td>
                     <td className="px-4 py-3">{r.email}</td>
-                    <td className="px-4 py-3">{r.role === "coach" ? "Cuerpo técnico" : r.role ?? "—"}</td>
+                    <td className="px-4 py-3">{r.role === "coach" ? ((r.roles ?? []).includes("atleta") ? "Cuerpo técnico + jugador" : "Cuerpo técnico") : r.role ?? "—"}</td>
                     <td className="px-4 py-3">{r.position || "—"}</td>
                     <td className="px-4 py-3">
                       {r.confirmed
@@ -305,6 +325,11 @@ function Page() {
                         ) : (
                           <Button variant="outline" size="sm" disabled={busyId === r.id} onClick={() => setPromote({ row: r, coachType: "preparador_fisico" })}>
                             <ShieldCheck className="h-3.5 w-3.5 mr-1" />A cuerpo técnico
+                          </Button>
+                        )}
+                        {r.role === "coach" && (
+                          <Button variant="outline" size="sm" disabled={busyId === r.id} onClick={() => toggleDual(r)}>
+                            <User className="h-3.5 w-3.5 mr-1" />{(r.roles ?? []).includes("atleta") ? "Quitar jugador" : "También juega"}
                           </Button>
                         )}
                         <Button variant="ghost" size="sm" onClick={() => onDelete(r)} disabled={r.email.toLowerCase() === ADMIN_EMAIL}>
