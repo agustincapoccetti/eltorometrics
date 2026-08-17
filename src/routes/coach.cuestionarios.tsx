@@ -246,6 +246,9 @@ function Page() {
             </div>
           </div>
 
+          <WhatsAppShare />
+
+
           <div className="border border-border p-5 mb-6">
             <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <h2 className="text-sm uppercase tracking-wider font-semibold">RPE de la sesión</h2>
