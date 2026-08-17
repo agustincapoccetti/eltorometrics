@@ -15,7 +15,7 @@ import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { isoDate } from "@/lib/week-utils";
-import { Trash2 } from "lucide-react";
+import { Trash2, Send, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/coach/cuestionarios")({
   component: () => <Protected requireRole="coach"><Page /></Protected>,
@@ -70,7 +70,66 @@ function HistBlock({ title, rows, dateKey, render, onDelete }: {
   );
 }
 
+const SHARE_FORMS = [
+  { key: "rpe", label: "RPE de la sesión", path: "/atleta/rpe" },
+  { key: "wellness", label: "Bienestar", path: "/atleta/wellness" },
+  { key: "recuperacion", label: "Recuperación", path: "/atleta/recuperacion" },
+] as const;
+
+function WhatsAppShare() {
+  const [form, setForm] = useState<string>("rpe");
+  const [extra, setExtra] = useState("");
+
+  const sel = SHARE_FORMS.find((f) => f.key === form)!;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const link = `${origin}${sel.path}`;
+  const message = `¡Hola! Recuerda completar el formulario de ${sel.label} en El Toro Rugby Performance.${extra ? ` ${extra.trim()}` : ""}\n${link}`;
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(message);
+      toast.success("Mensaje copiado");
+    } catch {
+      toast.error("No se pudo copiar");
+    }
+  }
+
+  function share() {
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+  }
+
+  return (
+    <div className="border border-border p-5 mb-6">
+      <h2 className="text-sm uppercase tracking-wider font-semibold mb-1">Recordatorio por WhatsApp</h2>
+      <p className="text-xs text-muted-foreground mb-4">
+        Genera un enlace directo al formulario y envíalo al grupo o a un jugador que se haya olvidado de completarlo.
+      </p>
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <Label>Formulario</Label>
+          <Select value={form} onValueChange={setForm}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {SHARE_FORMS.map((f) => <SelectItem key={f.key} value={f.key}>{f.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="wa-extra">Nota extra (opcional)</Label>
+          <Input id="wa-extra" value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Antes de las 20 h, por favor." />
+        </div>
+      </div>
+      <div className="mt-3 border border-border bg-secondary px-3 py-2 text-xs whitespace-pre-line break-words">{message}</div>
+      <div className="flex gap-2 mt-3 flex-wrap">
+        <Button onClick={share}><Send className="h-4 w-4 mr-1.5" />Enviar por WhatsApp</Button>
+        <Button variant="outline" onClick={copy}><Copy className="h-4 w-4 mr-1.5" />Copiar mensaje</Button>
+      </div>
+    </div>
+  );
+}
+
 function Page() {
+
   const [athletes, setAthletes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [positionFilter, setPositionFilter] = useState("all");
@@ -245,6 +304,9 @@ function Page() {
               <Input id="d" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
             </div>
           </div>
+
+          <WhatsAppShare />
+
 
           <div className="border border-border p-5 mb-6">
             <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
