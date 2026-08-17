@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isoDate, startOfWeek, endOfWeek } from "@/lib/week-utils";
+import { sendPushToTargets } from "@/lib/push.functions";
+import { toast } from "sonner";
+import { BellRing } from "lucide-react";
 
 type Athlete = { id: string; name: string };
 
@@ -98,7 +101,18 @@ export function PanelSummary() {
         <div className="space-y-3">
           <div>
             <p className="text-xs uppercase tracking-wider">Bienestar hoy · <span className="font-display">{pct(missingWellness.length)}%</span></p>
-            {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : <MissingChips list={missingWellness} />}
+            {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : (
+              <>
+                <MissingChips list={missingWellness} />
+                <RemindButton
+                  list={missingWellness}
+                  title="Completa tu bienestar"
+                  body="Todavía no registraste el cuestionario de bienestar de hoy."
+                  link="/atleta/wellness"
+                  tag="remind-wellness"
+                />
+              </>
+            )}
           </div>
           <div>
             <p className="text-xs uppercase tracking-wider">
@@ -106,7 +120,18 @@ export function PanelSummary() {
             </p>
             {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
               : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
-              : <MissingChips list={missingRpe} />}
+              : (
+                <>
+                  <MissingChips list={missingRpe} />
+                  <RemindButton
+                    list={missingRpe}
+                    title="Carga tu RPE"
+                    body={`Falta tu RPE de ${lastSession.name}.`}
+                    link="/atleta/rpe"
+                    tag="remind-rpe"
+                  />
+                </>
+              )}
           </div>
         </div>
       </Card>
@@ -177,5 +202,45 @@ function MissingChips({ list }: { list: Athlete[] }) {
         </button>
       )}
     </div>
+  );
+}
+
+function RemindButton({
+  list,
+  title,
+  body,
+  link,
+  tag,
+}: {
+  list: Athlete[];
+  title: string;
+  body: string;
+  link: string;
+  tag: string;
+}) {
+  const [sending, setSending] = useState(false);
+  async function send() {
+    setSending(true);
+    try {
+      const res = await sendPushToTargets({
+        data: { userIds: list.map((a) => a.id), title, body, link, tag: `${tag}-${isoDate(new Date())}` },
+      });
+      toast.success(`Recordatorio enviado a ${res.sent} dispositivo(s)`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSending(false);
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={send}
+      disabled={sending}
+      className="mt-2 inline-flex items-center gap-1 border border-border px-2 py-1 text-[11px] uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50"
+    >
+      <BellRing className="h-3 w-3" />
+      {sending ? "Enviando..." : `Recordar a ${list.length} pendiente${list.length === 1 ? "" : "s"}`}
+    </button>
   );
 }
