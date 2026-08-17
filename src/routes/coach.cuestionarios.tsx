@@ -15,7 +15,7 @@ import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
 import { isoDate } from "@/lib/week-utils";
-import { Trash2 } from "lucide-react";
+import { Trash2, Send, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/coach/cuestionarios")({
   component: () => <Protected requireRole="coach"><Page /></Protected>,
