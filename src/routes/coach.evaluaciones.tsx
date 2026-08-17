@@ -95,7 +95,15 @@ function Page() {
     if (data?.id) { setExpanded(data.id); setEditing(data.id); }
   }
 
+  async function updateTest(id: string, patch: { unit?: string; higher_is_better?: boolean }) {
+    const { error } = await supabase.from("evaluations").update(patch).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Test actualizado");
+    load();
+  }
+
   async function removeTest(id: string) {
+
     if (!confirm("¿Eliminar el test y todos sus resultados?")) return;
     const { error } = await supabase.from("evaluations").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
