@@ -98,7 +98,18 @@ export function PanelSummary() {
         <div className="space-y-3">
           <div>
             <p className="text-xs uppercase tracking-wider">Bienestar hoy · <span className="font-display">{pct(missingWellness.length)}%</span></p>
-            {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : <MissingChips list={missingWellness} />}
+            {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : (
+              <>
+                <MissingChips list={missingWellness} />
+                <RemindButton
+                  list={missingWellness}
+                  title="Completa tu bienestar"
+                  body="Todavía no registraste el cuestionario de bienestar de hoy."
+                  link="/atleta/wellness"
+                  tag="remind-wellness"
+                />
+              </>
+            )}
           </div>
           <div>
             <p className="text-xs uppercase tracking-wider">
@@ -106,7 +117,18 @@ export function PanelSummary() {
             </p>
             {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
               : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
-              : <MissingChips list={missingRpe} />}
+              : (
+                <>
+                  <MissingChips list={missingRpe} />
+                  <RemindButton
+                    list={missingRpe}
+                    title="Carga tu RPE"
+                    body={`Falta tu RPE de ${lastSession.name}.`}
+                    link="/atleta/rpe"
+                    tag="remind-rpe"
+                  />
+                </>
+              )}
           </div>
         </div>
       </Card>
