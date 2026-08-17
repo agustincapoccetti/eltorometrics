@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isoDate, startOfWeek, endOfWeek } from "@/lib/week-utils";
+import { sendPushToTargets } from "@/lib/push.functions";
+import { toast } from "sonner";
+import { BellRing } from "lucide-react";
 
 type Athlete = { id: string; name: string };
 
@@ -199,5 +202,45 @@ function MissingChips({ list }: { list: Athlete[] }) {
         </button>
       )}
     </div>
+  );
+}
+
+function RemindButton({
+  list,
+  title,
+  body,
+  link,
+  tag,
+}: {
+  list: Athlete[];
+  title: string;
+  body: string;
+  link: string;
+  tag: string;
+}) {
+  const [sending, setSending] = useState(false);
+  async function send() {
+    setSending(true);
+    try {
+      const res = await sendPushToTargets({
+        data: { userIds: list.map((a) => a.id), title, body, link, tag: `${tag}-${isoDate(new Date())}` },
+      });
+      toast.success(`Recordatorio enviado a ${res.sent} dispositivo(s)`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSending(false);
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={send}
+      disabled={sending}
+      className="mt-2 inline-flex items-center gap-1 border border-border px-2 py-1 text-[11px] uppercase tracking-wider hover:bg-foreground hover:text-background disabled:opacity-50"
+    >
+      <BellRing className="h-3 w-3" />
+      {sending ? "Enviando..." : `Recordar a ${list.length} pendiente${list.length === 1 ? "" : "s"}`}
+    </button>
   );
 }
