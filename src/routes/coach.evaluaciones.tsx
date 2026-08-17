@@ -95,7 +95,15 @@ function Page() {
     if (data?.id) { setExpanded(data.id); setEditing(data.id); }
   }
 
+  async function updateTest(id: string, patch: { unit?: string; higher_is_better?: boolean }) {
+    const { error } = await supabase.from("evaluations").update(patch).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Test actualizado");
+    load();
+  }
+
   async function removeTest(id: string) {
+
     if (!confirm("¿Eliminar el test y todos sus resultados?")) return;
     const { error } = await supabase.from("evaluations").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
@@ -324,6 +332,41 @@ function Page() {
                   {open && (
                     <div className="p-4 border-t border-border">
                       {t.description && <p className="text-xs text-muted-foreground mb-4 border border-border p-3">{t.description}</p>}
+
+                      <div className="border border-border p-3 mb-4">
+                        <p className="text-xs uppercase tracking-wider mb-2 font-semibold">Configuración del test</p>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          <div>
+                            <Label>Unidad de medida</Label>
+                            <Select value={UNITS.some((u) => u.value === t.unit) ? t.unit : "otra"} onValueChange={(v) => { if (v !== "otra") updateTest(t.id, { unit: v }); }}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                {UNITS.map((u) => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}
+                                <SelectItem value="otra">Otra (escribir)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {!UNITS.some((u) => u.value === t.unit) && (
+                              <Input
+                                className="mt-2"
+                                defaultValue={t.unit}
+                                onBlur={(e) => { const v = e.target.value.trim(); if (v && v !== t.unit) updateTest(t.id, { unit: v }); }}
+                                placeholder="Escribí la unidad"
+                              />
+                            )}
+                          </div>
+                          <div>
+                            <Label>¿Cómo se valoran los resultados?</Label>
+                            <Select value={String(t.higher_is_better)} onValueChange={(v) => updateTest(t.id, { higher_is_better: v === "true" })}>
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Gana el valor más alto (más es mejor)</SelectItem>
+                                <SelectItem value="false">Gana el valor más bajo (menos es mejor: tiempos)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+
 
                       <div className="flex items-center gap-2 mb-4 flex-wrap">
                         {editing === t.id ? (
