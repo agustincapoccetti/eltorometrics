@@ -84,18 +84,10 @@ export function PanelSummary() {
         {risk.length === 0 ? (
           <Empty>Sin jugadores en riesgo</Empty>
         ) : (
-          <ul className="space-y-1">
-            {risk.map(({ a, acwr }) => (
-              <li key={a.id}>
-                <Link to="/coach/atleta/$id" params={{ id: a.id }} className="flex items-center justify-between text-xs hover:underline">
-                  <span className="truncate">{a.name}</span>
-                  <span className="font-display ml-2">{acwr}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <RiskList risk={risk} />
         )}
       </Card>
+
 
       <Card title="Compliance de hoy" subtitle={`${total} atletas`}>
         <div className="space-y-3">
