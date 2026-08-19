@@ -164,6 +164,36 @@ function Card({ title, subtitle, children }: { title: string; subtitle?: string;
   );
 }
 
+function RiskList({ risk }: { risk: { a: Athlete; acwr: number }[] }) {
+  const [open, setOpen] = useState(false);
+  const shown = open ? risk : risk.slice(0, 3);
+  return (
+    <div>
+      <ul className="space-y-1">
+        {shown.map(({ a, acwr }) => (
+          <li key={a.id}>
+            <Link to="/coach/atleta/$id" params={{ id: a.id }} className="flex items-center justify-between text-xs hover:underline">
+              <span className="truncate">{a.name}</span>
+              <span className="font-display ml-2">{acwr}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {risk.length > 3 && (
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="mt-2 inline-flex items-center gap-1 border border-border px-2 py-1 text-[11px] uppercase tracking-wider hover:bg-foreground hover:text-background"
+        >
+          {open ? "Ver menos" : `Ver ${risk.length - 3} más`}
+          <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+
 function Empty({ children }: { children: React.ReactNode }) {
   return <p className="text-xs text-muted-foreground">{children}</p>;
 }
