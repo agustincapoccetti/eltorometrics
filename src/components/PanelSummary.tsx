@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isoDate, startOfWeek, endOfWeek } from "@/lib/week-utils";
 import { sendPushToTargets } from "@/lib/push.functions";
 import { toast } from "sonner";
-import { BellRing } from "lucide-react";
+import { BellRing, ChevronDown } from "lucide-react";
 
 type Athlete = { id: string; name: string };
 
