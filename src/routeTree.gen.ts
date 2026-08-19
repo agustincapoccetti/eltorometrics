@@ -18,6 +18,7 @@ import { Route as CoachIndexRouteImport } from './routes/coach.index'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
 import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
 import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
+import { Route as CoachRespuestasRouteImport } from './routes/coach.respuestas'
 import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
 import { Route as CoachPlanificacionRouteImport } from './routes/coach.planificacion'
 import { Route as CoachPartidosRouteImport } from './routes/coach.partidos'
@@ -85,6 +86,11 @@ const CoachUsuariosRoute = CoachUsuariosRouteImport.update({
 const CoachSemaforoRoute = CoachSemaforoRouteImport.update({
   id: '/coach/semaforo',
   path: '/coach/semaforo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachRespuestasRoute = CoachRespuestasRouteImport.update({
+  id: '/coach/respuestas',
+  path: '/coach/respuestas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/planificacion': typeof CoachPlanificacionRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
+  '/coach/respuestas': typeof CoachRespuestasRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
   '/atleta/': typeof AtletaIndexRoute
@@ -265,6 +272,7 @@ export interface FileRoutesByTo {
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/planificacion': typeof CoachPlanificacionRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
+  '/coach/respuestas': typeof CoachRespuestasRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
   '/atleta': typeof AtletaIndexRoute
@@ -300,6 +308,7 @@ export interface FileRoutesById {
   '/coach/partidos': typeof CoachPartidosRoute
   '/coach/planificacion': typeof CoachPlanificacionRoute
   '/coach/recuperacion': typeof CoachRecuperacionRoute
+  '/coach/respuestas': typeof CoachRespuestasRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
   '/atleta/': typeof AtletaIndexRoute
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/coach/partidos'
     | '/coach/planificacion'
     | '/coach/recuperacion'
+    | '/coach/respuestas'
     | '/coach/semaforo'
     | '/coach/usuarios'
     | '/atleta/'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/coach/partidos'
     | '/coach/planificacion'
     | '/coach/recuperacion'
+    | '/coach/respuestas'
     | '/coach/semaforo'
     | '/coach/usuarios'
     | '/atleta'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/coach/partidos'
     | '/coach/planificacion'
     | '/coach/recuperacion'
+    | '/coach/respuestas'
     | '/coach/semaforo'
     | '/coach/usuarios'
     | '/atleta/'
@@ -439,6 +451,7 @@ export interface RootRouteChildren {
   CoachPartidosRoute: typeof CoachPartidosRoute
   CoachPlanificacionRoute: typeof CoachPlanificacionRoute
   CoachRecuperacionRoute: typeof CoachRecuperacionRoute
+  CoachRespuestasRoute: typeof CoachRespuestasRoute
   CoachSemaforoRoute: typeof CoachSemaforoRoute
   CoachUsuariosRoute: typeof CoachUsuariosRoute
   AtletaIndexRoute: typeof AtletaIndexRoute
@@ -510,6 +523,13 @@ declare module '@tanstack/react-router' {
       path: '/coach/semaforo'
       fullPath: '/coach/semaforo'
       preLoaderRoute: typeof CoachSemaforoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/respuestas': {
+      id: '/coach/respuestas'
+      path: '/coach/respuestas'
+      fullPath: '/coach/respuestas'
+      preLoaderRoute: typeof CoachRespuestasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/recuperacion': {
@@ -703,6 +723,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachPartidosRoute: CoachPartidosRoute,
   CoachPlanificacionRoute: CoachPlanificacionRoute,
   CoachRecuperacionRoute: CoachRecuperacionRoute,
+  CoachRespuestasRoute: CoachRespuestasRoute,
   CoachSemaforoRoute: CoachSemaforoRoute,
   CoachUsuariosRoute: CoachUsuariosRoute,
   AtletaIndexRoute: AtletaIndexRoute,

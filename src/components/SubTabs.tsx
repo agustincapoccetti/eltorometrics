@@ -17,7 +17,9 @@ export const ENTRENO_TABS: SubTab[] = [
 export const PLANTEL_TABS: SubTab[] = [
   { to: "/coach/jugadores", label: "Jugadores" },
   { to: "/coach/cuestionarios", label: "Cuestionarios" },
+  { to: "/coach/respuestas", label: "Respuestas" },
 ];
+
 
 export const PLANIFICACION_TABS: SubTab[] = [
   { to: "/coach/gym", label: "Gym" },
