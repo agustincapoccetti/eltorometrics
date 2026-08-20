@@ -41,8 +41,8 @@ export function PanelSummary() {
       const [{ data: profiles }, { data: rpe }, { data: wellness }, { data: events }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, last_name").in("id", ids),
         supabase.from("rpe_entries").select("user_id, session_date, rpe_score").in("user_id", ids).gte("session_date", chronicStart),
-        supabase.from("wellness_entries").select("user_id, entry_date").in("user_id", ids).eq("entry_date", today),
-        supabase.from("calendar_events").select("name, event_date, type").eq("type", "training").lte("event_date", today).order("event_date", { ascending: false }).limit(1),
+        supabase.from("wellness_entries").select("user_id, entry_date").in("user_id", ids).eq("entry_date", monday),
+        supabase.from("calendar_events").select("name, event_date, type").eq("type", "training").lte("event_date", today).order("event_date", { ascending: false }).limit(5),
       ]);
 
       const nameOf = (p: any) => `${p.full_name ?? ""}${p.last_name ? " " + p.last_name : ""}`.trim() || "Sin nombre";
