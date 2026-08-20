@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { isoDate, startOfWeek, endOfWeek } from "@/lib/week-utils";
+import { isoDate, startOfWeek, endOfWeek, weekDays, withinHoursAfter, isTodayOrPast } from "@/lib/week-utils";
 import { sendPushToTargets } from "@/lib/push.functions";
 import { toast } from "sonner";
 import { BellRing, ChevronDown } from "lucide-react";
@@ -13,13 +13,16 @@ export function PanelSummary() {
   const [missingWellness, setMissingWellness] = useState<Athlete[]>([]);
   const [missingRpe, setMissingRpe] = useState<Athlete[]>([]);
   const [total, setTotal] = useState(0);
-  const [lastSession, setLastSession] = useState<{ name: string; date: string } | null>(null);
+  const [lastSession, setLastSession] = useState<{ name: string; date: string; open: boolean } | null>(null);
+  const [wellnessDate, setWellnessDate] = useState(weekDays()[0]);
+  const [wellnessOpen, setWellnessOpen] = useState(false);
   const [physioReq, setPhysioReq] = useState<any[]>([]);
   const [coachReq, setCoachReq] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
       const today = isoDate(new Date());
+      const monday = weekDays()[0];
       const weekStart = isoDate(startOfWeek());
       const weekEnd = isoDate(endOfWeek());
       const chronicStart = (() => { const d = new Date(); d.setDate(d.getDate() - 27); return isoDate(d); })();
@@ -39,8 +42,8 @@ export function PanelSummary() {
       const [{ data: profiles }, { data: rpe }, { data: wellness }, { data: events }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, last_name").in("id", ids),
         supabase.from("rpe_entries").select("user_id, session_date, rpe_score").in("user_id", ids).gte("session_date", chronicStart),
-        supabase.from("wellness_entries").select("user_id, entry_date").in("user_id", ids).eq("entry_date", today),
-        supabase.from("calendar_events").select("name, event_date, type").eq("type", "training").lte("event_date", today).order("event_date", { ascending: false }).limit(1),
+        supabase.from("wellness_entries").select("user_id, entry_date").in("user_id", ids).eq("entry_date", monday),
+        supabase.from("calendar_events").select("name, event_date, type").eq("type", "training").lte("event_date", today).order("event_date", { ascending: false }).limit(5),
       ]);
 
       const nameOf = (p: any) => `${p.full_name ?? ""}${p.last_name ? " " + p.last_name : ""}`.trim() || "Sin nombre";
@@ -63,10 +66,14 @@ export function PanelSummary() {
 
       const wSet = new Set((wellness ?? []).map((w: any) => w.user_id));
       setMissingWellness(list.filter((a) => !wSet.has(a.id)));
+      setWellnessDate(monday);
+      setWellnessOpen(isTodayOrPast(monday) && withinHoursAfter(monday, 24));
 
-      const ev = (events ?? [])[0] as any;
+      // Ventana abierta = la sesión más reciente cuyo plazo de 48 hs sigue vigente
+      const past = (events ?? []) as any[];
+      const ev = past.find((e) => isTodayOrPast(e.event_date) && withinHoursAfter(e.event_date, 48)) ?? past[0];
       if (ev) {
-        setLastSession({ name: ev.name, date: ev.event_date });
+        setLastSession({ name: ev.name, date: ev.event_date, open: withinHoursAfter(ev.event_date, 48) });
         const rSet = new Set((rpe ?? []).filter((r: any) => r.session_date === ev.event_date).map((r: any) => r.user_id));
         setMissingRpe(list.filter((a) => !rSet.has(a.id)));
       } else {
@@ -89,39 +96,47 @@ export function PanelSummary() {
       </Card>
 
 
-      <Card title="Compliance de hoy" subtitle={`${total} atletas`}>
+      <Card title="Compliance" subtitle={`${total} atletas`}>
         <div className="space-y-3">
           <div>
-            <p className="text-xs uppercase tracking-wider">Bienestar hoy · <span className="font-display">{pct(missingWellness.length)}%</span></p>
+            <p className="text-xs uppercase tracking-wider">
+              Bienestar · {wellnessDate} · <span className="font-display">{pct(missingWellness.length)}%</span>
+              {!wellnessOpen && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
+            </p>
             {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : (
               <>
                 <MissingChips list={missingWellness} />
-                <RemindButton
-                  list={missingWellness}
-                  title="Completa tu bienestar"
-                  body="Todavía no registraste el cuestionario de bienestar de hoy."
-                  link="/atleta/wellness"
-                  tag="remind-wellness"
-                />
+                {wellnessOpen && (
+                  <RemindButton
+                    list={missingWellness}
+                    title="Completa tu bienestar"
+                    body={`Todavía no registraste el cuestionario de bienestar del ${wellnessDate}.`}
+                    link="/atleta/wellness"
+                    tag="remind-wellness"
+                  />
+                )}
               </>
             )}
           </div>
           <div>
             <p className="text-xs uppercase tracking-wider">
               RPE {lastSession ? `· ${lastSession.name} (${lastSession.date})` : ""} · <span className="font-display">{lastSession ? `${pct(missingRpe.length)}%` : "—"}</span>
+              {lastSession && !lastSession.open && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
             </p>
             {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
               : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
               : (
                 <>
                   <MissingChips list={missingRpe} />
-                  <RemindButton
-                    list={missingRpe}
-                    title="Carga tu RPE"
-                    body={`Falta tu RPE de ${lastSession.name}.`}
-                    link="/atleta/rpe"
-                    tag="remind-rpe"
-                  />
+                  {lastSession.open && (
+                    <RemindButton
+                      list={missingRpe}
+                      title="Carga tu RPE"
+                      body={`Falta tu RPE de ${lastSession.name}.`}
+                      link="/atleta/rpe"
+                      tag="remind-rpe"
+                    />
+                  )}
                 </>
               )}
           </div>
