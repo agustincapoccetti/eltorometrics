@@ -11,9 +11,10 @@ type Athlete = { id: string; name: string };
 export function PanelSummary() {
   const [risk, setRisk] = useState<{ a: Athlete; acwr: number }[]>([]);
   const [missingWellness, setMissingWellness] = useState<Athlete[]>([]);
-  const [missingRpe, setMissingRpe] = useState<Athlete[]>([]);
+  const [sessions, setSessions] = useState<{ name: string; date: string; open: boolean; missing: Athlete[] }[]>([]);
   const [total, setTotal] = useState(0);
-  const [lastSession, setLastSession] = useState<{ name: string; date: string; open: boolean } | null>(null);
+
+
   const [wellnessDate, setWellnessDate] = useState(weekDays()[0]);
   const [wellnessOpen, setWellnessOpen] = useState(false);
   const [physioReq, setPhysioReq] = useState<any[]>([]);
@@ -69,19 +70,24 @@ export function PanelSummary() {
       setWellnessDate(monday);
       setWellnessOpen(isTodayOrPast(monday) && withinHoursAfter(monday, 24));
 
-      // Ventana abierta = la sesión más reciente cuyo plazo de 48 hs sigue vigente
-      const past = (events ?? []) as any[];
-      const ev = past.find((e) => isTodayOrPast(e.event_date) && withinHoursAfter(e.event_date, 48)) ?? past[0];
-      if (ev) {
-        setLastSession({ name: ev.name, date: ev.event_date, open: withinHoursAfter(ev.event_date, 48) });
-        const rSet = new Set((rpe ?? []).filter((r: any) => r.session_date === ev.event_date).map((r: any) => r.user_id));
-        setMissingRpe(list.filter((a) => !rSet.has(a.id)));
-      } else {
-        setLastSession(null);
-        setMissingRpe([]);
-      }
+      // Todas las sesiones pasadas cuya ventana de 48 hs sigue abierta (+ la última cerrada como referencia)
+      const past = ((events ?? []) as any[]).filter((e) => isTodayOrPast(e.event_date));
+      const openEvents = past.filter((e) => withinHoursAfter(e.event_date, 48));
+      const shown = openEvents.length ? openEvents : past.slice(0, 1);
+      setSessions(
+        shown.map((ev) => {
+          const rSet = new Set((rpe ?? []).filter((r: any) => r.session_date === ev.event_date).map((r: any) => r.user_id));
+          return {
+            name: ev.name,
+            date: ev.event_date,
+            open: withinHoursAfter(ev.event_date, 48),
+            missing: list.filter((a) => !rSet.has(a.id)),
+          };
+        })
+      );
     })();
   }, []);
+
 
   const pct = (missing: number) => (total ? Math.round(((total - missing) / total) * 100) : 0);
 
@@ -118,28 +124,36 @@ export function PanelSummary() {
               </>
             )}
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider">
-              RPE {lastSession ? `· ${lastSession.name} (${lastSession.date})` : ""} · <span className="font-display">{lastSession ? `${pct(missingRpe.length)}%` : "—"}</span>
-              {lastSession && !lastSession.open && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
-            </p>
-            {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
-              : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
-              : (
-                <>
-                  <MissingChips list={missingRpe} />
-                  {lastSession.open && (
-                    <RemindButton
-                      list={missingRpe}
-                      title="Carga tu RPE"
-                      body={`Falta tu RPE de ${lastSession.name}.`}
-                      link="/atleta/rpe"
-                      tag="remind-rpe"
-                    />
-                  )}
-                </>
-              )}
-          </div>
+          {sessions.length === 0 ? (
+            <div>
+              <p className="text-xs uppercase tracking-wider">RPE · <span className="font-display">—</span></p>
+              <Empty>Sin sesiones pasadas en el calendario</Empty>
+            </div>
+          ) : (
+            sessions.map((s) => (
+              <div key={s.date + s.name}>
+                <p className="text-xs uppercase tracking-wider">
+                  RPE · {s.name} ({s.date}) · <span className="font-display">{pct(s.missing.length)}%</span>
+                  {!s.open && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
+                </p>
+                {s.missing.length === 0 ? <Empty>Todos cargaron</Empty> : (
+                  <>
+                    <MissingChips list={s.missing} />
+                    {s.open && (
+                      <RemindButton
+                        list={s.missing}
+                        title="Carga tu RPE"
+                        body={`Falta tu RPE de ${s.name} (${s.date}).`}
+                        link="/atleta/rpe"
+                        tag={`remind-rpe-${s.date}`}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            ))
+          )}
+
         </div>
       </Card>
 
