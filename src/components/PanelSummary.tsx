@@ -70,8 +70,6 @@ export function PanelSummary() {
       setWellnessDate(monday);
       setWellnessOpen(isTodayOrPast(monday) && withinHoursAfter(monday, 24));
 
-      // Ventana abierta = la sesión más reciente cuyo plazo de 48 hs sigue vigente
-      const past = (events ?? []) as any[];
       // Todas las sesiones pasadas cuya ventana de 48 hs sigue abierta (+ la última cerrada como referencia)
       const past = ((events ?? []) as any[]).filter((e) => isTodayOrPast(e.event_date));
       const openEvents = past.filter((e) => withinHoursAfter(e.event_date, 48));
