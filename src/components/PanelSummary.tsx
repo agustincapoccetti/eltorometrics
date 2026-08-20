@@ -72,17 +72,24 @@ export function PanelSummary() {
 
       // Ventana abierta = la sesión más reciente cuyo plazo de 48 hs sigue vigente
       const past = (events ?? []) as any[];
-      const ev = past.find((e) => isTodayOrPast(e.event_date) && withinHoursAfter(e.event_date, 48)) ?? past[0];
-      if (ev) {
-        setLastSession({ name: ev.name, date: ev.event_date, open: withinHoursAfter(ev.event_date, 48) });
-        const rSet = new Set((rpe ?? []).filter((r: any) => r.session_date === ev.event_date).map((r: any) => r.user_id));
-        setMissingRpe(list.filter((a) => !rSet.has(a.id)));
-      } else {
-        setLastSession(null);
-        setMissingRpe([]);
-      }
+      // Todas las sesiones pasadas cuya ventana de 48 hs sigue abierta (+ la última cerrada como referencia)
+      const past = ((events ?? []) as any[]).filter((e) => isTodayOrPast(e.event_date));
+      const openEvents = past.filter((e) => withinHoursAfter(e.event_date, 48));
+      const shown = openEvents.length ? openEvents : past.slice(0, 1);
+      setSessions(
+        shown.map((ev) => {
+          const rSet = new Set((rpe ?? []).filter((r: any) => r.session_date === ev.event_date).map((r: any) => r.user_id));
+          return {
+            name: ev.name,
+            date: ev.event_date,
+            open: withinHoursAfter(ev.event_date, 48),
+            missing: list.filter((a) => !rSet.has(a.id)),
+          };
+        })
+      );
     })();
   }, []);
+
 
   const pct = (missing: number) => (total ? Math.round(((total - missing) / total) * 100) : 0);
 
