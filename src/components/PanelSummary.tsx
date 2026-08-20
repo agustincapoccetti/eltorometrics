@@ -124,28 +124,36 @@ export function PanelSummary() {
               </>
             )}
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-wider">
-              RPE {lastSession ? `· ${lastSession.name} (${lastSession.date})` : ""} · <span className="font-display">{lastSession ? `${pct(missingRpe.length)}%` : "—"}</span>
-              {lastSession && !lastSession.open && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
-            </p>
-            {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
-              : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
-              : (
-                <>
-                  <MissingChips list={missingRpe} />
-                  {lastSession.open && (
-                    <RemindButton
-                      list={missingRpe}
-                      title="Carga tu RPE"
-                      body={`Falta tu RPE de ${lastSession.name}.`}
-                      link="/atleta/rpe"
-                      tag="remind-rpe"
-                    />
-                  )}
-                </>
-              )}
-          </div>
+          {sessions.length === 0 ? (
+            <div>
+              <p className="text-xs uppercase tracking-wider">RPE · <span className="font-display">—</span></p>
+              <Empty>Sin sesiones pasadas en el calendario</Empty>
+            </div>
+          ) : (
+            sessions.map((s) => (
+              <div key={s.date + s.name}>
+                <p className="text-xs uppercase tracking-wider">
+                  RPE · {s.name} ({s.date}) · <span className="font-display">{pct(s.missing.length)}%</span>
+                  {!s.open && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
+                </p>
+                {s.missing.length === 0 ? <Empty>Todos cargaron</Empty> : (
+                  <>
+                    <MissingChips list={s.missing} />
+                    {s.open && (
+                      <RemindButton
+                        list={s.missing}
+                        title="Carga tu RPE"
+                        body={`Falta tu RPE de ${s.name} (${s.date}).`}
+                        link="/atleta/rpe"
+                        tag={`remind-rpe-${s.date}`}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            ))
+          )}
+
         </div>
       </Card>
 
