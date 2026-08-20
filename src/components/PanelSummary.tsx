@@ -66,10 +66,14 @@ export function PanelSummary() {
 
       const wSet = new Set((wellness ?? []).map((w: any) => w.user_id));
       setMissingWellness(list.filter((a) => !wSet.has(a.id)));
+      setWellnessDate(monday);
+      setWellnessOpen(isTodayOrPast(monday) && withinHoursAfter(monday, 24));
 
-      const ev = (events ?? [])[0] as any;
+      // Ventana abierta = la sesión más reciente cuyo plazo de 48 hs sigue vigente
+      const past = (events ?? []) as any[];
+      const ev = past.find((e) => isTodayOrPast(e.event_date) && withinHoursAfter(e.event_date, 48)) ?? past[0];
       if (ev) {
-        setLastSession({ name: ev.name, date: ev.event_date });
+        setLastSession({ name: ev.name, date: ev.event_date, open: withinHoursAfter(ev.event_date, 48) });
         const rSet = new Set((rpe ?? []).filter((r: any) => r.session_date === ev.event_date).map((r: any) => r.user_id));
         setMissingRpe(list.filter((a) => !rSet.has(a.id)));
       } else {
