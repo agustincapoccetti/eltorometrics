@@ -22,6 +22,7 @@ export function PanelSummary() {
   useEffect(() => {
     (async () => {
       const today = isoDate(new Date());
+      const monday = weekDays()[0];
       const weekStart = isoDate(startOfWeek());
       const weekEnd = isoDate(endOfWeek());
       const chronicStart = (() => { const d = new Date(); d.setDate(d.getDate() - 27); return isoDate(d); })();
