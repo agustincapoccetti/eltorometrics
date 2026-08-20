@@ -11,9 +11,8 @@ type Athlete = { id: string; name: string };
 export function PanelSummary() {
   const [risk, setRisk] = useState<{ a: Athlete; acwr: number }[]>([]);
   const [missingWellness, setMissingWellness] = useState<Athlete[]>([]);
-  const [missingRpe, setMissingRpe] = useState<Athlete[]>([]);
-  const [total, setTotal] = useState(0);
-  const [lastSession, setLastSession] = useState<{ name: string; date: string; open: boolean } | null>(null);
+  const [sessions, setSessions] = useState<{ name: string; date: string; open: boolean; missing: Athlete[] }[]>([]);
+
   const [wellnessDate, setWellnessDate] = useState(weekDays()[0]);
   const [wellnessOpen, setWellnessOpen] = useState(false);
   const [physioReq, setPhysioReq] = useState<any[]>([]);
