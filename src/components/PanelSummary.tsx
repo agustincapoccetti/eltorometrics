@@ -13,7 +13,9 @@ export function PanelSummary() {
   const [missingWellness, setMissingWellness] = useState<Athlete[]>([]);
   const [missingRpe, setMissingRpe] = useState<Athlete[]>([]);
   const [total, setTotal] = useState(0);
-  const [lastSession, setLastSession] = useState<{ name: string; date: string } | null>(null);
+  const [lastSession, setLastSession] = useState<{ name: string; date: string; open: boolean } | null>(null);
+  const [wellnessDate, setWellnessDate] = useState(weekDays()[0]);
+  const [wellnessOpen, setWellnessOpen] = useState(false);
   const [physioReq, setPhysioReq] = useState<any[]>([]);
   const [coachReq, setCoachReq] = useState<any[]>([]);
 
