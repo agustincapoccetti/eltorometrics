@@ -96,39 +96,47 @@ export function PanelSummary() {
       </Card>
 
 
-      <Card title="Compliance de hoy" subtitle={`${total} atletas`}>
+      <Card title="Compliance" subtitle={`${total} atletas`}>
         <div className="space-y-3">
           <div>
-            <p className="text-xs uppercase tracking-wider">Bienestar hoy · <span className="font-display">{pct(missingWellness.length)}%</span></p>
+            <p className="text-xs uppercase tracking-wider">
+              Bienestar · {wellnessDate} · <span className="font-display">{pct(missingWellness.length)}%</span>
+              {!wellnessOpen && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
+            </p>
             {missingWellness.length === 0 ? <Empty>Todos completaron</Empty> : (
               <>
                 <MissingChips list={missingWellness} />
-                <RemindButton
-                  list={missingWellness}
-                  title="Completa tu bienestar"
-                  body="Todavía no registraste el cuestionario de bienestar de hoy."
-                  link="/atleta/wellness"
-                  tag="remind-wellness"
-                />
+                {wellnessOpen && (
+                  <RemindButton
+                    list={missingWellness}
+                    title="Completa tu bienestar"
+                    body={`Todavía no registraste el cuestionario de bienestar del ${wellnessDate}.`}
+                    link="/atleta/wellness"
+                    tag="remind-wellness"
+                  />
+                )}
               </>
             )}
           </div>
           <div>
             <p className="text-xs uppercase tracking-wider">
               RPE {lastSession ? `· ${lastSession.name} (${lastSession.date})` : ""} · <span className="font-display">{lastSession ? `${pct(missingRpe.length)}%` : "—"}</span>
+              {lastSession && !lastSession.open && <span className="ml-1 text-muted-foreground">(cerrado)</span>}
             </p>
             {!lastSession ? <Empty>Sin sesiones pasadas en el calendario</Empty>
               : missingRpe.length === 0 ? <Empty>Todos cargaron</Empty>
               : (
                 <>
                   <MissingChips list={missingRpe} />
-                  <RemindButton
-                    list={missingRpe}
-                    title="Carga tu RPE"
-                    body={`Falta tu RPE de ${lastSession.name}.`}
-                    link="/atleta/rpe"
-                    tag="remind-rpe"
-                  />
+                  {lastSession.open && (
+                    <RemindButton
+                      list={missingRpe}
+                      title="Carga tu RPE"
+                      body={`Falta tu RPE de ${lastSession.name}.`}
+                      link="/atleta/rpe"
+                      tag="remind-rpe"
+                    />
+                  )}
                 </>
               )}
           </div>
