@@ -12,6 +12,8 @@ export function PanelSummary() {
   const [risk, setRisk] = useState<{ a: Athlete; acwr: number }[]>([]);
   const [missingWellness, setMissingWellness] = useState<Athlete[]>([]);
   const [sessions, setSessions] = useState<{ name: string; date: string; open: boolean; missing: Athlete[] }[]>([]);
+  const [total, setTotal] = useState(0);
+
 
   const [wellnessDate, setWellnessDate] = useState(weekDays()[0]);
   const [wellnessOpen, setWellnessOpen] = useState(false);
