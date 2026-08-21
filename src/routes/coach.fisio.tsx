@@ -46,6 +46,9 @@ function CoachPhysio() {
   const athletesRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({
     user_id: "",
