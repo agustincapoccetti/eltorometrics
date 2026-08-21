@@ -201,6 +201,34 @@ function CoachPhysio() {
     }
   }
 
+  async function rejectRequest() {
+    const a = rejectTarget;
+    const reason = rejectReason.trim();
+    if (!a || !reason) return;
+    setRejecting(true);
+    try {
+      const notes = `${a.notes ? a.notes + "\n" : ""}Cancelada por el staff. Motivo: ${reason}`;
+      const { error } = await supabase
+        .from("physio_appointments")
+        .update({ status: "cancelled", notes })
+        .eq("id", a.id);
+      if (error) { toast.error(error.message); return; }
+      setAppointments((cur) => cur.map((x) => x.id === a.id ? { ...x, status: "cancelled", notes } : x));
+      await createNotifications({
+        user_ids: [a.user_id],
+        title: "Solicitud de cita cancelada",
+        body: `${typeLabel(a.appointment_type)} · ${a.appointment_date} — Motivo: ${reason}`,
+        link: "/atleta/fisio", kind: "fisio", created_by: user!.id,
+      });
+      toast.success("Solicitud cancelada");
+      setRejectTarget(null);
+      setRejectReason("");
+    } finally {
+      setRejecting(false);
+    }
+  }
+
+
   async function downloadPdf() {
     await exportPdf({
       title: "Citas con fisioterapeuta",
