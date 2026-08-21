@@ -535,7 +535,10 @@ function PendingRequests({ appointments, profiles, onAssign, onReject }: { appoi
                 {a.reasons?.length ? <p className="text-[11px] text-muted-foreground mt-0.5">{a.reasons.join(" · ")}</p> : null}
                 {a.notes && <p className="text-[11px] italic mt-0.5">{a.notes}</p>}
               </div>
-              <Button size="sm" variant="outline" onClick={() => onAssign(a)}>Asignar horario</Button>
+              <div className="flex flex-col gap-1 shrink-0">
+                <Button size="sm" variant="outline" onClick={() => onAssign(a)}>Asignar horario</Button>
+                <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700" onClick={() => onReject(a)}>Cancelar</Button>
+              </div>
             </div>
           );
         })}
