@@ -544,6 +544,19 @@ function RequestFutureButton({ onCreated }: { onCreated: () => void | Promise<vo
       toast.error(error.message);
       return;
     }
+    try {
+      const { notifyPhysioRequest } = await import("@/lib/physio-request.functions");
+      await notifyPhysioRequest({
+        data: {
+          appointmentType: form.appointment_type,
+          appointmentDate: form.appointment_date,
+          reasons: form.reasons,
+          notes: form.notes || null,
+        },
+      });
+    } catch (e) {
+      console.warn("[fisio] no se pudo avisar al cuerpo técnico", e);
+    }
     toast.success("Solicitud enviada. El coach te asignará un horario.");
     setOpen(false);
     setForm({ appointment_type: "fisio_club", appointment_date: minDate, reasons: [], notes: "" });
