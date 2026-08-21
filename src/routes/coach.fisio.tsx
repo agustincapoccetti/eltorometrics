@@ -517,7 +517,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function PendingRequests({ appointments, profiles, onAssign }: { appointments: any[]; profiles: Record<string, any>; onAssign: (a: any) => void }) {
+function PendingRequests({ appointments, profiles, onAssign, onReject }: { appointments: any[]; profiles: Record<string, any>; onAssign: (a: any) => void; onReject: (a: any) => void }) {
   const requests = appointments.filter((a) => a.status === "requested").sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
   if (!requests.length) return null;
   return (
