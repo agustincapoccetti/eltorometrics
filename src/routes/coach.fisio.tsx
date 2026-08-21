@@ -46,6 +46,9 @@ function CoachPhysio() {
   const athletesRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [form, setForm] = useState({
     user_id: "",
@@ -198,6 +201,34 @@ function CoachPhysio() {
     }
   }
 
+  async function rejectRequest() {
+    const a = rejectTarget;
+    const reason = rejectReason.trim();
+    if (!a || !reason) return;
+    setRejecting(true);
+    try {
+      const notes = `${a.notes ? a.notes + "\n" : ""}Cancelada por el staff. Motivo: ${reason}`;
+      const { error } = await supabase
+        .from("physio_appointments")
+        .update({ status: "cancelled", notes })
+        .eq("id", a.id);
+      if (error) { toast.error(error.message); return; }
+      setAppointments((cur) => cur.map((x) => x.id === a.id ? { ...x, status: "cancelled", notes } : x));
+      await createNotifications({
+        user_ids: [a.user_id],
+        title: "Solicitud de cita cancelada",
+        body: `${typeLabel(a.appointment_type)} · ${a.appointment_date} — Motivo: ${reason}`,
+        link: "/atleta/fisio", kind: "fisio", created_by: user!.id,
+      });
+      toast.success("Solicitud cancelada");
+      setRejectTarget(null);
+      setRejectReason("");
+    } finally {
+      setRejecting(false);
+    }
+  }
+
+
   async function downloadPdf() {
     await exportPdf({
       title: "Citas con fisioterapeuta",
@@ -253,7 +284,41 @@ function CoachPhysio() {
         appointments={appointments}
         profiles={profiles}
         onAssign={(a: any) => openEdit({ ...a, status: "scheduled" })}
+        onReject={(a: any) => { setRejectTarget(a); setRejectReason(""); }}
       />
+
+      <Dialog open={!!rejectTarget} onOpenChange={(o) => !o && setRejectTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar solicitud de cita</DialogTitle>
+          </DialogHeader>
+          {rejectTarget && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                {typeLabel(rejectTarget.appointment_type)} · pedido para {rejectTarget.appointment_date}
+                {profiles[rejectTarget.user_id] ? ` · ${profiles[rejectTarget.user_id].full_name ?? ""}` : ""}
+              </p>
+              <div>
+                <Label htmlFor="reject-reason">Motivo de la cancelación</Label>
+                <Textarea
+                  id="reject-reason"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Ej.: no hay disponibilidad ese día, reprogramar para el martes..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectTarget(null)}>Volver</Button>
+            <Button onClick={rejectRequest} disabled={!rejectReason.trim() || rejecting}>
+              {rejecting ? "Cancelando..." : "Cancelar cita"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
         <div>
@@ -452,7 +517,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function PendingRequests({ appointments, profiles, onAssign }: { appointments: any[]; profiles: Record<string, any>; onAssign: (a: any) => void }) {
+function PendingRequests({ appointments, profiles, onAssign, onReject }: { appointments: any[]; profiles: Record<string, any>; onAssign: (a: any) => void; onReject: (a: any) => void }) {
   const requests = appointments.filter((a) => a.status === "requested").sort((a, b) => a.appointment_date.localeCompare(b.appointment_date));
   if (!requests.length) return null;
   return (
@@ -470,7 +535,10 @@ function PendingRequests({ appointments, profiles, onAssign }: { appointments: a
                 {a.reasons?.length ? <p className="text-[11px] text-muted-foreground mt-0.5">{a.reasons.join(" · ")}</p> : null}
                 {a.notes && <p className="text-[11px] italic mt-0.5">{a.notes}</p>}
               </div>
-              <Button size="sm" variant="outline" onClick={() => onAssign(a)}>Asignar horario</Button>
+              <div className="flex flex-col gap-1 shrink-0">
+                <Button size="sm" variant="outline" onClick={() => onAssign(a)}>Asignar horario</Button>
+                <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700" onClick={() => onReject(a)}>Cancelar</Button>
+              </div>
             </div>
           );
         })}
