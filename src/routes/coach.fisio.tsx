@@ -253,7 +253,41 @@ function CoachPhysio() {
         appointments={appointments}
         profiles={profiles}
         onAssign={(a: any) => openEdit({ ...a, status: "scheduled" })}
+        onReject={(a: any) => { setRejectTarget(a); setRejectReason(""); }}
       />
+
+      <Dialog open={!!rejectTarget} onOpenChange={(o) => !o && setRejectTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar solicitud de cita</DialogTitle>
+          </DialogHeader>
+          {rejectTarget && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                {typeLabel(rejectTarget.appointment_type)} · pedido para {rejectTarget.appointment_date}
+                {profiles[rejectTarget.user_id] ? ` · ${profiles[rejectTarget.user_id].full_name ?? ""}` : ""}
+              </p>
+              <div>
+                <Label htmlFor="reject-reason">Motivo de la cancelación</Label>
+                <Textarea
+                  id="reject-reason"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Ej.: no hay disponibilidad ese día, reprogramar para el martes..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectTarget(null)}>Volver</Button>
+            <Button onClick={rejectRequest} disabled={!rejectReason.trim() || rejecting}>
+              {rejecting ? "Cancelando..." : "Cancelar cita"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-4 mb-8">
         <div>
