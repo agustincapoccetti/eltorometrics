@@ -28,8 +28,9 @@ function timeToMinutes(t: string) {
 }
 
 /** Detecta el tipo de recordatorio a partir del enlace o el título. */
-function kindOf(s: { link?: string | null; title?: string | null }): "wellness" | "rpe" | null {
+function kindOf(s: { link?: string | null; title?: string | null }): "wellness" | "rpe" | "voto" | null {
   const hay = `${s.link ?? ""} ${s.title ?? ""}`.toLowerCase();
+  if (hay.includes("votacion") || hay.includes("votación") || hay.includes("voto")) return "voto";
   if (hay.includes("wellness") || hay.includes("bienestar")) return "wellness";
   if (hay.includes("rpe") || hay.includes("esfuerzo")) return "rpe";
   return null;
