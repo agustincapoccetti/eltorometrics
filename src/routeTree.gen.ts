@@ -32,6 +32,7 @@ import { Route as CoachCoachesRouteImport } from './routes/coach.coaches'
 import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
 import { Route as CoachBibliotecaRouteImport } from './routes/coach.biblioteca'
 import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
+import { Route as AtletaVotacionRouteImport } from './routes/atleta.votacion'
 import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
 import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
 import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
@@ -158,6 +159,11 @@ const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
   path: '/atleta/wellness',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtletaVotacionRoute = AtletaVotacionRouteImport.update({
+  id: '/atleta/votacion',
+  path: '/atleta/votacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AtletaRpeRoute = AtletaRpeRouteImport.update({
   id: '/atleta/rpe',
   path: '/atleta/rpe',
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
+  '/atleta/votacion': typeof AtletaVotacionRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/biblioteca': typeof CoachBibliotecaRoute
   '/coach/calendario': typeof CoachCalendarioRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
+  '/atleta/votacion': typeof AtletaVotacionRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/biblioteca': typeof CoachBibliotecaRoute
   '/coach/calendario': typeof CoachCalendarioRoute
@@ -295,6 +303,7 @@ export interface FileRoutesById {
   '/atleta/perfil': typeof AtletaPerfilRoute
   '/atleta/recuperacion': typeof AtletaRecuperacionRoute
   '/atleta/rpe': typeof AtletaRpeRoute
+  '/atleta/votacion': typeof AtletaVotacionRoute
   '/atleta/wellness': typeof AtletaWellnessRoute
   '/coach/biblioteca': typeof CoachBibliotecaRoute
   '/coach/calendario': typeof CoachCalendarioRoute
@@ -332,6 +341,7 @@ export interface FileRouteTypes {
     | '/atleta/perfil'
     | '/atleta/recuperacion'
     | '/atleta/rpe'
+    | '/atleta/votacion'
     | '/atleta/wellness'
     | '/coach/biblioteca'
     | '/coach/calendario'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/atleta/perfil'
     | '/atleta/recuperacion'
     | '/atleta/rpe'
+    | '/atleta/votacion'
     | '/atleta/wellness'
     | '/coach/biblioteca'
     | '/coach/calendario'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/atleta/perfil'
     | '/atleta/recuperacion'
     | '/atleta/rpe'
+    | '/atleta/votacion'
     | '/atleta/wellness'
     | '/coach/biblioteca'
     | '/coach/calendario'
@@ -438,6 +450,7 @@ export interface RootRouteChildren {
   AtletaPerfilRoute: typeof AtletaPerfilRoute
   AtletaRecuperacionRoute: typeof AtletaRecuperacionRoute
   AtletaRpeRoute: typeof AtletaRpeRoute
+  AtletaVotacionRoute: typeof AtletaVotacionRoute
   AtletaWellnessRoute: typeof AtletaWellnessRoute
   CoachBibliotecaRoute: typeof CoachBibliotecaRoute
   CoachCalendarioRoute: typeof CoachCalendarioRoute
@@ -623,6 +636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AtletaWellnessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atleta/votacion': {
+      id: '/atleta/votacion'
+      path: '/atleta/votacion'
+      fullPath: '/atleta/votacion'
+      preLoaderRoute: typeof AtletaVotacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/atleta/rpe': {
       id: '/atleta/rpe'
       path: '/atleta/rpe'
@@ -710,6 +730,7 @@ const rootRouteChildren: RootRouteChildren = {
   AtletaPerfilRoute: AtletaPerfilRoute,
   AtletaRecuperacionRoute: AtletaRecuperacionRoute,
   AtletaRpeRoute: AtletaRpeRoute,
+  AtletaVotacionRoute: AtletaVotacionRoute,
   AtletaWellnessRoute: AtletaWellnessRoute,
   CoachBibliotecaRoute: CoachBibliotecaRoute,
   CoachCalendarioRoute: CoachCalendarioRoute,

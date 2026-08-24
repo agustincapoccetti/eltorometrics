@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Trophy, Flame, ChevronRight, ChevronDown, Medal, Users } from "lucide-react";
+import { Trophy, Flame, ChevronRight, ChevronDown, Medal, Users, Vote } from "lucide-react";
+import { isoDate } from "@/lib/week-utils";
 
 type Row = {
   user_id: string;
@@ -15,11 +17,12 @@ type Row = {
   convocations: number;
   test_top5_count: number;
   test_pos_top3_count: number;
+  vote_wins: number;
   points: number;
 };
 
-/** Valores de puntos por concepto (deben coincidir con la función attendance_leaderboard). */
-const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3 };
+/** Valores de puntos por concepto (deben coincidir con gamification_leaderboard). */
+const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3, voteWin: 7 };
 
 function name(r: Row) {
   return `${r.full_name ?? ""}${r.last_name ? ` ${r.last_name}` : ""}`.trim() || "Atleta";
@@ -40,10 +43,10 @@ function breakdown(r: Row) {
     { label: "Convocatorias", count: r.convocations, per: W.convo },
     { label: "Top 5 del equipo en tests", count: r.test_top5_count, per: W.top5 },
     { label: "Top 3 de tu puesto en tests", count: r.test_pos_top3_count, per: W.pos3 },
+    { label: "Mejor de la semana (votación)", count: r.vote_wins ?? 0, per: W.voteWin },
   ].map((x) => ({ ...x, total: x.count * x.per }));
 }
 
-/** Frases motivadoras según la situación en la carrera del presentismo */
 function phrase(rank: number, total: number, gap: number, ahead: Row | null, streak: number): string {
   if (total <= 1) return "Cada presente que sumes empieza a construir tu temporada.";
   if (rank === 1) return "Estás al frente. Mantenerlo es la parte difícil.";
@@ -54,33 +57,69 @@ function phrase(rank: number, total: number, gap: number, ahead: Row | null, str
   return `Te faltan ${gap} puntos para entrar en el top ${Math.max(3, rank - 1)}. Se recorta entrenando.`;
 }
 
-function Breakdown({ r, invert }: { r: Row; invert?: boolean }) {
+/** Desglose plegable: hay que desplegarlo para verlo. */
+function BreakdownToggle({ r, invert }: { r: Row; invert?: boolean }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div className={`mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] ${invert ? "text-white/80" : "text-muted-foreground"}`}>
-      {breakdown(r).map((b) => (
-        <div key={b.label} className="flex items-baseline justify-between gap-2">
-          <span className="truncate">{b.label} ×{b.count}</span>
-          <span className={`tabular-nums font-semibold ${invert ? "text-white" : "text-foreground"}`}>{b.total}</span>
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
+        className={`inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider ${invert ? "text-white/80" : "text-muted-foreground"}`}
+      >
+        {open ? "Ocultar desglose" : "Ver desglose de puntos"}
+        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className={`mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] ${invert ? "text-white/80" : "text-muted-foreground"}`}>
+          {breakdown(r).map((b) => (
+            <div key={b.label} className="flex items-baseline justify-between gap-2">
+              <span className="truncate">{b.label} ×{b.count}</span>
+              <span className={`tabular-nums font-semibold ${invert ? "text-white" : "text-foreground"}`}>{b.total}</span>
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
+const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+function ranges() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const monthFrom = isoDate(new Date(y, now.getMonth(), 1));
+  const monthTo = isoDate(new Date(y, now.getMonth() + 1, 0));
+  return {
+    mes: { from: monthFrom, to: monthTo, label: `${MONTHS[now.getMonth()]}` },
+    temporada: { from: `${y}-01-01`, to: `${y}-12-31`, label: `Temporada ${y}` },
+  };
+}
+
 export function AttendanceRace({ userId }: { userId: string }) {
-  const [rows, setRows] = useState<Row[] | null>(null);
+  const [scope, setScope] = useState<"mes" | "temporada">("mes");
+  const [data, setData] = useState<Record<string, Row[]>>({});
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const R = useMemo(ranges, []);
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase.rpc("attendance_leaderboard" as any, {} as any);
-      if (error) { setRows([]); return; }
-      setRows((data as unknown as Row[]) ?? []);
+      for (const key of ["mes", "temporada"] as const) {
+        const { data: rows, error } = await supabase.rpc("gamification_leaderboard" as any, {
+          _from: R[key].from,
+          _to: R[key].to,
+        } as any);
+        if (!error) setData((d) => ({ ...d, [key]: (rows as unknown as Row[]) ?? [] }));
+      }
     })();
-  }, []);
+  }, [R]);
 
-  if (!rows || rows.length === 0) return null;
+  const rows = data[scope];
+  if (!rows) return null;
+  const hasAny = (data["mes"]?.length ?? 0) > 0 || (data["temporada"]?.length ?? 0) > 0;
+  if (!hasAny) return null;
 
   const idx = rows.findIndex((r) => r.user_id === userId);
   const me = idx >= 0 ? rows[idx] : null;
@@ -94,15 +133,28 @@ export function AttendanceRace({ userId }: { userId: string }) {
   return (
     <>
       <section className="border-2 border-black">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="w-full text-left p-4 sm:p-5 hover:bg-accent transition-colors"
-        >
+        <div className="flex gap-1 border-b-2 border-black p-1">
+          {(["mes", "temporada"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setScope(s)}
+              className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
+                scope === s ? "bg-black text-white" : "hover:bg-accent"
+              }`}
+            >
+              {s === "mes" ? `Mes · ${R.mes.label}` : "Temporada"}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <Trophy className="h-5 w-5 mt-0.5 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Carrera del presentismo</p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {scope === "mes" ? `Ranking mensual · premio de ${R.mes.label}` : "Ranking de la temporada"}
+              </p>
 
               {me ? (
                 <>
@@ -113,7 +165,6 @@ export function AttendanceRace({ userId }: { userId: string }) {
                     {phrase(rank, rows.length, gap, ahead, me.streak_weeks)}
                   </p>
 
-                  {/* Barra de progreso contra el líder */}
                   <div className="mt-3 h-2 bg-secondary border border-border">
                     <div
                       className="h-full bg-black"
@@ -132,9 +183,9 @@ export function AttendanceRace({ userId }: { userId: string }) {
                     ))}
                   </div>
 
-                  <Breakdown r={me} />
+                  <BreakdownToggle r={me} />
 
-                  <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
                     {me.streak_weeks > 0 && (
                       <span className="inline-flex items-center gap-1 text-foreground">
                         <Flame className="h-3 w-3" />{me.streak_weeks} sem. de racha
@@ -150,33 +201,53 @@ export function AttendanceRace({ userId }: { userId: string }) {
                         <Users className="h-3 w-3" />{me.test_pos_top3_count} top 3 de puesto
                       </span>
                     )}
+                    {(me.vote_wins ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <Vote className="h-3 w-3" />{me.vote_wins} veces el mejor de la semana
+                      </span>
+                    )}
                   </div>
                 </>
               ) : (
                 <>
                   <h2 className="font-display text-lg uppercase tracking-wide mt-0.5">Todavía sin puntos</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Tu primer presente te mete en la tabla. Lidera {shortName(leader!)} con {leader!.points} pts.
+                    {leader
+                      ? `Tu primer presente te mete en la tabla. Lidera ${shortName(leader)} con ${leader.points} pts.`
+                      : "Tu primer presente te mete en la tabla."}
                   </p>
                 </>
               )}
 
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider">
-                Ver tabla completa <ChevronRight className="h-3.5 w-3.5" />
-              </span>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider"
+                >
+                  Ver tabla completa <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+                <Link
+                  to="/atleta/votacion"
+                  className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider underline"
+                >
+                  <Vote className="h-3.5 w-3.5" /> Votar al mejor de la semana
+                </Link>
+              </div>
             </div>
           </div>
-        </button>
+        </div>
       </section>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Carrera del presentismo · Temporada</DialogTitle>
+            <DialogTitle>Ranking · {scope === "mes" ? R.mes.label : R.temporada.label}</DialogTitle>
             <DialogDescription>
               {W.present} pts por presente · {W.form} pt por formulario · {W.streak} pts por semana de racha ·{" "}
-              {W.convo} pts por convocatoria · {W.top5} pts por entrar en el top 5 del equipo en un test ·{" "}
-              {W.pos3} pts por entrar en el top 3 de tu puesto. Toca a un jugador para ver de dónde salen sus puntos.
+              {W.convo} pts por convocatoria · {W.top5} pts por top 5 del equipo en un test ·{" "}
+              {W.pos3} pts por top 3 de tu puesto · {W.voteWin} pts extra si eres el más votado de la semana.
+              Toca a un jugador para desplegar sus puntos.
             </DialogDescription>
           </DialogHeader>
           <div className="border border-border divide-y divide-border">
@@ -209,7 +280,7 @@ export function AttendanceRace({ userId }: { userId: string }) {
                   </button>
                   {isOpen && (
                     <div className="px-3 pb-3">
-                      <Breakdown r={r} invert={isMe} />
+                      <BreakdownToggle r={r} invert={isMe} />
                     </div>
                   )}
                 </div>

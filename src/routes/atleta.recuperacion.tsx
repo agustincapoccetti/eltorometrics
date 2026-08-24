@@ -17,6 +17,9 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { WeekStrip } from "@/components/WeekStrip";
 import { isCurrentWeek, startOfWeek, isoDate, weekDays, withinHoursAfter, isTodayOrPast } from "@/lib/week-utils";
 
+/** El formulario de recuperación se habilita a partir del 27/09 (comienzo del torneo). */
+const RECOVERY_LOCKED_UNTIL = "2026-09-26";
+
 export const Route = createFileRoute("/atleta/recuperacion")({
   component: () => <Protected requireRole="atleta"><Recuperacion /></Protected>,
 });
@@ -77,7 +80,9 @@ function Recuperacion() {
 
   const isDay = isTodayOrPast(sunday);
   const inWindow = withinHoursAfter(sunday, 24);
-  const editable = isCurrentWeek(date) && date === sunday && isDay && inWindow;
+  // El formulario permanece bloqueado hasta que empiece el torneo (26/09).
+  const tournamentOpen = isoDate(new Date()) > RECOVERY_LOCKED_UNTIL;
+  const editable = tournamentOpen && isCurrentWeek(date) && date === sunday && isDay && inWindow;
 
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
@@ -133,13 +138,15 @@ function Recuperacion() {
           <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm font-medium">
-              {!isDay
-                ? `Todavía no es el día. La recuperación se completa el domingo ${sunday}.`
-                : "El plazo venció: solo se puede cargar el domingo o hasta 24 hs después."}
+              {!tournamentOpen
+                ? "El formulario de recuperación está bloqueado hasta el comienzo del torneo (26/09). Se habilitará el domingo siguiente."
+                : !isDay
+                  ? `Todavía no es el día. La recuperación se completa el domingo ${sunday}.`
+                  : "El plazo venció: solo se puede cargar el domingo o hasta 24 hs después."}
             </p>
             <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
               <HeartPulse className="h-3 w-3 mt-0.5" />
-              Aprovechá la semana para recuperarte: sueño, hidratación, movilidad y buena alimentación. Cada estrategia cuenta.
+              Aprovecha la semana para recuperarte: sueño, hidratación, movilidad y buena alimentación. Cada estrategia cuenta.
             </p>
           </div>
         </div>
