@@ -33,6 +33,19 @@ function fullName(c: { full_name: string | null; last_name: string | null }) {
   return `${c.full_name ?? ""}${c.last_name ? ` ${c.last_name}` : ""}`.trim() || "Atleta";
 }
 
+/** Ventana de votación: viernes 19:00 → domingo 22:00 (hora local). */
+function voteWindow(now = new Date()) {
+  const mon = startOfWeek(now);
+  const opens = new Date(mon);
+  opens.setDate(mon.getDate() + 4);
+  opens.setHours(19, 0, 0, 0);
+  const closes = new Date(mon);
+  closes.setDate(mon.getDate() + 6);
+  closes.setHours(22, 0, 0, 0);
+  const t = now.getTime();
+  return { opens, closes, isOpen: t >= opens.getTime() && t <= closes.getTime(), before: t < opens.getTime() };
+}
+
 function Votacion() {
   const { user } = useAuth();
   const weekStart = useMemo(() => isoDate(startOfWeek()), []);
