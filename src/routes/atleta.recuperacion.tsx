@@ -77,7 +77,9 @@ function Recuperacion() {
 
   const isDay = isTodayOrPast(sunday);
   const inWindow = withinHoursAfter(sunday, 24);
-  const editable = isCurrentWeek(date) && date === sunday && isDay && inWindow;
+  // El formulario permanece bloqueado hasta que empiece el torneo (26/09).
+  const tournamentOpen = isoDate(new Date()) > RECOVERY_LOCKED_UNTIL;
+  const editable = tournamentOpen && isCurrentWeek(date) && date === sunday && isDay && inWindow;
 
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
