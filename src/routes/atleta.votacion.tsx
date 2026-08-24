@@ -8,10 +8,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Vote, Trophy, Info, CheckCircle2 } from "lucide-react";
 import { startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
 import { fmtDate } from "@/lib/format-date";
+
 
 export const Route = createFileRoute("/atleta/votacion")({
   head: () => ({
