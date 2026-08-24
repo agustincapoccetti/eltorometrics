@@ -50,6 +50,7 @@ function Votacion() {
   const { user } = useAuth();
   const weekStart = useMemo(() => isoDate(startOfWeek()), []);
   const weekEnd = useMemo(() => weekDays()[6], []);
+  const win = useMemo(() => voteWindow(), []);
 
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [nominee, setNominee] = useState<string>("");
