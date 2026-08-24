@@ -138,13 +138,15 @@ function Recuperacion() {
           <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm font-medium">
-              {!isDay
-                ? `Todavía no es el día. La recuperación se completa el domingo ${sunday}.`
-                : "El plazo venció: solo se puede cargar el domingo o hasta 24 hs después."}
+              {!tournamentOpen
+                ? "El formulario de recuperación está bloqueado hasta el comienzo del torneo (26/09). Se habilitará el domingo siguiente."
+                : !isDay
+                  ? `Todavía no es el día. La recuperación se completa el domingo ${sunday}.`
+                  : "El plazo venció: solo se puede cargar el domingo o hasta 24 hs después."}
             </p>
             <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
               <HeartPulse className="h-3 w-3 mt-0.5" />
-              Aprovechá la semana para recuperarte: sueño, hidratación, movilidad y buena alimentación. Cada estrategia cuenta.
+              Aprovecha la semana para recuperarte: sueño, hidratación, movilidad y buena alimentación. Cada estrategia cuenta.
             </p>
           </div>
         </div>
