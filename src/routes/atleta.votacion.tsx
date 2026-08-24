@@ -124,6 +124,9 @@ function Votacion() {
             <p className="text-sm text-muted-foreground mt-1">
               El compañero más votado suma <strong>7 puntos extra</strong>, que cuentan para el ranking del mes y para la temporada.
             </p>
+            <p className="text-xs mt-2">
+              Votación abierta del <strong>viernes 19:00</strong> al <strong>domingo 22:00</strong>. Solo puedes votar <strong>una vez</strong> y no se puede cambiar.
+            </p>
           </div>
         </div>
       </div>
