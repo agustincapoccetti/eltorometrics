@@ -90,22 +90,19 @@ function Votacion() {
 
   async function save() {
     if (!user) return;
+    if (!win.isOpen) { toast.error("La votación está cerrada"); return; }
+    if (voteId) { toast.error("Ya votaste esta semana: el voto es único"); return; }
     if (!nominee) { toast.error("Elige al compañero que mejor entrenó"); return; }
     const c = comment.trim();
     if (c.length < 10) { toast.error("El comentario es obligatorio: explica en pocas palabras por qué lo votas"); return; }
     setSaving(true);
-    if (voteId) {
-      const { error } = await supabase.from("weekly_votes").update({ nominee_id: nominee, comment: c }).eq("id", voteId);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const { data, error } = await supabase
-        .from("weekly_votes")
-        .insert({ voter_id: user.id, nominee_id: nominee, week_start: weekStart, comment: c })
-        .select("id")
-        .single();
-      if (error) { toast.error(error.message); setSaving(false); return; }
-      setVoteId(data.id);
-    }
+    const { data, error } = await supabase
+      .from("weekly_votes")
+      .insert({ voter_id: user.id, nominee_id: nominee, week_start: weekStart, comment: c })
+      .select("id")
+      .single();
+    if (error) { toast.error(error.message); setSaving(false); return; }
+    setVoteId(data.id);
     setSaving(false);
     toast.success("Voto registrado");
     load();
