@@ -940,6 +940,36 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_votes: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          nominee_id: string
+          updated_at: string
+          voter_id: string
+          week_start: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          nominee_id: string
+          updated_at?: string
+          voter_id: string
+          week_start: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          nominee_id?: string
+          updated_at?: string
+          voter_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       weight_history: {
         Row: {
           id: string
@@ -1023,6 +1053,24 @@ export type Database = {
         }[]
       }
       cancel_physio_slot: { Args: { _slot_id: string }; Returns: undefined }
+      gamification_leaderboard: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          convocations: number
+          forms_count: number
+          full_name: string
+          last_name: string
+          photo_url: string
+          points: number
+          position: string
+          present_days: number
+          streak_weeks: number
+          test_pos_top3_count: number
+          test_top5_count: number
+          user_id: string
+          vote_wins: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1032,6 +1080,16 @@ export type Database = {
       }
       is_admin: { Args: { _uid: string }; Returns: boolean }
       reserve_physio_slot: { Args: { _slot_id: string }; Returns: string }
+      weekly_vote_winners: {
+        Args: { _week_start?: string }
+        Returns: {
+          full_name: string
+          last_name: string
+          nominee_id: string
+          photo_url: string
+          votes: number
+        }[]
+      }
     }
     Enums: {
       app_role: "atleta" | "coach"
