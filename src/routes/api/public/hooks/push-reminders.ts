@@ -42,8 +42,22 @@ async function run() {
   const { weekday, dateKey, minutes } = nowInTz();
 
   /** Quita a los atletas que ya completaron el formulario correspondiente. */
-  async function filterPending(kind: "wellness" | "rpe" | null, ids: string[]) {
+  async function filterPending(kind: "wellness" | "rpe" | "voto" | null, ids: string[]) {
     if (!kind || !ids.length) return ids;
+
+    if (kind === "voto") {
+      // Lunes de la semana en curso (weekday: lunes = 0)
+      const d = new Date(`${dateKey}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() - weekday);
+      const weekStart = d.toISOString().slice(0, 10);
+      const { data } = await supabaseAdmin
+        .from("weekly_votes")
+        .select("voter_id")
+        .eq("week_start", weekStart)
+        .in("voter_id", ids);
+      const done = new Set((data ?? []).map((r) => r.voter_id));
+      return ids.filter((id) => !done.has(id));
+    }
 
     if (kind === "wellness") {
       const { data } = await supabaseAdmin
