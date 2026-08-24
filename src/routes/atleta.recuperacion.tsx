@@ -17,6 +17,9 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { WeekStrip } from "@/components/WeekStrip";
 import { isCurrentWeek, startOfWeek, isoDate, weekDays, withinHoursAfter, isTodayOrPast } from "@/lib/week-utils";
 
+/** El formulario de recuperación se habilita a partir del 27/09 (comienzo del torneo). */
+const RECOVERY_LOCKED_UNTIL = "2026-09-26";
+
 export const Route = createFileRoute("/atleta/recuperacion")({
   component: () => <Protected requireRole="atleta"><Recuperacion /></Protected>,
 });
