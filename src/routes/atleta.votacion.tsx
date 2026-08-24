@@ -33,10 +33,24 @@ function fullName(c: { full_name: string | null; last_name: string | null }) {
   return `${c.full_name ?? ""}${c.last_name ? ` ${c.last_name}` : ""}`.trim() || "Atleta";
 }
 
+/** Ventana de votación: viernes 19:00 → domingo 22:00 (hora local). */
+function voteWindow(now = new Date()) {
+  const mon = startOfWeek(now);
+  const opens = new Date(mon);
+  opens.setDate(mon.getDate() + 4);
+  opens.setHours(19, 0, 0, 0);
+  const closes = new Date(mon);
+  closes.setDate(mon.getDate() + 6);
+  closes.setHours(22, 0, 0, 0);
+  const t = now.getTime();
+  return { opens, closes, isOpen: t >= opens.getTime() && t <= closes.getTime(), before: t < opens.getTime() };
+}
+
 function Votacion() {
   const { user } = useAuth();
   const weekStart = useMemo(() => isoDate(startOfWeek()), []);
   const weekEnd = useMemo(() => weekDays()[6], []);
+  const win = useMemo(() => voteWindow(), []);
 
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [nominee, setNominee] = useState<string>("");
@@ -77,22 +91,19 @@ function Votacion() {
 
   async function save() {
     if (!user) return;
+    if (!win.isOpen) { toast.error("La votación está cerrada"); return; }
+    if (voteId) { toast.error("Ya votaste esta semana: el voto es único"); return; }
     if (!nominee) { toast.error("Elige al compañero que mejor entrenó"); return; }
     const c = comment.trim();
     if (c.length < 10) { toast.error("El comentario es obligatorio: explica en pocas palabras por qué lo votas"); return; }
     setSaving(true);
-    if (voteId) {
-      const { error } = await supabase.from("weekly_votes").update({ nominee_id: nominee, comment: c }).eq("id", voteId);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const { data, error } = await supabase
-        .from("weekly_votes")
-        .insert({ voter_id: user.id, nominee_id: nominee, week_start: weekStart, comment: c })
-        .select("id")
-        .single();
-      if (error) { toast.error(error.message); setSaving(false); return; }
-      setVoteId(data.id);
-    }
+    const { data, error } = await supabase
+      .from("weekly_votes")
+      .insert({ voter_id: user.id, nominee_id: nominee, week_start: weekStart, comment: c })
+      .select("id")
+      .single();
+    if (error) { toast.error(error.message); setSaving(false); return; }
+    setVoteId(data.id);
     setSaving(false);
     toast.success("Voto registrado");
     load();
@@ -113,6 +124,9 @@ function Votacion() {
             <p className="text-sm text-muted-foreground mt-1">
               El compañero más votado suma <strong>7 puntos extra</strong>, que cuentan para el ranking del mes y para la temporada.
             </p>
+            <p className="text-xs mt-2">
+              Votación abierta del <strong>viernes 19:00</strong> al <strong>domingo 22:00</strong>. Solo puedes votar <strong>una vez</strong> y no se puede cambiar.
+            </p>
           </div>
         </div>
       </div>
@@ -125,6 +139,30 @@ function Votacion() {
         </p>
       </div>
 
+      {!win.isOpen ? (
+        <div className="border-2 border-dashed border-border p-6 mb-6 text-center">
+          <p className="font-display text-base uppercase tracking-wide">
+            {win.before ? "La votación abre el viernes a las 19:00" : "La votación de esta semana ya cerró"}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {win.before
+              ? "Hasta entonces no se puede votar. Tendrás hasta el domingo a las 22:00."
+              : "Cerró el domingo a las 22:00. La próxima abre el viernes a las 19:00."}
+          </p>
+          {voteId && (
+            <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
+              <CheckCircle2 className="h-3 w-3" /> Tu voto de esta semana quedó registrado.
+            </p>
+          )}
+        </div>
+      ) : voteId ? (
+        <div className="border border-border p-6 mb-6 flex items-start gap-3">
+          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+          <p className="text-sm">
+            Ya votaste esta semana. El voto es <strong>único</strong> y no se puede modificar.
+          </p>
+        </div>
+      ) : (
       <div className="border border-border p-6 mb-6">
         <Label className="text-xs uppercase tracking-wider">Tu voto</Label>
         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -161,14 +199,11 @@ function Votacion() {
         </div>
 
         <Button onClick={save} disabled={saving} className="w-full mt-4" size="lg">
-          {saving ? "Guardando..." : voteId ? "Actualizar mi voto" : "Votar"}
+          {saving ? "Guardando..." : "Votar (una sola vez)"}
         </Button>
-        {voteId && (
-          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" /> Ya votaste esta semana. Puedes cambiar tu voto hasta que termine.
-          </p>
-        )}
       </div>
+      )}
+
 
       <div className="border border-border p-6">
         <h3 className="text-lg mb-2 flex items-center gap-2"><Trophy className="h-4 w-4" /> Más votado de la semana</h3>
