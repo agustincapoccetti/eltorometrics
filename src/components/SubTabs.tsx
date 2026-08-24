@@ -6,6 +6,7 @@ export const HISTORIAL_TABS: SubTab[] = [
   { to: "/atleta/wellness", label: "Bienestar" },
   { to: "/atleta/rpe", label: "RPE" },
   { to: "/atleta/recuperacion", label: "Recuperación" },
+  { to: "/atleta/votacion", label: "Votación" },
 ];
 
 export const ENTRENO_TABS: SubTab[] = [
