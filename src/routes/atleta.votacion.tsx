@@ -174,27 +174,35 @@ function Votacion() {
         </div>
       ) : (
       <div className="border border-border p-6 mb-6">
-        <Label className="text-xs uppercase tracking-wider">Tu voto</Label>
-        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {candidates.map((c) => (
-            <button
-              key={c.user_id}
-              type="button"
-              onClick={() => setNominee(c.user_id)}
-              className={`text-left px-3 py-2 border text-sm transition ${
-                nominee === c.user_id ? "bg-black text-white border-black" : "border-border hover:bg-accent"
-              }`}
-            >
-              <span className="font-medium">{fullName(c)}</span>
-              {c.position && (
-                <span className={`ml-2 text-[10px] ${nominee === c.user_id ? "text-white/70" : "text-muted-foreground"}`}>
-                  {c.position}
-                </span>
-              )}
-            </button>
-          ))}
-          {candidates.length === 0 && <p className="text-sm text-muted-foreground">Todavía no hay compañeros para votar.</p>}
-        </div>
+        <Label htmlFor="nominee" className="text-xs uppercase tracking-wider">Tu voto</Label>
+        <Select value={nominee} onValueChange={setNominee} disabled={!win.isOpen || !!voteId}>
+          <SelectTrigger id="nominee" className="mt-2 w-full h-11 text-sm rounded-none border-black">
+            <SelectValue placeholder="Seleccioná al compañero que mejor entrenó" />
+          </SelectTrigger>
+          <SelectContent className="rounded-none border-black max-h-[260px]">
+            {candidates.length === 0 ? (
+              <SelectItem value="__empty__" disabled>Todavía no hay compañeros para votar</SelectItem>
+            ) : (
+              Object.entries(
+                candidates.reduce((acc, c) => {
+                  const group = c.position || "Sin posición";
+                  (acc[group] ||= []).push(c);
+                  return acc;
+                }, {} as Record<string, Candidate[]>)
+              ).sort(([a], [b]) => a.localeCompare(b))
+                .map(([group, list]) => (
+                  <SelectGroup key={group}>
+                    <SelectLabel className="text-[11px] uppercase tracking-wider text-muted-foreground">{group}</SelectLabel>
+                    {list.map((c) => (
+                      <SelectItem key={c.user_id} value={c.user_id}>
+                        {fullName(c)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))
+            )}
+          </SelectContent>
+        </Select>
 
         <div className="mt-4">
           <Label htmlFor="c">Por qué lo votas (obligatorio)</Label>
@@ -208,7 +216,7 @@ function Votacion() {
           <p className="text-[11px] text-muted-foreground mt-1">{comment.trim().length}/10 caracteres mínimos</p>
         </div>
 
-        <Button onClick={save} disabled={saving} className="w-full mt-4" size="lg">
+        <Button onClick={save} disabled={saving || !nominee} className="w-full mt-4" size="lg">
           {saving ? "Guardando..." : "Votar (una sola vez)"}
         </Button>
       </div>
