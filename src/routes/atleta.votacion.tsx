@@ -139,6 +139,30 @@ function Votacion() {
         </p>
       </div>
 
+      {!win.isOpen ? (
+        <div className="border-2 border-dashed border-border p-6 mb-6 text-center">
+          <p className="font-display text-base uppercase tracking-wide">
+            {win.before ? "La votación abre el viernes a las 19:00" : "La votación de esta semana ya cerró"}
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {win.before
+              ? "Hasta entonces no se puede votar. Tendrás hasta el domingo a las 22:00."
+              : "Cerró el domingo a las 22:00. La próxima abre el viernes a las 19:00."}
+          </p>
+          {voteId && (
+            <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
+              <CheckCircle2 className="h-3 w-3" /> Tu voto de esta semana quedó registrado.
+            </p>
+          )}
+        </div>
+      ) : voteId ? (
+        <div className="border border-border p-6 mb-6 flex items-start gap-3">
+          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+          <p className="text-sm">
+            Ya votaste esta semana. El voto es <strong>único</strong> y no se puede modificar.
+          </p>
+        </div>
+      ) : (
       <div className="border border-border p-6 mb-6">
         <Label className="text-xs uppercase tracking-wider">Tu voto</Label>
         <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
