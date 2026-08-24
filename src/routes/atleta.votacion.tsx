@@ -199,14 +199,11 @@ function Votacion() {
         </div>
 
         <Button onClick={save} disabled={saving} className="w-full mt-4" size="lg">
-          {saving ? "Guardando..." : voteId ? "Actualizar mi voto" : "Votar"}
+          {saving ? "Guardando..." : "Votar (una sola vez)"}
         </Button>
-        {voteId && (
-          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" /> Ya votaste esta semana. Puedes cambiar tu voto hasta que termine.
-          </p>
-        )}
       </div>
+      )}
+
 
       <div className="border border-border p-6">
         <h3 className="text-lg mb-2 flex items-center gap-2"><Trophy className="h-4 w-4" /> Más votado de la semana</h3>
