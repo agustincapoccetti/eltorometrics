@@ -1069,6 +1069,7 @@ export type Database = {
           test_top5_count: number
           user_id: string
           vote_wins: number
+          votes_cast: number
         }[]
       }
       has_role: {
