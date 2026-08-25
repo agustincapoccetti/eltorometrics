@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Vote, Trophy, Info, CheckCircle2 } from "lucide-react";
+import { Vote, Trophy, Info, CheckCircle2, History } from "lucide-react";
 import { startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
 import { fmtDate } from "@/lib/format-date";
 
