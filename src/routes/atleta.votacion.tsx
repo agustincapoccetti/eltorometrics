@@ -104,6 +104,7 @@ function Votacion() {
     if (!win.isOpen) { toast.error("La votación está cerrada"); return; }
     if (voteId) { toast.error("Ya votaste esta semana: el voto es único"); return; }
     if (!nominee) { toast.error("Elige al compañero que mejor entrenó"); return; }
+    if (nominee === user.id) { toast.error("No puedes votarte a ti mismo"); return; }
     const c = comment.trim();
     if (c.length < 10) { toast.error("El comentario es obligatorio: explica en pocas palabras por qué lo votas"); return; }
     setSaving(true);
@@ -133,6 +134,7 @@ function Votacion() {
             <h2 className="font-display text-lg uppercase tracking-wide mt-0.5">¿Quién entrenó mejor esta semana?</h2>
             <p className="text-sm text-muted-foreground mt-1">
               El compañero más votado suma <strong>7 puntos extra</strong>, que cuentan para el ranking del mes y para la temporada.
+              Y por participar votando ganas <strong>1 punto</strong>. No puedes votarte a ti mismo.
             </p>
             <p className="text-xs mt-2">
               Votación abierta del <strong>viernes 19:00</strong> al <strong>domingo 22:00</strong>. Solo puedes votar <strong>una vez</strong> y no se puede cambiar.
