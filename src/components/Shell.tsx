@@ -228,10 +228,14 @@ export function Shell({ children, title }: { children: ReactNode; title?: string
 
       {/* Dock fijo abajo solo en móvil */}
       {hasNav && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-20 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 bg-gradient-to-t from-background via-background/95 to-background/0">
+        <div
+          className="md:hidden fixed left-0 right-0 bottom-0 z-30 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 bg-background transform-gpu"
+          style={{ willChange: "transform", backfaceVisibility: "hidden", transform: "translate3d(0,0,0)" }}
+        >
           <NavDock items={items} isActive={isActive} variant="bottom" />
         </div>
       )}
+
     </div>
   );
 }
