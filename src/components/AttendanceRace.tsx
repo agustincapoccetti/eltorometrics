@@ -208,6 +208,11 @@ export function AttendanceRace({ userId }: { userId: string }) {
                         <Vote className="h-3 w-3" />{me.vote_wins} veces el mejor de la semana
                       </span>
                     )}
+                    {(me.votes_cast ?? 0) > 0 && (
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <Vote className="h-3 w-3" />{me.votes_cast} {me.votes_cast === 1 ? "semana votada" : "semanas votadas"}
+                      </span>
+                    )}
                   </div>
                 </>
               ) : (
