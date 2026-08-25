@@ -66,6 +66,10 @@ function Votacion() {
   const [nominee, setNominee] = useState<string>("");
   const [comment, setComment] = useState("");
   const [voteId, setVoteId] = useState<string | null>(null);
+  const [myVote, setMyVote] = useState<{ week_start: string; nominee_id: string; comment: string; created_at: string } | null>(null);
+  const [justVoted, setJustVoted] = useState(false);
+  const [history, setHistory] = useState<Array<{ id: string; week_start: string; nominee_id: string; comment: string; created_at: string }>>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [winners, setWinners] = useState<Array<{ nominee_id: string; full_name: string | null; last_name: string | null; votes: number }>>([]);
   const [totalVotes, setTotalVotes] = useState(0);
@@ -82,14 +86,24 @@ function Votacion() {
       .sort((a, b) => fullName(a).localeCompare(fullName(b)));
     setCandidates(list);
 
-    const { data: mine } = await supabase
+    const { data: all } = await supabase
       .from("weekly_votes")
-      .select("*")
+      .select("id, week_start, nominee_id, comment, created_at")
       .eq("voter_id", user.id)
-      .eq("week_start", weekStart)
-      .maybeSingle();
-    if (mine) { setVoteId(mine.id); setNominee(mine.nominee_id); setComment(mine.comment ?? ""); }
-    else { setVoteId(null); }
+      .order("week_start", { ascending: false });
+    const rowsAll = all ?? [];
+    setHistory(rowsAll);
+    const mine = rowsAll.find((r) => r.week_start === weekStart) ?? null;
+    if (mine) { setVoteId(mine.id); setMyVote(mine); setNominee(mine.nominee_id); setComment(mine.comment ?? ""); }
+    else { setVoteId(null); setMyVote(null); }
+
+    const ids = Array.from(new Set(rowsAll.map((r) => r.nominee_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, last_name").in("id", ids);
+      const map: Record<string, string> = {};
+      for (const p of profs ?? []) map[p.id] = fullName(p as any);
+      setNames(map);
+    }
 
     const { data: w } = await supabase.rpc("weekly_vote_winners" as any, { _week_start: weekStart } as any);
     const ws = (w as unknown as Array<{ nominee_id: string; full_name: string | null; last_name: string | null; votes: number }>) ?? [];
@@ -98,6 +112,9 @@ function Votacion() {
   }
 
   useEffect(() => { load(); }, [user]);
+
+  const nomineeName = (id: string) =>
+    names[id] ?? (candidates.find((c) => c.user_id === id) ? fullName(candidates.find((c) => c.user_id === id)!) : "Compañero");
 
   async function save() {
     if (!user) return;
@@ -108,17 +125,40 @@ function Votacion() {
     const c = comment.trim();
     if (c.length < 10) { toast.error("El comentario es obligatorio: explica en pocas palabras por qué lo votas"); return; }
     setSaving(true);
+    // Doble verificación contra la base: evita votos duplicados al recargar o reabrir el enlace
+    const { data: existing } = await supabase
+      .from("weekly_votes")
+      .select("id")
+      .eq("voter_id", user.id)
+      .eq("week_start", weekStart)
+      .maybeSingle();
+    if (existing) {
+      setVoteId(existing.id);
+      setSaving(false);
+      toast.error("Ya votaste esta semana");
+      load();
+      return;
+    }
     const { data, error } = await supabase
       .from("weekly_votes")
       .insert({ voter_id: user.id, nominee_id: nominee, week_start: weekStart, comment: c })
-      .select("id")
+      .select("id, week_start, nominee_id, comment, created_at")
       .single();
-    if (error) { toast.error(error.message); setSaving(false); return; }
+    if (error) {
+      const dup = (error as any).code === "23505" || /duplicate|unique/i.test(error.message);
+      toast.error(dup ? "Ya votaste esta semana: el voto es único" : error.message);
+      setSaving(false);
+      if (dup) load();
+      return;
+    }
     setVoteId(data.id);
+    setMyVote(data);
+    setJustVoted(true);
     setSaving(false);
     toast.success("Voto registrado");
     load();
   }
+
 
   return (
     <Shell title="Votación semanal">
