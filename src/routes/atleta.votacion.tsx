@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Vote, Trophy, Info, CheckCircle2 } from "lucide-react";
+import { Vote, Trophy, Info, CheckCircle2, History as HistoryIcon } from "lucide-react";
 import { startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
 import { fmtDate } from "@/lib/format-date";
 
@@ -66,6 +66,10 @@ function Votacion() {
   const [nominee, setNominee] = useState<string>("");
   const [comment, setComment] = useState("");
   const [voteId, setVoteId] = useState<string | null>(null);
+  const [myVote, setMyVote] = useState<{ week_start: string; nominee_id: string; comment: string; created_at: string } | null>(null);
+  const [justVoted, setJustVoted] = useState(false);
+  const [history, setHistory] = useState<Array<{ id: string; week_start: string; nominee_id: string; comment: string; created_at: string }>>([]);
+  const [names, setNames] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [winners, setWinners] = useState<Array<{ nominee_id: string; full_name: string | null; last_name: string | null; votes: number }>>([]);
   const [totalVotes, setTotalVotes] = useState(0);
@@ -82,14 +86,24 @@ function Votacion() {
       .sort((a, b) => fullName(a).localeCompare(fullName(b)));
     setCandidates(list);
 
-    const { data: mine } = await supabase
+    const { data: all } = await supabase
       .from("weekly_votes")
-      .select("*")
+      .select("id, week_start, nominee_id, comment, created_at")
       .eq("voter_id", user.id)
-      .eq("week_start", weekStart)
-      .maybeSingle();
-    if (mine) { setVoteId(mine.id); setNominee(mine.nominee_id); setComment(mine.comment ?? ""); }
-    else { setVoteId(null); }
+      .order("week_start", { ascending: false });
+    const rowsAll = all ?? [];
+    setHistory(rowsAll);
+    const mine = rowsAll.find((r) => r.week_start === weekStart) ?? null;
+    if (mine) { setVoteId(mine.id); setMyVote(mine); setNominee(mine.nominee_id); setComment(mine.comment ?? ""); }
+    else { setVoteId(null); setMyVote(null); }
+
+    const ids = Array.from(new Set(rowsAll.map((r) => r.nominee_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, last_name").in("id", ids);
+      const map: Record<string, string> = {};
+      for (const p of profs ?? []) map[p.id] = fullName(p as any);
+      setNames(map);
+    }
 
     const { data: w } = await supabase.rpc("weekly_vote_winners" as any, { _week_start: weekStart } as any);
     const ws = (w as unknown as Array<{ nominee_id: string; full_name: string | null; last_name: string | null; votes: number }>) ?? [];
@@ -98,6 +112,9 @@ function Votacion() {
   }
 
   useEffect(() => { load(); }, [user]);
+
+  const nomineeName = (id: string) =>
+    names[id] ?? (candidates.find((c) => c.user_id === id) ? fullName(candidates.find((c) => c.user_id === id)!) : "Compañero");
 
   async function save() {
     if (!user) return;
@@ -108,17 +125,40 @@ function Votacion() {
     const c = comment.trim();
     if (c.length < 10) { toast.error("El comentario es obligatorio: explica en pocas palabras por qué lo votas"); return; }
     setSaving(true);
+    // Doble verificación contra la base: evita votos duplicados al recargar o reabrir el enlace
+    const { data: existing } = await supabase
+      .from("weekly_votes")
+      .select("id")
+      .eq("voter_id", user.id)
+      .eq("week_start", weekStart)
+      .maybeSingle();
+    if (existing) {
+      setVoteId(existing.id);
+      setSaving(false);
+      toast.error("Ya votaste esta semana");
+      load();
+      return;
+    }
     const { data, error } = await supabase
       .from("weekly_votes")
       .insert({ voter_id: user.id, nominee_id: nominee, week_start: weekStart, comment: c })
-      .select("id")
+      .select("id, week_start, nominee_id, comment, created_at")
       .single();
-    if (error) { toast.error(error.message); setSaving(false); return; }
+    if (error) {
+      const dup = (error as any).code === "23505" || /duplicate|unique/i.test(error.message);
+      toast.error(dup ? "Ya votaste esta semana: el voto es único" : error.message);
+      setSaving(false);
+      if (dup) load();
+      return;
+    }
     setVoteId(data.id);
+    setMyVote(data);
+    setJustVoted(true);
     setSaving(false);
     toast.success("Voto registrado");
     load();
   }
+
 
   return (
     <Shell title="Votación semanal">
@@ -168,12 +208,39 @@ function Votacion() {
           )}
         </div>
       ) : voteId ? (
-        <div className="border border-border p-6 mb-6 flex items-start gap-3">
-          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <p className="text-sm">
-            Ya votaste esta semana. El voto es <strong>único</strong> y no se puede modificar.
-          </p>
+        <div className="border-2 border-black p-5 mb-6">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5" />
+            <h3 className="font-display text-base uppercase tracking-wide">
+              {justVoted ? "¡Voto confirmado!" : "Ya votaste esta semana"}
+            </h3>
+          </div>
+          <dl className="mt-3 divide-y divide-border border border-border">
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Compañero elegido</dt>
+              <dd className="text-sm font-medium">{myVote ? nomineeName(myVote.nominee_id) : "—"}</dd>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Fecha del voto</dt>
+              <dd className="text-sm tabular-nums">
+                {myVote ? new Date(myVote.created_at).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) : "—"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Semana</dt>
+              <dd className="text-sm tabular-nums">{fmtDate(weekStart)} – {fmtDate(weekEnd)}</dd>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Puntos otorgados</dt>
+              <dd className="text-sm">+7 a tu compañero · +1 para ti por participar</dd>
+            </div>
+          </dl>
+          {myVote?.comment && (
+            <p className="text-xs text-muted-foreground mt-3">Tu comentario: “{myVote.comment}”</p>
+          )}
+          <p className="text-xs text-muted-foreground mt-2">El voto es <strong>único</strong> y no se puede modificar.</p>
         </div>
+
       ) : (
       <div className="border border-border p-6 mb-6">
         <Label htmlFor="nominee" className="text-xs uppercase tracking-wider">Tu voto</Label>
@@ -243,6 +310,31 @@ function Votacion() {
           </>
         )}
       </div>
+
+      <div className="border border-border p-6 mt-6">
+        <h3 className="text-lg mb-2 flex items-center gap-2"><HistoryIcon className="h-4 w-4" /> Mis votaciones</h3>
+        {history.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Todavía no registraste ninguna votación.</p>
+        ) : (
+          <ul className="space-y-2">
+            {history.map((h) => (
+              <li key={h.id} className="border border-border px-3 py-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">
+                    Semana del {fmtDate(h.week_start)}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
+                    {new Date(h.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                  </span>
+                </div>
+                <p className="text-sm font-medium mt-0.5">{nomineeName(h.nominee_id)}</p>
+                {h.comment && <p className="text-xs text-muted-foreground mt-0.5">“{h.comment}”</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
     </Shell>
   );
 }
