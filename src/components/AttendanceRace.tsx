@@ -18,11 +18,12 @@ type Row = {
   test_top5_count: number;
   test_pos_top3_count: number;
   vote_wins: number;
+  votes_cast: number;
   points: number;
 };
 
 /** Valores de puntos por concepto (deben coincidir con gamification_leaderboard). */
-const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3, voteWin: 7 };
+const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3, voteWin: 7, voteCast: 1 };
 
 function name(r: Row) {
   return `${r.full_name ?? ""}${r.last_name ? ` ${r.last_name}` : ""}`.trim() || "Atleta";
