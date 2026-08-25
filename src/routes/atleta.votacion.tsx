@@ -208,12 +208,39 @@ function Votacion() {
           )}
         </div>
       ) : voteId ? (
-        <div className="border border-border p-6 mb-6 flex items-start gap-3">
-          <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
-          <p className="text-sm">
-            Ya votaste esta semana. El voto es <strong>único</strong> y no se puede modificar.
-          </p>
+        <div className="border-2 border-black p-5 mb-6">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5" />
+            <h3 className="font-display text-base uppercase tracking-wide">
+              {justVoted ? "¡Voto confirmado!" : "Ya votaste esta semana"}
+            </h3>
+          </div>
+          <dl className="mt-3 divide-y divide-border border border-border">
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Compañero elegido</dt>
+              <dd className="text-sm font-medium">{myVote ? nomineeName(myVote.nominee_id) : "—"}</dd>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Fecha del voto</dt>
+              <dd className="text-sm tabular-nums">
+                {myVote ? new Date(myVote.created_at).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" }) : "—"}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Semana</dt>
+              <dd className="text-sm tabular-nums">{fmtDate(weekStart)} – {fmtDate(weekEnd)}</dd>
+            </div>
+            <div className="flex items-center justify-between px-3 py-2">
+              <dt className="text-xs uppercase tracking-wider text-muted-foreground">Puntos otorgados</dt>
+              <dd className="text-sm">+7 a tu compañero · +1 para ti por participar</dd>
+            </div>
+          </dl>
+          {myVote?.comment && (
+            <p className="text-xs text-muted-foreground mt-3">Tu comentario: “{myVote.comment}”</p>
+          )}
+          <p className="text-xs text-muted-foreground mt-2">El voto es <strong>único</strong> y no se puede modificar.</p>
         </div>
+
       ) : (
       <div className="border border-border p-6 mb-6">
         <Label htmlFor="nominee" className="text-xs uppercase tracking-wider">Tu voto</Label>
