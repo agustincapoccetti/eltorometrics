@@ -45,6 +45,7 @@ function breakdown(r: Row) {
     { label: "Top 5 del equipo en tests", count: r.test_top5_count, per: W.top5 },
     { label: "Top 3 de tu puesto en tests", count: r.test_pos_top3_count, per: W.pos3 },
     { label: "Mejor de la semana (votación)", count: r.vote_wins ?? 0, per: W.voteWin },
+    { label: "Semanas en que votaste", count: r.votes_cast ?? 0, per: W.voteCast },
   ].map((x) => ({ ...x, total: x.count * x.per }));
 }
 
