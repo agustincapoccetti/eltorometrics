@@ -310,6 +310,31 @@ function Votacion() {
           </>
         )}
       </div>
+
+      <div className="border border-border p-6 mt-6">
+        <h3 className="text-lg mb-2 flex items-center gap-2"><History className="h-4 w-4" /> Mis votaciones</h3>
+        {history.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Todavía no registraste ninguna votación.</p>
+        ) : (
+          <ul className="space-y-2">
+            {history.map((h) => (
+              <li key={h.id} className="border border-border px-3 py-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">
+                    Semana del {fmtDate(h.week_start)}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground tabular-nums">
+                    {new Date(h.created_at).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                  </span>
+                </div>
+                <p className="text-sm font-medium mt-0.5">{nomineeName(h.nominee_id)}</p>
+                {h.comment && <p className="text-xs text-muted-foreground mt-0.5">“{h.comment}”</p>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
     </Shell>
   );
 }
