@@ -248,8 +248,8 @@ export function AttendanceRace({ userId }: { userId: string }) {
             <DialogDescription>
               {W.present} pts por presente · {W.form} pt por formulario · {W.streak} pts por semana de racha ·{" "}
               {W.convo} pts por convocatoria · {W.top5} pts por top 5 del equipo en un test ·{" "}
-              {W.pos3} pts por top 3 de tu puesto · {W.voteWin} pts extra si eres el más votado de la semana.
-              Toca a un jugador para desplegar sus puntos.
+              {W.pos3} pts por top 3 de tu puesto · {W.voteWin} pts extra si eres el más votado de la semana ·{" "}
+              {W.voteCast} pt por votar cada semana. Toca a un jugador para desplegar sus puntos.
             </DialogDescription>
           </DialogHeader>
           <div className="border border-border divide-y divide-border">
