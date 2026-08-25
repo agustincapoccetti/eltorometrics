@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Vote, Trophy, Info, CheckCircle2, History } from "lucide-react";
+import { Vote, Trophy, Info, CheckCircle2, History as HistoryIcon } from "lucide-react";
 import { startOfWeek, isoDate, weekDays } from "@/lib/week-utils";
 import { fmtDate } from "@/lib/format-date";
 
@@ -312,7 +312,7 @@ function Votacion() {
       </div>
 
       <div className="border border-border p-6 mt-6">
-        <h3 className="text-lg mb-2 flex items-center gap-2"><History className="h-4 w-4" /> Mis votaciones</h3>
+        <h3 className="text-lg mb-2 flex items-center gap-2"><HistoryIcon className="h-4 w-4" /> Mis votaciones</h3>
         {history.length === 0 ? (
           <p className="text-sm text-muted-foreground">Todavía no registraste ninguna votación.</p>
         ) : (
