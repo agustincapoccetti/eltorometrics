@@ -133,6 +133,7 @@ function Votacion() {
             <h2 className="font-display text-lg uppercase tracking-wide mt-0.5">¿Quién entrenó mejor esta semana?</h2>
             <p className="text-sm text-muted-foreground mt-1">
               El compañero más votado suma <strong>7 puntos extra</strong>, que cuentan para el ranking del mes y para la temporada.
+              Y por participar votando ganas <strong>1 punto</strong>. No puedes votarte a ti mismo.
             </p>
             <p className="text-xs mt-2">
               Votación abierta del <strong>viernes 19:00</strong> al <strong>domingo 22:00</strong>. Solo puedes votar <strong>una vez</strong> y no se puede cambiar.
