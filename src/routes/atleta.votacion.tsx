@@ -104,6 +104,7 @@ function Votacion() {
     if (!win.isOpen) { toast.error("La votación está cerrada"); return; }
     if (voteId) { toast.error("Ya votaste esta semana: el voto es único"); return; }
     if (!nominee) { toast.error("Elige al compañero que mejor entrenó"); return; }
+    if (nominee === user.id) { toast.error("No puedes votarte a ti mismo"); return; }
     const c = comment.trim();
     if (c.length < 10) { toast.error("El comentario es obligatorio: explica en pocas palabras por qué lo votas"); return; }
     setSaving(true);
