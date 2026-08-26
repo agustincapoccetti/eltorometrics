@@ -1068,6 +1068,8 @@ export type Database = {
           test_pos_top3_count: number
           test_top5_count: number
           user_id: string
+          vote_seconds: number
+          vote_thirds: number
           vote_wins: number
           votes_cast: number
         }[]
