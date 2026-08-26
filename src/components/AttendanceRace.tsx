@@ -18,12 +18,14 @@ type Row = {
   test_top5_count: number;
   test_pos_top3_count: number;
   vote_wins: number;
+  vote_seconds: number;
+  vote_thirds: number;
   votes_cast: number;
   points: number;
 };
 
 /** Valores de puntos por concepto (deben coincidir con gamification_leaderboard). */
-const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3, voteWin: 7, voteCast: 1 };
+const W = { present: 3, form: 1, streak: 2, convo: 4, top5: 5, pos3: 3, voteWin: 7, voteSecond: 5, voteThird: 3, voteCast: 1 };
 
 function name(r: Row) {
   return `${r.full_name ?? ""}${r.last_name ? ` ${r.last_name}` : ""}`.trim() || "Atleta";
@@ -44,7 +46,9 @@ function breakdown(r: Row) {
     { label: "Convocatorias", count: r.convocations, per: W.convo },
     { label: "Top 5 del equipo en tests", count: r.test_top5_count, per: W.top5 },
     { label: "Top 3 de tu puesto en tests", count: r.test_pos_top3_count, per: W.pos3 },
-    { label: "Mejor de la semana (votación)", count: r.vote_wins ?? 0, per: W.voteWin },
+    { label: "Más votado de la semana", count: r.vote_wins ?? 0, per: W.voteWin },
+    { label: "2º más votado de la semana", count: r.vote_seconds ?? 0, per: W.voteSecond },
+    { label: "3º más votado de la semana", count: r.vote_thirds ?? 0, per: W.voteThird },
     { label: "Semanas en que votaste", count: r.votes_cast ?? 0, per: W.voteCast },
   ].map((x) => ({ ...x, total: x.count * x.per }));
 }
@@ -205,7 +209,12 @@ export function AttendanceRace({ userId }: { userId: string }) {
                     )}
                     {(me.vote_wins ?? 0) > 0 && (
                       <span className="inline-flex items-center gap-1 text-foreground">
-                        <Vote className="h-3 w-3" />{me.vote_wins} veces el mejor de la semana
+                        <Vote className="h-3 w-3" />{me.vote_wins} veces el más votado
+                      </span>
+                    )}
+                    {((me.vote_seconds ?? 0) + (me.vote_thirds ?? 0)) > 0 && (
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <Vote className="h-3 w-3" />{(me.vote_seconds ?? 0) + (me.vote_thirds ?? 0)} veces en el podio de votación
                       </span>
                     )}
                     {(me.votes_cast ?? 0) > 0 && (
@@ -253,7 +262,8 @@ export function AttendanceRace({ userId }: { userId: string }) {
             <DialogDescription>
               {W.present} pts por presente · {W.form} pt por formulario · {W.streak} pts por semana de racha ·{" "}
               {W.convo} pts por convocatoria · {W.top5} pts por top 5 del equipo en un test ·{" "}
-              {W.pos3} pts por top 3 de tu puesto · {W.voteWin} pts extra si eres el más votado de la semana ·{" "}
+              {W.pos3} pts por top 3 de tu puesto · {W.voteWin} pts si eres el más votado de la semana ·{" "}
+              {W.voteSecond} pts si eres el 2º más votado · {W.voteThird} pts si eres el 3º más votado ·{" "}
               {W.voteCast} pt por votar cada semana. Toca a un jugador para desplegar sus puntos.
             </DialogDescription>
           </DialogHeader>
