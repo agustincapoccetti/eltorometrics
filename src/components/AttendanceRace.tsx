@@ -209,7 +209,12 @@ export function AttendanceRace({ userId }: { userId: string }) {
                     )}
                     {(me.vote_wins ?? 0) > 0 && (
                       <span className="inline-flex items-center gap-1 text-foreground">
-                        <Vote className="h-3 w-3" />{me.vote_wins} veces el mejor de la semana
+                        <Vote className="h-3 w-3" />{me.vote_wins} veces el más votado
+                      </span>
+                    )}
+                    {((me.vote_seconds ?? 0) + (me.vote_thirds ?? 0)) > 0 && (
+                      <span className="inline-flex items-center gap-1 text-foreground">
+                        <Vote className="h-3 w-3" />{(me.vote_seconds ?? 0) + (me.vote_thirds ?? 0)} veces en el podio de votación
                       </span>
                     )}
                     {(me.votes_cast ?? 0) > 0 && (
