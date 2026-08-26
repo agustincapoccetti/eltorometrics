@@ -18,6 +18,8 @@ type Row = {
   test_top5_count: number;
   test_pos_top3_count: number;
   vote_wins: number;
+  vote_seconds: number;
+  vote_thirds: number;
   votes_cast: number;
   points: number;
 };
