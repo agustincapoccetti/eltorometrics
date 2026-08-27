@@ -87,6 +87,15 @@ function Recuperacion() {
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
   const pct = maxPoints ? Math.round((totalPoints / maxPoints) * 100) : 0;
+  const tiers = useMemo(() => {
+    const map = new Map<number, any[]>();
+    strategies.forEach((s) => {
+      if (!map.has(s.points)) map.set(s.points, []);
+      map.get(s.points)!.push(s);
+    });
+    return Array.from(map.entries()).sort((a, b) => b[0] - a[0]);
+  }, [strategies]);
+
 
   async function save() {
     if (!user) return;
