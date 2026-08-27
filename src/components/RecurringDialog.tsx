@@ -60,13 +60,16 @@ export function RecurringDialog({ open, onOpenChange, kind, onCreated }: Props) 
     const { data: sched, error } = await supabase.from("recurring_schedules").insert(payload).select().single();
     if (error || !sched) { setSaving(false); toast.error(error?.message ?? "Error"); return; }
 
-    // Materialize events/slots from start_date through end_date or +90 days
-    const until = endDate ? new Date(endDate) : new Date(Date.now() + 90 * 86400000);
-    const from = new Date(startDate);
+    // Materialize events/slots from start_date through end_date or +12 months
+    const localIso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const until = endDate ? new Date(`${endDate}T12:00:00`) : new Date(Date.now() + 365 * 86400000);
+    const from = new Date(`${startDate}T12:00:00`);
     const rows: any[] = [];
     for (let d = new Date(from); d <= until; d.setDate(d.getDate() + 1)) {
       if (!weekdays.includes(d.getDay())) continue;
-      const isoDate = d.toISOString().slice(0, 10);
+      const isoDate = localIso(d);
+
       if (kind === "training") {
         rows.push({
           event_date: isoDate, event_time: startTime, duration_minutes: parseInt(duration),
