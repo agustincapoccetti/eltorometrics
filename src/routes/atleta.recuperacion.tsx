@@ -87,6 +87,15 @@ function Recuperacion() {
   const totalPoints = useMemo(() => strategies.reduce((s, x) => s + (checked[x.id] ? x.points : 0), 0), [checked, strategies]);
   const maxPoints = useMemo(() => strategies.reduce((s, x) => s + x.points, 0), [strategies]);
   const pct = maxPoints ? Math.round((totalPoints / maxPoints) * 100) : 0;
+  const tiers = useMemo(() => {
+    const map = new Map<number, any[]>();
+    strategies.forEach((s) => {
+      if (!map.has(s.points)) map.set(s.points, []);
+      map.get(s.points)!.push(s);
+    });
+    return Array.from(map.entries()).sort((a, b) => b[0] - a[0]);
+  }, [strategies]);
+
 
   async function save() {
     if (!user) return;
@@ -161,27 +170,45 @@ function Recuperacion() {
           </div>
 
           <div className="text-right">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Score</p>
-            <p className="text-4xl font-display">{totalPoints}<span className="text-lg text-muted-foreground">/{maxPoints}</span></p>
-            <p className="text-xs">{pct}% recuperado</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Puntuación</p>
+            <p className="text-4xl font-display">{totalPoints}<span className="text-lg text-muted-foreground">/100</span></p>
+            <p className="text-xs">{totalPoints >= 100 ? "¡Objetivo cumplido!" : `Faltan ${100 - totalPoints} pts`}</p>
           </div>
         </div>
 
-        <div className="space-y-2">
-          {strategies.map((s) => (
-            <label key={s.id} className={`flex items-start gap-3 p-3 border transition ${!editable ? "opacity-60 cursor-not-allowed" : "cursor-pointer"} ${checked[s.id] ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}>
-              <span className="text-2xl leading-none w-8 text-center flex-shrink-0" aria-hidden>{s.icon ?? "✅"}</span>
-              <Checkbox checked={!!checked[s.id]} disabled={!editable} onCheckedChange={(v) => setChecked({ ...checked, [s.id]: !!v })} className="mt-1" />
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium text-sm">{s.name}</p>
-                  <span className="text-xs font-display">+{s.points}</span>
-                </div>
-                {s.description && <p className={`text-xs mt-0.5 ${checked[s.id] ? "opacity-80" : "text-muted-foreground"}`}>{s.description}</p>}
+        <div className="border-2 border-black bg-black text-white px-3 py-2 mb-4">
+          <p className="text-xs uppercase tracking-wider font-semibold">Objetivo: acumular 100 o más puntos dentro de las 24 hs posteriores al juego</p>
+        </div>
+
+        <div className="mb-4 h-3 w-full border border-black bg-white">
+          <div className="h-full bg-black transition-all" style={{ width: `${Math.min(100, Math.round((totalPoints / 100) * 100))}%` }} />
+        </div>
+
+        <div className="space-y-4">
+          {tiers.map(([points, list]) => (
+            <div key={points} className="border-2 border-black">
+              <div className="bg-black text-white px-3 py-1.5 text-xs uppercase tracking-wider font-semibold">
+                {points} puntos
               </div>
-            </label>
+              <div className="divide-y divide-border">
+                {list.map((s) => (
+                  <label key={s.id} className={`flex items-start gap-3 p-3 transition ${!editable ? "opacity-60 cursor-not-allowed" : "cursor-pointer"} ${checked[s.id] ? "bg-primary text-primary-foreground" : "hover:bg-accent"}`}>
+                    <span className="text-2xl leading-none w-8 text-center flex-shrink-0" aria-hidden>{s.icon ?? "✅"}</span>
+                    <Checkbox checked={!!checked[s.id]} disabled={!editable} onCheckedChange={(v) => setChecked({ ...checked, [s.id]: !!v })} className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium text-sm">{s.name}</p>
+                        <span className="text-xs font-display">+{s.points}</span>
+                      </div>
+                      {s.description && <p className={`text-xs mt-0.5 ${checked[s.id] ? "opacity-80" : "text-muted-foreground"}`}>{s.description}</p>}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
+
 
         <div className="mt-4">
           <Label htmlFor="n">Notas (opcional)</Label>
