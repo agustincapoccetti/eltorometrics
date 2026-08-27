@@ -305,7 +305,9 @@ function Votacion() {
                 </li>
               ))}
             </ul>
-            <p className="text-[11px] text-muted-foreground mt-2">{totalVotes} votos contados en el liderazgo actual.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">
+              {totalVotes} votos contados en el liderazgo actual. Puntos al podio: 1° 7 pts · 2° 5 pts · 3° 3 pts.
+            </p>
           </>
         )}
       </div>
