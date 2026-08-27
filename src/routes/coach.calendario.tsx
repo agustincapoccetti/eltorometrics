@@ -34,11 +34,15 @@ function CoachCalendar() {
 
 
   async function load() {
-    const start = new Date(month.getFullYear(), month.getMonth(), 1).toISOString().slice(0, 10);
-    const end = new Date(month.getFullYear(), month.getMonth() + 1, 0).toISOString().slice(0, 10);
+    const y = month.getFullYear();
+    const m = month.getMonth();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const start = `${y}-${pad(m + 1)}-01`;
+    const end = `${y}-${pad(m + 1)}-${pad(new Date(y, m + 1, 0).getDate())}`;
     const { data } = await supabase.from("calendar_events").select("*").gte("event_date", start).lte("event_date", end).order("event_date");
     setEvents(data ?? []);
   }
+
   useEffect(() => { load(); }, [month]);
 
   function openCreate(date: string) {
