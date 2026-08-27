@@ -27,9 +27,9 @@ export const Route = createFileRoute("/atleta/votacion")({
   head: () => ({
     meta: [
       { title: "Votación semanal · El Toro Rugby Performance" },
-      { name: "description", content: "Vota al compañero que mejor entrenó esta semana y explica por qué. El más votado gana 7 puntos extra." },
+      { name: "description", content: "Vota al compañero que mejor entrenó esta semana y explica por qué. El más votado gana 7 puntos extra, el segundo 5 y el tercero 3." },
       { property: "og:title", content: "Votación semanal · El Toro Rugby Performance" },
-      { property: "og:description", content: "Vota al compañero que mejor entrenó esta semana y explica por qué." },
+      { property: "og:description", content: "Vota al compañero que mejor entrenó esta semana y explica por qué. El más votado gana 7 puntos extra, el segundo 5 y el tercero 3." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -173,11 +173,10 @@ function Votacion() {
             </p>
             <h2 className="font-display text-lg uppercase tracking-wide mt-0.5">¿Quién entrenó mejor esta semana?</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              El compañero más votado suma <strong>7 puntos extra</strong>, que cuentan para el ranking del mes y para la temporada.
-              Y por participar votando ganas <strong>1 punto</strong>. No puedes votarte a ti mismo.
+              El compañero más votado suma <strong>7 puntos extra</strong>, el segundo <strong>5 puntos</strong> y el tercero <strong>3 puntos</strong>. Todos esos puntos cuentan para el ranking del mes y para la temporada. Por participar votando ganás <strong>1 punto</strong>. No podés votarte a ti mismo.
             </p>
             <p className="text-xs mt-2">
-              Votación abierta del <strong>viernes 19:00</strong> al <strong>domingo 22:00</strong>. Solo puedes votar <strong>una vez</strong> y no se puede cambiar.
+              Votación abierta del <strong>viernes 19:00</strong> al <strong>domingo 22:00</strong>. Solo podés votar <strong>una vez</strong> y no se puede cambiar.
             </p>
           </div>
         </div>
@@ -232,7 +231,7 @@ function Votacion() {
             </div>
             <div className="flex items-center justify-between px-3 py-2">
               <dt className="text-xs uppercase tracking-wider text-muted-foreground">Puntos otorgados</dt>
-              <dd className="text-sm">+7 a tu compañero · +1 para ti por participar</dd>
+              <dd className="text-sm">+7/+5/+3 según la posición final · +1 para vos por participar</dd>
             </div>
           </dl>
           {myVote?.comment && (
@@ -306,7 +305,9 @@ function Votacion() {
                 </li>
               ))}
             </ul>
-            <p className="text-[11px] text-muted-foreground mt-2">{totalVotes} votos contados en el liderazgo actual.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">
+              {totalVotes} votos contados en el liderazgo actual. Puntos al podio: 1° 7 pts · 2° 5 pts · 3° 3 pts.
+            </p>
           </>
         )}
       </div>
