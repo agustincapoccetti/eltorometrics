@@ -40,12 +40,22 @@ type Plan = {
   description: string | null;
 };
 
+type AgendaEvent = {
+  id: string;
+  event_date: string;
+  event_time: string | null;
+  duration_minutes: number | null;
+  name: string;
+  type: "training" | "match";
+};
+
 const EMPTY = { name: "", type: "training", plan_time: "", duration_minutes: "90", description: "" };
 
 function CoachPlanning() {
   const { user } = useAuth();
   const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [agendaEvents, setAgendaEvents] = useState<AgendaEvent[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [editing, setEditing] = useState<Plan | null>(null);
   const [form, setForm] = useState(EMPTY);
@@ -56,12 +66,23 @@ function CoachPlanning() {
     const m = month.getMonth();
     const start = `${y}-${String(m + 1).padStart(2, "0")}-01`;
     const end = `${y}-${String(m + 1).padStart(2, "0")}-${String(new Date(y, m + 1, 0).getDate()).padStart(2, "0")}`;
-    const { data, error } = await supabase
-      .from("training_plans").select("*")
-      .gte("plan_date", start).lte("plan_date", end)
-      .order("plan_date").order("plan_time", { nullsFirst: true });
-    if (error) { toast.error(error.message); return; }
-    setPlans((data ?? []) as Plan[]);
+    const [plansResult, agendaResult] = await Promise.all([
+      supabase
+        .from("training_plans").select("*")
+        .gte("plan_date", start).lte("plan_date", end)
+        .order("plan_date").order("plan_time", { nullsFirst: true }),
+      supabase
+        .from("calendar_events")
+        .select("id, event_date, event_time, duration_minutes, name, type")
+        .gte("event_date", start).lte("event_date", end)
+        .order("event_date").order("event_time", { nullsFirst: true }),
+    ]);
+    if (plansResult.error || agendaResult.error) {
+      toast.error(plansResult.error?.message ?? agendaResult.error?.message ?? "No se pudo cargar el calendario");
+      return;
+    }
+    setPlans((plansResult.data ?? []) as Plan[]);
+    setAgendaEvents((agendaResult.data ?? []) as AgendaEvent[]);
   }
   useEffect(() => { load(); }, [month]);
 
@@ -114,10 +135,14 @@ function CoachPlanning() {
   }
 
   const dayPlans = selectedDate ? plans.filter((p) => p.plan_date === selectedDate) : [];
+  const dayAgendaEvents = selectedDate ? agendaEvents.filter((event) => event.event_date === selectedDate) : [];
   const withPlan = plans.filter((p) => p.description);
 
-  // MonthCalendar espera event_date/type
-  const calEvents = plans.map((p) => ({ id: p.id, event_date: p.plan_date, name: p.name, type: p.type }));
+  // La planificación privada y la agenda del equipo comparten calendario, pero no datos.
+  const calEvents = [
+    ...agendaEvents.map((event) => ({ ...event, id: `agenda-${event.id}` })),
+    ...plans.map((plan) => ({ id: `plan-${plan.id}`, event_date: plan.plan_date, name: plan.name, type: plan.type })),
+  ];
 
   return (
     <Shell title="Planificación">
@@ -139,13 +164,14 @@ function CoachPlanning() {
         renderDay={(_iso, evs) => (
           <div className="space-y-0.5">
             {evs.slice(0, 3).map((e) => {
-              const full = plans.find((x) => x.id === e.id);
+              const isAgendaEvent = e.id.startsWith("agenda-");
+              const full = isAgendaEvent ? undefined : plans.find((x) => `plan-${x.id}` === e.id);
               return (
                 <div
                   key={e.id}
                   className={`text-[10px] truncate px-1 py-0.5 ${e.type === "match" ? "bg-primary text-primary-foreground" : "border border-primary"}`}
                 >
-                  {full?.description ? "✓ " : ""}{e.name}
+                  {isAgendaEvent ? "Agenda · " : full?.description ? "✓ " : ""}{e.name}
                 </div>
               );
             })}
@@ -203,6 +229,20 @@ function CoachPlanning() {
                   <Button variant="ghost" size="icon" onClick={() => remove(p.id)} aria-label="Eliminar">
                     <Trash2 className="h-4 w-4" />
                   </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {dayAgendaEvents.length > 0 && !editing && (
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Agenda visible para jugadores</p>
+              {dayAgendaEvents.map((event) => (
+                <div key={event.id} className="border border-border p-3">
+                  <p className="font-display text-xs uppercase tracking-wider">
+                    {event.type === "match" ? "Partido" : "Entreno"}{event.event_time ? ` · ${fmtTime(event.event_time)}` : ""}
+                  </p>
+                  <p className="text-sm">{event.name}</p>
                 </div>
               ))}
             </div>
