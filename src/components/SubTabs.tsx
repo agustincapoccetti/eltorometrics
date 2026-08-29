@@ -12,6 +12,7 @@ export const HISTORIAL_TABS: SubTab[] = [
 export const ENTRENO_TABS: SubTab[] = [
   { to: "/atleta/gym", label: "Gym" },
   { to: "/atleta/fisio", label: "Fisio" },
+  { to: "/atleta/biblioteca", label: "Biblioteca" },
 ];
 
 // ---- Coach ----
@@ -19,6 +20,7 @@ export const PLANTEL_TABS: SubTab[] = [
   { to: "/coach/jugadores", label: "Jugadores" },
   { to: "/coach/cuestionarios", label: "Cuestionarios" },
   { to: "/coach/respuestas", label: "Respuestas" },
+  { to: "/coach/votacion", label: "Votación" },
 ];
 
 
