@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
+import { Route as CoachVotacionRouteImport } from './routes/coach.votacion'
 import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
 import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
 import { Route as CoachRespuestasRouteImport } from './routes/coach.respuestas'
@@ -77,6 +78,11 @@ const CoachIndexRoute = CoachIndexRouteImport.update({
 const AtletaIndexRoute = AtletaIndexRouteImport.update({
   id: '/atleta/',
   path: '/atleta/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachVotacionRoute = CoachVotacionRouteImport.update({
+  id: '/coach/votacion',
+  path: '/coach/votacion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachUsuariosRoute = CoachUsuariosRouteImport.update({
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/coach/respuestas': typeof CoachRespuestasRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
+  '/coach/votacion': typeof CoachVotacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/coach/respuestas': typeof CoachRespuestasRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
+  '/coach/votacion': typeof CoachVotacionRoute
   '/atleta': typeof AtletaIndexRoute
   '/coach': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/coach/respuestas': typeof CoachRespuestasRoute
   '/coach/semaforo': typeof CoachSemaforoRoute
   '/coach/usuarios': typeof CoachUsuariosRoute
+  '/coach/votacion': typeof CoachVotacionRoute
   '/atleta/': typeof AtletaIndexRoute
   '/coach/': typeof CoachIndexRoute
   '/coach/atleta/$id': typeof CoachAtletaIdRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/coach/respuestas'
     | '/coach/semaforo'
     | '/coach/usuarios'
+    | '/coach/votacion'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/coach/respuestas'
     | '/coach/semaforo'
     | '/coach/usuarios'
+    | '/coach/votacion'
     | '/atleta'
     | '/coach'
     | '/coach/atleta/$id'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/coach/respuestas'
     | '/coach/semaforo'
     | '/coach/usuarios'
+    | '/coach/votacion'
     | '/atleta/'
     | '/coach/'
     | '/coach/atleta/$id'
@@ -467,6 +479,7 @@ export interface RootRouteChildren {
   CoachRespuestasRoute: typeof CoachRespuestasRoute
   CoachSemaforoRoute: typeof CoachSemaforoRoute
   CoachUsuariosRoute: typeof CoachUsuariosRoute
+  CoachVotacionRoute: typeof CoachVotacionRoute
   AtletaIndexRoute: typeof AtletaIndexRoute
   CoachIndexRoute: typeof CoachIndexRoute
   CoachAtletaIdRoute: typeof CoachAtletaIdRoute
@@ -522,6 +535,13 @@ declare module '@tanstack/react-router' {
       path: '/atleta'
       fullPath: '/atleta/'
       preLoaderRoute: typeof AtletaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/votacion': {
+      id: '/coach/votacion'
+      path: '/coach/votacion'
+      fullPath: '/coach/votacion'
+      preLoaderRoute: typeof CoachVotacionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/usuarios': {
@@ -747,6 +767,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachRespuestasRoute: CoachRespuestasRoute,
   CoachSemaforoRoute: CoachSemaforoRoute,
   CoachUsuariosRoute: CoachUsuariosRoute,
+  CoachVotacionRoute: CoachVotacionRoute,
   AtletaIndexRoute: AtletaIndexRoute,
   CoachIndexRoute: CoachIndexRoute,
   CoachAtletaIdRoute: CoachAtletaIdRoute,
