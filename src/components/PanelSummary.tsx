@@ -5,6 +5,7 @@ import { isoDate, startOfWeek, endOfWeek, weekDays, withinHoursAfter, isTodayOrP
 import { sendPushToTargets } from "@/lib/push.functions";
 import { toast } from "sonner";
 import { BellRing, ChevronDown } from "lucide-react";
+import { ComplianceRings } from "@/components/ComplianceRings";
 
 type Athlete = { id: string; name: string };
 
@@ -92,6 +93,8 @@ export function PanelSummary() {
   const pct = (missing: number) => (total ? Math.round(((total - missing) / total) * 100) : 0);
 
   return (
+    <>
+    <ComplianceRings />
     <section className="grid gap-3 md:grid-cols-3 mb-10">
       <Card title="Riesgo esta semana" subtitle={`${risk.length} en zona de riesgo (ACWR)`}>
         {risk.length === 0 ? (
@@ -180,6 +183,7 @@ export function PanelSummary() {
         )}
       </Card>
     </section>
+    </>
   );
 }
 
