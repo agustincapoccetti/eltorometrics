@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { SemaforoView } from "@/components/SemaforoView";
 import { PanelSummary } from "@/components/PanelSummary";
+import { CoachLeaderboard } from "@/components/CoachLeaderboard";
 
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,7 +97,7 @@ interface Row {
   avgFatigue: number | null;
 }
 
-type PanelTab = "resumen" | "semaforo" | "carga" | "informes";
+type PanelTab = "resumen" | "semaforo" | "ranking" | "carga" | "informes";
 
 function CoachDash() {
   const [tab, setTab] = useState<PanelTab>("resumen");
@@ -386,6 +387,7 @@ function CoachDash() {
   const TABS: { k: PanelTab; label: string }[] = [
     { k: "resumen", label: "Resumen" },
     { k: "semaforo", label: "Semáforo" },
+    { k: "ranking", label: "Ranking" },
     { k: "carga", label: "Carga" },
     { k: "informes", label: "Informes" },
   ];
@@ -405,6 +407,8 @@ function CoachDash() {
       </nav>
 
       {tab === "resumen" && <PanelSummary />}
+
+      {tab === "ranking" && <div className="mb-10"><CoachLeaderboard /></div>}
 
       {tab === "semaforo" && (
       <section className="mb-10">

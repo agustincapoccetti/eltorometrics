@@ -38,8 +38,8 @@ const ATLETA_NAV: NavItem[] = [
 // Rutas agrupadas dentro de cada ítem del dock (pestañas internas)
 const ATLETA_GROUPS: Record<string, string[]> = {
   "/atleta/wellness": ["/atleta/wellness", "/atleta/rpe", "/atleta/recuperacion"],
-  "/atleta/gym": ["/atleta/gym", "/atleta/fisio"],
-  "/atleta/perfil": ["/atleta/perfil", "/atleta/calendario", "/atleta/biblioteca"],
+  "/atleta/gym": ["/atleta/gym", "/atleta/fisio", "/atleta/biblioteca"],
+  "/atleta/perfil": ["/atleta/perfil", "/atleta/calendario"],
 };
 
 

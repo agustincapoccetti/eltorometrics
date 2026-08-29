@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { SubTabs, ENTRENO_TABS } from "@/components/SubTabs";
 import { Protected } from "@/lib/protected";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -73,6 +74,7 @@ function AthleteLibrary() {
 
   return (
     <Shell title="Biblioteca">
+      <SubTabs tabs={ENTRENO_TABS} />
       <p className="text-sm text-muted-foreground mb-4">
         Recursos compartidos por el cuerpo técnico.
       </p>
