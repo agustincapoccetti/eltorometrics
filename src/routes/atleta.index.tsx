@@ -188,6 +188,20 @@ function AthleteToday() {
         </div>
       </div>
 
+      <div className="mb-6">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Accesos</p>
+        <div className="grid grid-cols-2 gap-3">
+          <QuickLink to="/atleta/calendario" icon={<CalendarIcon className="h-4 w-4" />} label="Agenda" />
+          <QuickLink to="/atleta/biblioteca" icon={<BookOpen className="h-4 w-4" />} label="Biblioteca" />
+        </div>
+      </div>
+
+      {user && (
+        <div className="mb-6">
+          <AthleteRings userId={user.id} />
+        </div>
+      )}
+
       <div className="space-y-4">
         {pendingCards.slice(0, 3).map(({ key, ...c }) => (
           <TodayCard key={key} {...c} />
