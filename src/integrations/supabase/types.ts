@@ -50,6 +50,86 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_polls: {
+        Row: {
+          active: boolean
+          closes_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          event_date: string | null
+          id: string
+          multi: boolean
+          options: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          closes_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          multi?: boolean
+          options?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date?: string | null
+          id?: string
+          multi?: boolean
+          options?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      availability_responses: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          poll_id: string
+          selected: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          poll_id: string
+          selected?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          poll_id?: string
+          selected?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "availability_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_events: {
         Row: {
           created_at: string

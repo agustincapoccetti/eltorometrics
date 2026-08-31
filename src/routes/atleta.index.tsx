@@ -15,6 +15,7 @@ import { fmtDateLong, fmtRelative, fmtTime } from "@/lib/format-date";
 import { typeLabel, typeIcon } from "@/lib/appointment-types";
 import { AttendanceRace } from "@/components/AttendanceRace";
 import { AthleteRings } from "@/components/AthleteRings";
+import { AvailabilityCard } from "@/components/AvailabilityCard";
 
 
 export const Route = createFileRoute("/atleta/")({
@@ -196,6 +197,12 @@ function AthleteToday() {
           <QuickLink to="/atleta/biblioteca" icon={<BookOpen className="h-4 w-4" />} label="Biblioteca" />
         </div>
       </div>
+
+      {user && (
+        <div className="mb-6">
+          <AvailabilityCard userId={user.id} />
+        </div>
+      )}
 
       {user && (
         <div className="mb-6">

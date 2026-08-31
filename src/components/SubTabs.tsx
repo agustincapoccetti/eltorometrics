@@ -30,6 +30,7 @@ export const PLANIFICACION_TABS: SubTab[] = [
   { to: "/coach/planificacion", label: "Planific." },
   { to: "/coach/partidos", label: "Partidos" },
   { to: "/coach/evaluaciones", label: "Evaluaciones" },
+  { to: "/coach/disponibilidad", label: "Disponib." },
 ];
 
 
