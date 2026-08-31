@@ -199,6 +199,12 @@ function AthleteToday() {
 
       {user && (
         <div className="mb-6">
+          <AvailabilityCard userId={user.id} />
+        </div>
+      )}
+
+      {user && (
+        <div className="mb-6">
           <AthleteRings userId={user.id} />
         </div>
       )}
