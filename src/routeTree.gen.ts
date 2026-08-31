@@ -28,6 +28,7 @@ import { Route as CoachJugadoresRouteImport } from './routes/coach.jugadores'
 import { Route as CoachGymRouteImport } from './routes/coach.gym'
 import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
 import { Route as CoachEvaluacionesRouteImport } from './routes/coach.evaluaciones'
+import { Route as CoachDisponibilidadRouteImport } from './routes/coach.disponibilidad'
 import { Route as CoachCuestionariosRouteImport } from './routes/coach.cuestionarios'
 import { Route as CoachCoachesRouteImport } from './routes/coach.coaches'
 import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
@@ -140,6 +141,11 @@ const CoachEvaluacionesRoute = CoachEvaluacionesRouteImport.update({
   path: '/coach/evaluaciones',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachDisponibilidadRoute = CoachDisponibilidadRouteImport.update({
+  id: '/coach/disponibilidad',
+  path: '/coach/disponibilidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachCuestionariosRoute = CoachCuestionariosRouteImport.update({
   id: '/coach/cuestionarios',
   path: '/coach/cuestionarios',
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/coaches': typeof CoachCoachesRoute
   '/coach/cuestionarios': typeof CoachCuestionariosRoute
+  '/coach/disponibilidad': typeof CoachDisponibilidadRoute
   '/coach/evaluaciones': typeof CoachEvaluacionesRoute
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/coaches': typeof CoachCoachesRoute
   '/coach/cuestionarios': typeof CoachCuestionariosRoute
+  '/coach/disponibilidad': typeof CoachDisponibilidadRoute
   '/coach/evaluaciones': typeof CoachEvaluacionesRoute
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/coach/calendario': typeof CoachCalendarioRoute
   '/coach/coaches': typeof CoachCoachesRoute
   '/coach/cuestionarios': typeof CoachCuestionariosRoute
+  '/coach/disponibilidad': typeof CoachDisponibilidadRoute
   '/coach/evaluaciones': typeof CoachEvaluacionesRoute
   '/coach/fisio': typeof CoachFisioRoute
   '/coach/gym': typeof CoachGymRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/coach/calendario'
     | '/coach/coaches'
     | '/coach/cuestionarios'
+    | '/coach/disponibilidad'
     | '/coach/evaluaciones'
     | '/coach/fisio'
     | '/coach/gym'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/coach/calendario'
     | '/coach/coaches'
     | '/coach/cuestionarios'
+    | '/coach/disponibilidad'
     | '/coach/evaluaciones'
     | '/coach/fisio'
     | '/coach/gym'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/coach/calendario'
     | '/coach/coaches'
     | '/coach/cuestionarios'
+    | '/coach/disponibilidad'
     | '/coach/evaluaciones'
     | '/coach/fisio'
     | '/coach/gym'
@@ -468,6 +480,7 @@ export interface RootRouteChildren {
   CoachCalendarioRoute: typeof CoachCalendarioRoute
   CoachCoachesRoute: typeof CoachCoachesRoute
   CoachCuestionariosRoute: typeof CoachCuestionariosRoute
+  CoachDisponibilidadRoute: typeof CoachDisponibilidadRoute
   CoachEvaluacionesRoute: typeof CoachEvaluacionesRoute
   CoachFisioRoute: typeof CoachFisioRoute
   CoachGymRoute: typeof CoachGymRoute
@@ -621,6 +634,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoachEvaluacionesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach/disponibilidad': {
+      id: '/coach/disponibilidad'
+      path: '/coach/disponibilidad'
+      fullPath: '/coach/disponibilidad'
+      preLoaderRoute: typeof CoachDisponibilidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coach/cuestionarios': {
       id: '/coach/cuestionarios'
       path: '/coach/cuestionarios'
@@ -756,6 +776,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachCalendarioRoute: CoachCalendarioRoute,
   CoachCoachesRoute: CoachCoachesRoute,
   CoachCuestionariosRoute: CoachCuestionariosRoute,
+  CoachDisponibilidadRoute: CoachDisponibilidadRoute,
   CoachEvaluacionesRoute: CoachEvaluacionesRoute,
   CoachFisioRoute: CoachFisioRoute,
   CoachGymRoute: CoachGymRoute,
