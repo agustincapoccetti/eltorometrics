@@ -15,6 +15,7 @@ import { fmtDateLong, fmtRelative, fmtTime } from "@/lib/format-date";
 import { typeLabel, typeIcon } from "@/lib/appointment-types";
 import { AttendanceRace } from "@/components/AttendanceRace";
 import { AthleteRings } from "@/components/AthleteRings";
+import { AvailabilityCard } from "@/components/AvailabilityCard";
 
 
 export const Route = createFileRoute("/atleta/")({
