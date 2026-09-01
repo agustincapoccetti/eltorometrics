@@ -92,40 +92,47 @@ function BreakdownToggle({ r, invert }: { r: Row; invert?: boolean }) {
 
 const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-function ranges() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const monthFrom = isoDate(new Date(y, now.getMonth(), 1));
-  const monthTo = isoDate(new Date(y, now.getMonth() + 1, 0));
-  return {
-    mes: { from: monthFrom, to: monthTo, label: `${MONTHS[now.getMonth()]}` },
-    temporada: { from: `${y}-01-01`, to: `${y}-12-31`, label: `Temporada ${y}` },
-  };
-}
-
 export function AttendanceRace({ userId }: { userId: string }) {
+  const now = useMemo(() => new Date(), []);
+  const year = now.getFullYear();
   const [scope, setScope] = useState<"mes" | "temporada">("mes");
+  const [month, setMonth] = useState(now.getMonth());
   const [data, setData] = useState<Record<string, Row[]>>({});
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const R = useMemo(ranges, []);
+
+  const R = useMemo(
+    () => ({
+      mes: {
+        from: isoDate(new Date(year, month, 1)),
+        to: isoDate(new Date(year, month + 1, 0)),
+        label: MONTHS[month]!,
+      },
+      temporada: { from: `${year}-01-01`, to: `${year}-12-31`, label: `Temporada ${year}` },
+    }),
+    [year, month],
+  );
+
+  const range = R[scope];
+  const cacheKey = `${range.from}_${range.to}`;
 
   useEffect(() => {
+    let alive = true;
     (async () => {
-      for (const key of ["mes", "temporada"] as const) {
-        const { data: rows, error } = await supabase.rpc("gamification_leaderboard" as any, {
-          _from: R[key].from,
-          _to: R[key].to,
-        } as any);
-        if (!error) setData((d) => ({ ...d, [key]: (rows as unknown as Row[]) ?? [] }));
-      }
+      if (data[cacheKey]) return;
+      const { data: rows, error } = await supabase.rpc("gamification_leaderboard" as any, {
+        _from: range.from,
+        _to: range.to,
+      } as any);
+      if (!alive) return;
+      if (!error) setData((d) => ({ ...d, [cacheKey]: (rows as unknown as Row[]) ?? [] }));
     })();
-  }, [R]);
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cacheKey]);
 
-  const rows = data[scope];
+  const rows = data[cacheKey];
   if (!rows) return null;
-  const hasAny = (data["mes"]?.length ?? 0) > 0 || (data["temporada"]?.length ?? 0) > 0;
-  if (!hasAny) return null;
 
   const idx = rows.findIndex((r) => r.user_id === userId);
   const me = idx >= 0 ? rows[idx] : null;
@@ -153,6 +160,24 @@ export function AttendanceRace({ userId }: { userId: string }) {
             </button>
           ))}
         </div>
+
+        {scope === "mes" && (
+          <div className="flex gap-1 overflow-x-auto border-b border-border p-1">
+            {MONTHS.map((m, i) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMonth(i)}
+                disabled={i > now.getMonth()}
+                className={`shrink-0 px-2 py-1 text-[11px] uppercase tracking-wide border border-black ${
+                  month === i ? "bg-black text-white" : "hover:bg-accent disabled:opacity-30 disabled:hover:bg-transparent"
+                }`}
+              >
+                {m.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="p-4 sm:p-5">
           <div className="flex items-start gap-3">

@@ -31,7 +31,7 @@ function initialsOf(name: string) {
 
 export function ComplianceRings() {
   const [rows, setRows] = useState<Row[]>([]);
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [totals, setTotals] = useState({ done: 0, exp: 0 });
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export function ComplianceRings() {
       });
 
       const ratio = (r: Row) => (r.weekExp ? r.weekDone / r.weekExp : 1);
-      list.sort((a, b) => ratio(a) - ratio(b) || a.name.localeCompare(b.name));
+      list.sort((a, b) => ratio(b) - ratio(a) || a.name.localeCompare(b.name));
       setRows(list);
       setTotals({
         done: list.reduce((s, r) => s + r.monthDone, 0),
