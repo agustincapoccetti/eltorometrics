@@ -45,41 +45,49 @@ function breakdown(r: Row) {
   ].map((x) => ({ ...x, total: x.count * x.per }));
 }
 
-function ranges() {
-  const now = new Date();
-  const y = now.getFullYear();
-  return {
-    mes: {
-      from: isoDate(new Date(y, now.getMonth(), 1)),
-      to: isoDate(new Date(y, now.getMonth() + 1, 0)),
-      label: MONTHS[now.getMonth()],
-    },
-    temporada: { from: `${y}-01-01`, to: `${y}-12-31`, label: `Temporada ${y}` },
-  };
-}
-
 export function CoachLeaderboard() {
+  const now = useMemo(() => new Date(), []);
+  const year = now.getFullYear();
   const [scope, setScope] = useState<"mes" | "temporada">("mes");
+  const [month, setMonth] = useState(now.getMonth());
   const [data, setData] = useState<Record<string, Row[]>>({});
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [positionFilter, setPositionFilter] = useState("all");
-  const R = useMemo(ranges, []);
+
+  const R = useMemo(
+    () => ({
+      mes: {
+        from: isoDate(new Date(year, month, 1)),
+        to: isoDate(new Date(year, month + 1, 0)),
+        label: MONTHS[month]!,
+      },
+      temporada: { from: `${year}-01-01`, to: `${year}-12-31`, label: `Temporada ${year}` },
+    }),
+    [year, month],
+  );
+
+  const range = R[scope];
+  const cacheKey = `${range.from}_${range.to}`;
 
   useEffect(() => {
+    let alive = true;
     (async () => {
-      for (const key of ["mes", "temporada"] as const) {
-        const { data: rows, error } = await supabase.rpc("gamification_leaderboard" as any, {
-          _from: R[key].from,
-          _to: R[key].to,
-        } as any);
-        if (!error) setData((d) => ({ ...d, [key]: (rows as unknown as Row[]) ?? [] }));
-      }
+      if (data[cacheKey]) { setLoading(false); return; }
+      setLoading(true);
+      const { data: rows, error } = await supabase.rpc("gamification_leaderboard" as any, {
+        _from: range.from,
+        _to: range.to,
+      } as any);
+      if (!alive) return;
+      if (!error) setData((d) => ({ ...d, [cacheKey]: (rows as unknown as Row[]) ?? [] }));
       setLoading(false);
     })();
-  }, [R]);
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cacheKey]);
 
-  const all = data[scope] ?? [];
+  const all = data[cacheKey] ?? [];
   const positions = Array.from(new Set(all.map((r) => r.position).filter(Boolean) as string[])).sort();
   const rows = positionFilter === "all" ? all : all.filter((r) => r.position === positionFilter);
   const maxPoints = all[0]?.points || 1;
