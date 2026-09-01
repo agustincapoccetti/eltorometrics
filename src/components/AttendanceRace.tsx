@@ -161,6 +161,24 @@ export function AttendanceRace({ userId }: { userId: string }) {
           ))}
         </div>
 
+        {scope === "mes" && (
+          <div className="flex gap-1 overflow-x-auto border-b border-border p-1">
+            {MONTHS.map((m, i) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMonth(i)}
+                disabled={i > now.getMonth()}
+                className={`shrink-0 px-2 py-1 text-[11px] uppercase tracking-wide border border-black ${
+                  month === i ? "bg-black text-white" : "hover:bg-accent disabled:opacity-30 disabled:hover:bg-transparent"
+                }`}
+              >
+                {m.slice(0, 3)}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <Trophy className="h-5 w-5 mt-0.5 shrink-0" />
