@@ -48,22 +48,42 @@ export const Route = createFileRoute("/atleta/biblioteca")({
 
 function AthleteLibrary() {
   const [items, setItems] = useState<LibraryItem[]>([]);
+  const [folders, setFolders] = useState<LibraryFolder[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [folderFilter, setFolderFilter] = useState<string>("all");
   const [q, setQ] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "az" | "za">("recent");
   const [preview, setPreview] = useState<LibraryItem | null>(null);
 
   useEffect(() => {
-    supabase
-      .from("library_items")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setItems(data ?? []));
+    (async () => {
+      const [{ data: its }, { data: fs }] = await Promise.all([
+        supabase.from("library_items").select("*").order("created_at", { ascending: false }),
+        supabase.from("library_folders").select("id,name,category").order("name"),
+      ]);
+      setItems(its ?? []);
+      setFolders(fs ?? []);
+    })();
   }, []);
 
+  const visibleFolders = folders.filter((f) => filter === "all" || f.category === filter);
   const term = q.trim().toLowerCase();
-  const filtered = items
-    .filter((i) => (filter === "all" ? true : i.category === filter))
+  const byCategory = items.filter((i) => (filter === "all" ? true : i.category === filter));
+  const folderCounts: Record<string, number> = {
+    all: byCategory.length,
+    none: byCategory.filter((i) => !i.folder_id).length,
+  };
+  for (const f of visibleFolders)
+    folderCounts[f.id] = byCategory.filter((i) => i.folder_id === f.id).length;
+
+  const filtered = byCategory
+    .filter((i) =>
+      folderFilter === "all"
+        ? true
+        : folderFilter === "none"
+          ? !i.folder_id
+          : i.folder_id === folderFilter,
+    )
     .filter((i) =>
       !term
         ? true
