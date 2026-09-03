@@ -401,12 +401,40 @@ export type Database = {
         }
         Relationships: []
       }
+      library_folders: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       library_items: {
         Row: {
           category: string
           created_at: string
           created_by: string
           description: string | null
+          folder_id: string | null
           id: string
           thumbnail_url: string | null
           title: string
@@ -418,6 +446,7 @@ export type Database = {
           created_at?: string
           created_by: string
           description?: string | null
+          folder_id?: string | null
           id?: string
           thumbnail_url?: string | null
           title: string
@@ -429,13 +458,22 @@ export type Database = {
           created_at?: string
           created_by?: string
           description?: string | null
+          folder_id?: string | null
           id?: string
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "library_items_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "library_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       match_participations: {
         Row: {
