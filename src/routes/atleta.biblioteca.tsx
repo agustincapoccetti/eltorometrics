@@ -26,6 +26,8 @@ import {
   fileNameOf,
 } from "@/lib/library";
 
+import { FolderChips, type LibraryFolder } from "@/components/LibraryFolders";
+
 type LibraryItem = {
   id: string;
   title: string;
@@ -33,6 +35,7 @@ type LibraryItem = {
   url: string;
   category: string;
   thumbnail_url?: string | null;
+  folder_id?: string | null;
 };
 
 export const Route = createFileRoute("/atleta/biblioteca")({
