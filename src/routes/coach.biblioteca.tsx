@@ -23,8 +23,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, Pencil, ExternalLink, PlayCircle, Search } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  ExternalLink,
+  PlayCircle,
+  Search,
+  FolderPlus,
+} from "lucide-react";
 import { toast } from "sonner";
+import { FolderChips, type LibraryFolder } from "@/components/LibraryFolders";
 import {
   LIBRARY_CATEGORIES,
   categoryLabel,
@@ -41,7 +50,6 @@ import {
   FILE_URL_PREFIX,
 } from "@/lib/library";
 
-
 type LibraryItem = {
   id: string;
   title: string;
@@ -49,6 +57,7 @@ type LibraryItem = {
   url: string;
   category: string;
   thumbnail_url?: string | null;
+  folder_id?: string | null;
 };
 
 export const Route = createFileRoute("/coach/biblioteca")({
@@ -62,7 +71,9 @@ export const Route = createFileRoute("/coach/biblioteca")({
 function CoachLibrary() {
   const { user } = useAuth();
   const [items, setItems] = useState<LibraryItem[]>([]);
+  const [folders, setFolders] = useState<LibraryFolder[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [folderFilter, setFolderFilter] = useState<string>("all");
   const [q, setQ] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "az" | "za">("recent");
   const [preview, setPreview] = useState<LibraryItem | null>(null);
@@ -77,14 +88,21 @@ function CoachLibrary() {
     url: "",
     category: "gym",
     thumbnail_url: "",
+    folder_id: "none",
   });
 
+  // Carpetas
+  const [folderOpen, setFolderOpen] = useState(false);
+  const [folderEditing, setFolderEditing] = useState<LibraryFolder | null>(null);
+  const [folderForm, setFolderForm] = useState({ name: "", category: "gym" });
+
   async function load() {
-    const { data } = await supabase
-      .from("library_items")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setItems(data ?? []);
+    const [{ data: its }, { data: fs }] = await Promise.all([
+      supabase.from("library_items").select("*").order("created_at", { ascending: false }),
+      supabase.from("library_folders").select("id,name,category").order("name"),
+    ]);
+    setItems(its ?? []);
+    setFolders(fs ?? []);
   }
   useEffect(() => {
     load();
@@ -94,7 +112,14 @@ function CoachLibrary() {
     setEditing(null);
     setMode("link");
     setFile(null);
-    setForm({ title: "", description: "", url: "", category: "gym", thumbnail_url: "" });
+    setForm({
+      title: "",
+      description: "",
+      url: "",
+      category: filter === "all" ? "gym" : filter,
+      thumbnail_url: "",
+      folder_id: folderFilter !== "all" && folderFilter !== "none" ? folderFilter : "none",
+    });
     setOpen(true);
   }
   function openEdit(it: LibraryItem) {
@@ -107,6 +132,7 @@ function CoachLibrary() {
       url: it.url,
       category: it.category,
       thumbnail_url: it.thumbnail_url ?? "",
+      folder_id: it.folder_id ?? "none",
     });
     setOpen(true);
   }
@@ -141,8 +167,11 @@ function CoachLibrary() {
       }
 
       const payload = {
-        ...form,
+        title: form.title,
+        description: form.description,
+        category: form.category,
         url,
+        folder_id: form.folder_id === "none" ? null : form.folder_id,
         thumbnail_url: mode === "file" ? form.thumbnail_url || null : form.thumbnail_url,
       };
       const { error } = editing
@@ -171,10 +200,74 @@ function CoachLibrary() {
     load();
   }
 
+  /* ---------- Carpetas ---------- */
+  function openNewFolder() {
+    setFolderEditing(null);
+    setFolderForm({ name: "", category: filter === "all" ? "gym" : filter });
+    setFolderOpen(true);
+  }
+  function openEditFolder(f: LibraryFolder) {
+    setFolderEditing(f);
+    setFolderForm({ name: f.name, category: f.category });
+    setFolderOpen(true);
+  }
+  async function saveFolder() {
+    const name = folderForm.name.trim();
+    if (!name) {
+      toast.error("Ponle un nombre a la carpeta");
+      return;
+    }
+    const { error } = folderEditing
+      ? await supabase
+          .from("library_folders")
+          .update({ name, category: folderForm.category })
+          .eq("id", folderEditing.id)
+      : await supabase
+          .from("library_folders")
+          .insert({ name, category: folderForm.category, created_by: user!.id });
+    if (error) {
+      toast.error(
+        error.code === "23505" || error.message.includes("duplicate")
+          ? "Ya existe una carpeta con ese nombre en esa categoría"
+          : error.message,
+      );
+      return;
+    }
+    toast.success(folderEditing ? "Carpeta actualizada" : "Carpeta creada");
+    setFolderOpen(false);
+    load();
+  }
+  async function removeFolder(f: LibraryFolder) {
+    if (!confirm(`¿Eliminar la carpeta "${f.name}"? Los recursos quedarán sin carpeta.`)) return;
+    const { error } = await supabase.from("library_folders").delete().eq("id", f.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (folderFilter === f.id) setFolderFilter("all");
+    load();
+  }
+
+  const visibleFolders = folders.filter((f) => filter === "all" || f.category === filter);
+  const activeFolder = folders.find((f) => f.id === folderFilter) ?? null;
 
   const term = q.trim().toLowerCase();
-  const filtered = items
-    .filter((i) => (filter === "all" ? true : i.category === filter))
+  const byCategory = items.filter((i) => (filter === "all" ? true : i.category === filter));
+  const folderCounts: Record<string, number> = {
+    all: byCategory.length,
+    none: byCategory.filter((i) => !i.folder_id).length,
+  };
+  for (const f of visibleFolders)
+    folderCounts[f.id] = byCategory.filter((i) => i.folder_id === f.id).length;
+
+  const filtered = byCategory
+    .filter((i) =>
+      folderFilter === "all"
+        ? true
+        : folderFilter === "none"
+          ? !i.folder_id
+          : i.folder_id === folderFilter,
+    )
     .filter((i) =>
       !term ? true : `${i.title} ${i.description ?? ""}`.toLowerCase().includes(term),
     )
@@ -191,10 +284,16 @@ function CoachLibrary() {
         <p className="text-sm text-muted-foreground">
           Comparte videos y enlaces para que los atletas consulten.
         </p>
-        <Button onClick={openNew}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo recurso
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={openNewFolder}>
+            <FolderPlus className="h-4 w-4 mr-2" />
+            Nueva carpeta
+          </Button>
+          <Button onClick={openNew}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo recurso
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 mb-3">
@@ -219,8 +318,7 @@ function CoachLibrary() {
         </Select>
       </div>
 
-
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
           Categoría:
         </span>
@@ -228,7 +326,10 @@ function CoachLibrary() {
           <button
             key={c.v}
             type="button"
-            onClick={() => setFilter(c.v)}
+            onClick={() => {
+              setFilter(c.v);
+              setFolderFilter("all");
+            }}
             className={`px-3 py-1.5 text-xs uppercase tracking-wider border ${filter === c.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}
           >
             <span className="mr-1">{c.icon}</span>
@@ -237,21 +338,51 @@ function CoachLibrary() {
         ))}
       </div>
 
+      <div className="flex items-center gap-2 flex-wrap">
+        <FolderChips
+          folders={visibleFolders}
+          value={folderFilter}
+          onChange={setFolderFilter}
+          counts={folderCounts}
+        />
+        {activeFolder && (
+          <div className="flex gap-1 mb-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              title="Renombrar carpeta"
+              onClick={() => openEditFolder(activeFolder)}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              title="Eliminar carpeta"
+              onClick={() => removeFolder(activeFolder)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        )}
+      </div>
+
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No hay recursos en esta categoría.</p>
+        <p className="text-sm text-muted-foreground">No hay recursos en esta carpeta.</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {filtered.map((it) => {
             const thumb = getThumbnail(it);
             const embed = getEmbedUrl(it.url);
+            const folderName = folders.find((f) => f.id === it.folder_id)?.name;
             return (
               <div key={it.id} className="border border-border flex flex-col overflow-hidden">
                 {thumb ? (
                   <button
                     type="button"
-                    onClick={() =>
-                      embed ? setPreview(it) : openResource(it)
-                    }
+                    onClick={() => (embed ? setPreview(it) : openResource(it))}
                     className="relative block aspect-video bg-muted overflow-hidden group text-left"
                   >
                     <img
@@ -268,9 +399,7 @@ function CoachLibrary() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() =>
-                      embed ? setPreview(it) : openResource(it)
-                    }
+                    onClick={() => (embed ? setPreview(it) : openResource(it))}
                     className="aspect-video bg-muted flex flex-col items-center justify-center gap-1 text-2xl"
                   >
                     {isFileResource(it.url) ? fileIcon(it.url) : categoryIcon(it.category)}
@@ -285,6 +414,7 @@ function CoachLibrary() {
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       {categoryIcon(it.category)} {categoryLabel(it.category)}
+                      {folderName && ` · 📁 ${folderName}`}
                     </span>
                     <div className="flex gap-1">
                       <Button
@@ -311,9 +441,7 @@ function CoachLibrary() {
                   )}
                   <button
                     type="button"
-                    onClick={() =>
-                      embed ? setPreview(it) : openResource(it)
-                    }
+                    onClick={() => (embed ? setPreview(it) : openResource(it))}
                     className="text-xs text-primary mt-2 inline-flex items-center gap-1 hover:underline text-left"
                   >
                     <ExternalLink className="h-3 w-3" />
@@ -343,7 +471,7 @@ function CoachLibrary() {
               <Label>Categoría</Label>
               <Select
                 value={form.category}
-                onValueChange={(v) => setForm({ ...form, category: v })}
+                onValueChange={(v) => setForm({ ...form, category: v, folder_id: "none" })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -354,6 +482,27 @@ function CoachLibrary() {
                       {c.icon} {c.l}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Carpeta</Label>
+              <Select
+                value={form.folder_id}
+                onValueChange={(v) => setForm({ ...form, folder_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sin carpeta</SelectItem>
+                  {folders
+                    .filter((f) => f.category === form.category)
+                    .map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        📁 {f.name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -445,10 +594,52 @@ function CoachLibrary() {
             <Button onClick={save} disabled={saving}>
               {saving ? "Guardando…" : editing ? "Actualizar" : "Guardar"}
             </Button>
-
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={folderOpen} onOpenChange={setFolderOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{folderEditing ? "Editar carpeta" : "Nueva carpeta"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nombre</Label>
+              <Input
+                value={folderForm.name}
+                onChange={(e) => setFolderForm({ ...folderForm, name: e.target.value })}
+                placeholder="Ej. Tren inferior, Scrum, Movilidad…"
+              />
+            </div>
+            <div>
+              <Label>Categoría</Label>
+              <Select
+                value={folderForm.category}
+                onValueChange={(v) => setFolderForm({ ...folderForm, category: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LIBRARY_CATEGORIES.map((c) => (
+                    <SelectItem key={c.v} value={c.v}>
+                      {c.icon} {c.l}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFolderOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveFolder}>{folderEditing ? "Actualizar" : "Crear"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!preview} onOpenChange={(v) => !v && setPreview(null)}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden">
           <DialogHeader className="px-4 pt-4">
