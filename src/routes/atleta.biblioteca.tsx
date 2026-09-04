@@ -124,7 +124,7 @@ function AthleteLibrary() {
         </Select>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1">
           Categoría:
         </span>
@@ -132,7 +132,10 @@ function AthleteLibrary() {
           <button
             key={c.v}
             type="button"
-            onClick={() => setFilter(c.v)}
+            onClick={() => {
+              setFilter(c.v);
+              setFolderFilter("all");
+            }}
             className={`px-3 py-1.5 text-xs uppercase tracking-wider border ${filter === c.v ? "bg-primary text-primary-foreground border-primary" : "border-border hover:bg-accent"}`}
           >
             <span className="mr-1">{c.icon}</span>
@@ -140,6 +143,17 @@ function AthleteLibrary() {
           </button>
         ))}
       </div>
+
+      {visibleFolders.length > 0 && (
+        <FolderChips
+          folders={visibleFolders}
+          value={folderFilter}
+          onChange={setFolderFilter}
+          counts={folderCounts}
+        />
+      )}
+
+
 
 
       {filtered.length === 0 ? (
@@ -149,6 +163,7 @@ function AthleteLibrary() {
           {filtered.map((it) => {
             const thumb = getThumbnail(it);
             const embed = getEmbedUrl(it.url);
+            const folderName = folders.find((f) => f.id === it.folder_id)?.name;
             return (
               <div
                 key={it.id}
@@ -192,6 +207,7 @@ function AthleteLibrary() {
                 <div className="p-3">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     {categoryIcon(it.category)} {categoryLabel(it.category)}
+                    {folderName && ` · 📁 ${folderName}`}
                   </span>
                   <p className="text-xs font-medium mt-1 leading-snug">{it.title}</p>
                   {it.description && (
