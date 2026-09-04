@@ -430,6 +430,7 @@ function CoachPlayers() {
             className="h-9 pl-7 text-xs"
           />
         </div>
+        <AttendanceExport athletes={athletes} />
         <div className="sm:ml-auto flex items-center gap-1">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-1 hidden sm:inline">Presentismo del día</span>
           <Button size="sm" variant="outline" onClick={() => shiftDate(-1)}><ChevronLeft className="h-3 w-3" /></Button>
