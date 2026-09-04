@@ -207,6 +207,7 @@ function AthleteLibrary() {
                 <div className="p-3">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     {categoryIcon(it.category)} {categoryLabel(it.category)}
+                    {folderName && ` · 📁 ${folderName}`}
                   </span>
                   <p className="text-xs font-medium mt-1 leading-snug">{it.title}</p>
                   {it.description && (
