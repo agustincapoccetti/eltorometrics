@@ -163,6 +163,7 @@ function AthleteLibrary() {
           {filtered.map((it) => {
             const thumb = getThumbnail(it);
             const embed = getEmbedUrl(it.url);
+            const folderName = folders.find((f) => f.id === it.folder_id)?.name;
             return (
               <div
                 key={it.id}
