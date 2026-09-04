@@ -37,6 +37,281 @@ function lastNameOf(p: any) {
   return (p.last_name?.trim() || p.full_name?.split(" ").slice(-1)[0] || "").toLowerCase();
 }
 
+const MONTH_LABELS = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+
+function displayName(p: any) {
+  return (p.last_name ? p.last_name + ", " : "") + (p.full_name ?? "");
+}
+
+function downloadCsv(filename: string, rows: (string | number)[][]) {
+  const csv = rows
+    .map((r) =>
+      r
+        .map((c) => {
+          const s = c == null ? "" : String(c);
+          return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        })
+        .join(";"),
+    )
+    .join("\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Exportación de presentismo con rango de fechas, totales y desglose mensual. */
+function AttendanceExport({ athletes }: { athletes: any[] }) {
+  const [open, setOpen] = useState(false);
+  const [from, setFrom] = useState(isoDate(startOfYear()));
+  const [to, setTo] = useState(isoDate(new Date()));
+  const [positionFilter, setPositionFilter] = useState("all");
+  const [busy, setBusy] = useState(false);
+
+  const positions = useMemo(
+    () => Array.from(new Set(athletes.map((a) => a.position?.trim() || "Sin puesto"))).sort(),
+    [athletes],
+  );
+
+  async function build() {
+    if (from > to) {
+      toast.error("La fecha inicial debe ser anterior a la final");
+      return null;
+    }
+    const people = athletes.filter(
+      (a) => positionFilter === "all" || (a.position?.trim() || "Sin puesto") === positionFilter,
+    );
+    if (!people.length) {
+      toast.error("No hay jugadores para ese filtro");
+      return null;
+    }
+    const { data, error } = await supabase
+      .from("attendance")
+      .select("user_id, attendance_date, present, source")
+      .gte("attendance_date", from)
+      .lte("attendance_date", to);
+    if (error) {
+      toast.error(error.message);
+      return null;
+    }
+    const rows = data ?? [];
+
+    // Meses presentes en el rango
+    const months: string[] = [];
+    const start = new Date(from + "T12:00");
+    const end = new Date(to + "T12:00");
+    const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (cur <= end) {
+      months.push(`${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}`);
+      cur.setMonth(cur.getMonth() + 1);
+    }
+
+    // Días de sesión (cualquier registro de asistencia en la fecha)
+    const sessionDays = new Set(rows.map((r: any) => r.attendance_date));
+    const sessionsByMonth: Record<string, number> = {};
+    sessionDays.forEach((d) => {
+      const k = String(d).slice(0, 7);
+      sessionsByMonth[k] = (sessionsByMonth[k] ?? 0) + 1;
+    });
+
+    const per: Record<string, { total: number; auto: number; byMonth: Record<string, number> }> = {};
+    rows.forEach((r: any) => {
+      if (!r.present) return;
+      const e = (per[r.user_id] ??= { total: 0, auto: 0, byMonth: {} });
+      e.total++;
+      if (r.source === "rpe") e.auto++;
+      const k = String(r.attendance_date).slice(0, 7);
+      e.byMonth[k] = (e.byMonth[k] ?? 0) + 1;
+    });
+
+    const monthHead = months.map((m) => {
+      const [y, mm] = m.split("-");
+      return `${MONTH_LABELS[Number(mm) - 1]} ${y!.slice(2)}`;
+    });
+    const head = [
+      "Jugador",
+      "Puesto",
+      ...monthHead,
+      "Total presentes",
+      "Sesiones",
+      "% Asistencia",
+      "Auto (RPE)",
+    ];
+    const totalSessions = sessionDays.size;
+
+    const body = people
+      .slice()
+      .sort((a, b) => lastNameOf(a).localeCompare(lastNameOf(b)))
+      .map((p) => {
+        const e = per[p.id] ?? { total: 0, auto: 0, byMonth: {} };
+        const pct = totalSessions ? Math.round((e.total / totalSessions) * 100) : 0;
+        return [
+          displayName(p),
+          p.position?.trim() || "Sin puesto",
+          ...months.map((m) => e.byMonth[m] ?? 0),
+          e.total,
+          totalSessions,
+          `${pct}%`,
+          e.auto,
+        ];
+      });
+
+    const monthsSummary = months.map((m) => {
+      const [y, mm] = m.split("-");
+      const sessions = sessionsByMonth[m] ?? 0;
+      const present = people.reduce((acc, p) => acc + (per[p.id]?.byMonth[m] ?? 0), 0);
+      const expected = sessions * people.length;
+      return [
+        `${MONTH_LABELS[Number(mm) - 1]} ${y}`,
+        sessions,
+        present,
+        expected ? `${Math.round((present / expected) * 100)}%` : "—",
+      ];
+    });
+
+    const teamPresent = body.reduce((acc, r) => acc + Number(r[r.length - 4]), 0);
+    return { head, body, months, monthsSummary, totalSessions, people, teamPresent };
+  }
+
+  async function doCsv() {
+    setBusy(true);
+    try {
+      const d = await build();
+      if (!d) return;
+      const rows: (string | number)[][] = [
+        [`Presentismo El Toro Rugby — ${from} a ${to}`],
+        [],
+        d.head,
+        ...d.body,
+        [],
+        ["Resumen por mes", "Sesiones", "Presentes", "% Asistencia"],
+        ...d.monthsSummary,
+        [],
+        ["Sesiones totales", d.totalSessions],
+        ["Jugadores", d.people.length],
+        ["Presentes totales", d.teamPresent],
+      ];
+      downloadCsv(`presentismo_${from}_${to}.csv`, rows);
+      setOpen(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doPdf() {
+    setBusy(true);
+    try {
+      const d = await build();
+      if (!d) return;
+      await exportPdf({
+        title: "Presentismo",
+        subtitle: `Del ${from} al ${to} · ${d.people.length} jugadores · ${d.totalSessions} sesiones · ${d.teamPresent} presentes`,
+        tables: [
+          { title: "Detalle por jugador", head: d.head, rows: d.body },
+          {
+            title: "Resumen por mes",
+            head: ["Mes", "Sesiones", "Presentes", "% Asistencia"],
+            rows: d.monthsSummary,
+          },
+        ],
+        filename: `presentismo_${from}_${to}.pdf`,
+      });
+      setOpen(false);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <Download className="h-3.5 w-3.5 mr-2" />
+        Exportar presentismo
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Exportar presentismo</DialogTitle>
+            <DialogDescription className="text-xs">
+              Elige el rango de fechas. El archivo incluye presentes por mes, total por jugador,
+              sesiones del período, % de asistencia y resumen mensual del plantel.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Desde</Label>
+                <Input
+                  type="date"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Hasta</Label>
+                <Input
+                  type="date"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs">Puesto</Label>
+              <Select value={positionFilter} onValueChange={setPositionFilter}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los puestos</SelectItem>
+                  {positions.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { l: "Este mes", f: isoDate(startOfMonth()), t: isoDate(new Date()) },
+                  { l: "Esta semana", f: isoDate(startOfWeek()), t: isoDate(new Date()) },
+                  { l: "Temporada", f: isoDate(startOfYear()), t: isoDate(new Date()) },
+                ] as const
+              ).map((p) => (
+                <button
+                  key={p.l}
+                  type="button"
+                  onClick={() => {
+                    setFrom(p.f);
+                    setTo(p.t);
+                  }}
+                  className="px-2.5 py-1 text-[10px] uppercase tracking-wider border border-border hover:bg-accent"
+                >
+                  {p.l}
+                </button>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={doCsv} disabled={busy}>
+              CSV
+            </Button>
+            <Button onClick={doPdf} disabled={busy}>
+              {busy ? "Generando…" : "PDF"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 function CoachPlayers() {
   const { user } = useAuth();
   const [athletes, setAthletes] = useState<any[]>([]);
