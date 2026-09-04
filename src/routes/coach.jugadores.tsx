@@ -10,9 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Download } from "lucide-react";
 import { useSort, sortIndicator } from "@/lib/sort";
 import { useStickyState } from "@/lib/sticky-state";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { exportPdf } from "@/lib/pdf-export";
 
 export const Route = createFileRoute("/coach/jugadores")({
   component: () => <Protected requireRole="coach"><CoachPlayers /></Protected>,
