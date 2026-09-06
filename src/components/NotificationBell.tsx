@@ -21,22 +21,24 @@ export function NotificationBell() {
 
   async function load() {
     if (!user) return;
-    const { data } = await supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30);
+    const { data } = await supabase
+      .from("notifications")
+      .select("id,title,body,link,kind,read,created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20);
     setList((data ?? []) as Notif[]);
   }
 
   useEffect(() => {
     if (!user) return;
+    // Sin conexión en tiempo real: consultamos al entrar y cada 5 minutos
+    // para reducir el consumo del backend.
     load();
     ensureServiceWorker();
     setPerm(getPushPermission());
-    const ch = supabase.channel(`notif-${user.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, (payload: any) => {
-        setList((cur) => [payload.new as Notif, ...cur]);
-        tryShowPush(payload.new.title, payload.new.body ?? undefined, payload.new.link ?? undefined);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    const iv = window.setInterval(load, 5 * 60 * 1000);
+    return () => { window.clearInterval(iv); };
   }, [user]);
 
   async function enablePush() {
@@ -70,7 +72,7 @@ export function NotificationBell() {
   if (!user) return null;
 
   return (
-    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) markAllRead(); }}>
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) { load(); markAllRead(); } }}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-4 w-4" />
