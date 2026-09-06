@@ -72,7 +72,7 @@ export function NotificationBell() {
   if (!user) return null;
 
   return (
-    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) markAllRead(); }}>
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (o) { load(); markAllRead(); } }}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="relative">
           <Bell className="h-4 w-4" />
