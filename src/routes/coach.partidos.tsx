@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, ChevronRight } from "lucide-react";
+import { MatchesExport } from "@/components/MatchesExport";
 
 export const Route = createFileRoute("/coach/partidos")({
   component: () => <Protected requireRole="coach"><CoachMatches /></Protected>,
@@ -27,7 +28,8 @@ function CoachMatches() {
   const [matches, setMatches] = useState<any[]>([]);
   const [athletes, setAthletes] = useState<any[]>([]);
   const [openNew, setOpenNew] = useState(false);
-  const [newMatch, setNewMatch] = useState({ match_date: new Date().toISOString().slice(0,10), opponent: "", location: "", notes: "" });
+  const emptyMatch = () => ({ match_date: new Date().toISOString().slice(0,10), opponent: "", location: "", notes: "", tournament: "regional" as "dhb" | "regional" });
+  const [newMatch, setNewMatch] = useState(emptyMatch);
   const [selected, setSelected] = useState<any | null>(null);
   const [participations, setParticipations] = useState<Record<string, any>>({});
 
@@ -51,13 +53,22 @@ function CoachMatches() {
     setParticipations(map);
   }
 
+  async function setTournament(t: "dhb" | "regional") {
+    if (!selected) return;
+    const { error } = await supabase.from("matches").update({ tournament: t } as any).eq("id", selected.id);
+    if (error) { toast.error(error.message); return; }
+    const upd = { ...selected, tournament: t };
+    setSelected(upd);
+    setMatches((cur) => cur.map((m) => (m.id === upd.id ? upd : m)));
+  }
+
   async function createMatch() {
     if (!newMatch.match_date) { toast.error("Falta fecha"); return; }
-    const { data, error } = await supabase.from("matches").insert({ ...newMatch, created_by: user!.id }).select().single();
+    const { data, error } = await supabase.from("matches").insert({ ...newMatch, created_by: user!.id } as any).select().single();
     if (error) { toast.error(error.message); return; }
     toast.success("Partido creado");
     setOpenNew(false);
-    setNewMatch({ match_date: new Date().toISOString().slice(0,10), opponent: "", location: "", notes: "" });
+    setNewMatch(emptyMatch());
     setMatches((cur) => [data, ...cur]);
     openMatch(data);
   }
@@ -101,7 +112,7 @@ function CoachMatches() {
       <SubTabs tabs={PLANIFICACION_TABS} />
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-muted-foreground">Convocá jugadores, registrá minutos jugados y lesiones por partido.</p>
-        <Button onClick={() => setOpenNew(true)}><Plus className="h-4 w-4 mr-2" />Nuevo partido</Button>
+        <div className="flex gap-2"><MatchesExport /><Button onClick={() => setOpenNew(true)}><Plus className="h-4 w-4 mr-2" />Nuevo partido</Button></div>
       </div>
 
       <div className="grid lg:grid-cols-[320px_1fr] gap-4">
@@ -112,7 +123,7 @@ function CoachMatches() {
             <button key={m.id} onClick={() => openMatch(m)} className={`w-full text-left px-3 py-2 border-b border-border last:border-b-0 hover:bg-accent flex items-center gap-2 ${selected?.id === m.id ? "bg-accent" : ""}`}>
               <div className="flex-1 text-xs">
                 <p className="font-medium">{m.opponent || "Sin rival"}</p>
-                <p className="text-[10px] text-muted-foreground">{m.match_date}{m.location ? " · " + m.location : ""}</p>
+                <p className="text-[10px] text-muted-foreground">{m.match_date}{m.location ? " · " + m.location : ""} · {m.tournament === "dhb" ? "DHB" : "Regional"}</p>
               </div>
               <ChevronRight className="h-3 w-3 text-muted-foreground" />
             </button>
@@ -128,6 +139,14 @@ function CoachMatches() {
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Partido</p>
                   <h2 className="text-xl">{selected.opponent || "Sin rival"}</h2>
                   <p className="text-xs text-muted-foreground">{selected.match_date}{selected.location ? " · " + selected.location : ""}</p>
+                  <div className="flex gap-3 mt-2">
+                    {(["dhb", "regional"] as const).map((t) => (
+                      <label key={t} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                        <Checkbox checked={selected.tournament === t} onCheckedChange={() => setTournament(t)} />
+                        {t === "dhb" ? "DHB" : "Regional"}
+                      </label>
+                    ))}
+                  </div>
                   {selected.notes && <p className="text-xs mt-1">{selected.notes}</p>}
                 </div>
                 <Button size="sm" variant="outline" onClick={() => deleteMatch(selected.id)}><Trash2 className="h-3 w-3" /></Button>
@@ -180,6 +199,16 @@ function CoachMatches() {
           <DialogHeader><DialogTitle>Nuevo partido</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div><Label>Fecha</Label><Input type="date" value={newMatch.match_date} onChange={(e) => setNewMatch({ ...newMatch, match_date: e.target.value })} /></div>
+            <div><Label>Torneo</Label>
+              <div className="flex gap-4 mt-1">
+                {(["dhb", "regional"] as const).map((t) => (
+                  <label key={t} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox checked={newMatch.tournament === t} onCheckedChange={() => setNewMatch({ ...newMatch, tournament: t })} />
+                    {t === "dhb" ? "DHB" : "Regional"}
+                  </label>
+                ))}
+              </div>
+            </div>
             <div><Label>Rival</Label><Input value={newMatch.opponent} onChange={(e) => setNewMatch({ ...newMatch, opponent: e.target.value })} placeholder="Ej: Hindú" /></div>
             <div><Label>Lugar</Label><Input value={newMatch.location} onChange={(e) => setNewMatch({ ...newMatch, location: e.target.value })} placeholder="Local / Visitante / Cancha" /></div>
             <div><Label>Notas</Label><Textarea value={newMatch.notes} onChange={(e) => setNewMatch({ ...newMatch, notes: e.target.value })} /></div>
