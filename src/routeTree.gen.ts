@@ -9,56 +9,46 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as RecuperarRouteImport } from './routes/recuperar'
-import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
-import { Route as AtletaBibliotecaRouteImport } from './routes/atleta.biblioteca'
-import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
-import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
-import { Route as AtletaGymRouteImport } from './routes/atleta.gym'
-import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
-import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
-import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
-import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
-import { Route as AtletaVotacionRouteImport } from './routes/atleta.votacion'
-import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
+import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as RecuperarRouteImport } from './routes/recuperar'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachIndexRouteImport } from './routes/coach.index'
-import { Route as CoachBibliotecaRouteImport } from './routes/coach.biblioteca'
-import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
-import { Route as CoachCoachesRouteImport } from './routes/coach.coaches'
-import { Route as CoachCuestionariosRouteImport } from './routes/coach.cuestionarios'
-import { Route as CoachDisponibilidadRouteImport } from './routes/coach.disponibilidad'
-import { Route as CoachEvaluacionesRouteImport } from './routes/coach.evaluaciones'
-import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
-import { Route as CoachGymRouteImport } from './routes/coach.gym'
-import { Route as CoachJugadoresRouteImport } from './routes/coach.jugadores'
-import { Route as CoachNotificacionesRouteImport } from './routes/coach.notificaciones'
-import { Route as CoachPartidosRouteImport } from './routes/coach.partidos'
-import { Route as CoachPlanificacionRouteImport } from './routes/coach.planificacion'
-import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
-import { Route as CoachRespuestasRouteImport } from './routes/coach.respuestas'
-import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
-import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
+import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
 import { Route as CoachVotacionRouteImport } from './routes/coach.votacion'
+import { Route as CoachUsuariosRouteImport } from './routes/coach.usuarios'
+import { Route as CoachSemaforoRouteImport } from './routes/coach.semaforo'
+import { Route as CoachRespuestasRouteImport } from './routes/coach.respuestas'
+import { Route as CoachRecuperacionRouteImport } from './routes/coach.recuperacion'
+import { Route as CoachPlanificacionRouteImport } from './routes/coach.planificacion'
+import { Route as CoachPartidosRouteImport } from './routes/coach.partidos'
+import { Route as CoachNotificacionesRouteImport } from './routes/coach.notificaciones'
+import { Route as CoachJugadoresRouteImport } from './routes/coach.jugadores'
+import { Route as CoachGymRouteImport } from './routes/coach.gym'
+import { Route as CoachFisioRouteImport } from './routes/coach.fisio'
+import { Route as CoachEvaluacionesRouteImport } from './routes/coach.evaluaciones'
+import { Route as CoachDisponibilidadRouteImport } from './routes/coach.disponibilidad'
+import { Route as CoachCuestionariosRouteImport } from './routes/coach.cuestionarios'
+import { Route as CoachCoachesRouteImport } from './routes/coach.coaches'
+import { Route as CoachCalendarioRouteImport } from './routes/coach.calendario'
+import { Route as CoachBibliotecaRouteImport } from './routes/coach.biblioteca'
+import { Route as AtletaWellnessRouteImport } from './routes/atleta.wellness'
+import { Route as AtletaVotacionRouteImport } from './routes/atleta.votacion'
+import { Route as AtletaRpeRouteImport } from './routes/atleta.rpe'
+import { Route as AtletaRecuperacionRouteImport } from './routes/atleta.recuperacion'
+import { Route as AtletaPerfilRouteImport } from './routes/atleta.perfil'
+import { Route as AtletaOnboardingRouteImport } from './routes/atleta.onboarding'
+import { Route as AtletaGymRouteImport } from './routes/atleta.gym'
+import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
+import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
+import { Route as AtletaBibliotecaRouteImport } from './routes/atleta.biblioteca'
 import { Route as CoachAtletaIdRouteImport } from './routes/coach.atleta.$id'
 import { Route as ApiPublicHooksPushRemindersRouteImport } from './routes/api/public/hooks/push-reminders'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecuperarRoute = RecuperarRouteImport.update({
-  id: '/recuperar',
-  path: '/recuperar',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegistroRoute = RegistroRouteImport.update({
@@ -66,64 +56,19 @@ const RegistroRoute = RegistroRouteImport.update({
   path: '/registro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const RecuperarRoute = RecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AtletaIndexRoute = AtletaIndexRouteImport.update({
-  id: '/atleta/',
-  path: '/atleta/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AtletaBibliotecaRoute = AtletaBibliotecaRouteImport.update({
-  id: '/atleta/biblioteca',
-  path: '/atleta/biblioteca',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaCalendarioRoute = AtletaCalendarioRouteImport.update({
-  id: '/atleta/calendario',
-  path: '/atleta/calendario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaFisioRoute = AtletaFisioRouteImport.update({
-  id: '/atleta/fisio',
-  path: '/atleta/fisio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaGymRoute = AtletaGymRouteImport.update({
-  id: '/atleta/gym',
-  path: '/atleta/gym',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaOnboardingRoute = AtletaOnboardingRouteImport.update({
-  id: '/atleta/onboarding',
-  path: '/atleta/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaPerfilRoute = AtletaPerfilRouteImport.update({
-  id: '/atleta/perfil',
-  path: '/atleta/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaRecuperacionRoute = AtletaRecuperacionRouteImport.update({
-  id: '/atleta/recuperacion',
-  path: '/atleta/recuperacion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaRpeRoute = AtletaRpeRouteImport.update({
-  id: '/atleta/rpe',
-  path: '/atleta/rpe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaVotacionRoute = AtletaVotacionRouteImport.update({
-  id: '/atleta/votacion',
-  path: '/atleta/votacion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
-  id: '/atleta/wellness',
-  path: '/atleta/wellness',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachIndexRoute = CoachIndexRouteImport.update({
@@ -131,79 +76,14 @@ const CoachIndexRoute = CoachIndexRouteImport.update({
   path: '/coach/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CoachBibliotecaRoute = CoachBibliotecaRouteImport.update({
-  id: '/coach/biblioteca',
-  path: '/coach/biblioteca',
+const AtletaIndexRoute = AtletaIndexRouteImport.update({
+  id: '/atleta/',
+  path: '/atleta/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CoachCalendarioRoute = CoachCalendarioRouteImport.update({
-  id: '/coach/calendario',
-  path: '/coach/calendario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachCoachesRoute = CoachCoachesRouteImport.update({
-  id: '/coach/coaches',
-  path: '/coach/coaches',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachCuestionariosRoute = CoachCuestionariosRouteImport.update({
-  id: '/coach/cuestionarios',
-  path: '/coach/cuestionarios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachDisponibilidadRoute = CoachDisponibilidadRouteImport.update({
-  id: '/coach/disponibilidad',
-  path: '/coach/disponibilidad',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachEvaluacionesRoute = CoachEvaluacionesRouteImport.update({
-  id: '/coach/evaluaciones',
-  path: '/coach/evaluaciones',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachFisioRoute = CoachFisioRouteImport.update({
-  id: '/coach/fisio',
-  path: '/coach/fisio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachGymRoute = CoachGymRouteImport.update({
-  id: '/coach/gym',
-  path: '/coach/gym',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachJugadoresRoute = CoachJugadoresRouteImport.update({
-  id: '/coach/jugadores',
-  path: '/coach/jugadores',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachNotificacionesRoute = CoachNotificacionesRouteImport.update({
-  id: '/coach/notificaciones',
-  path: '/coach/notificaciones',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachPartidosRoute = CoachPartidosRouteImport.update({
-  id: '/coach/partidos',
-  path: '/coach/partidos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachPlanificacionRoute = CoachPlanificacionRouteImport.update({
-  id: '/coach/planificacion',
-  path: '/coach/planificacion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
-  id: '/coach/recuperacion',
-  path: '/coach/recuperacion',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachRespuestasRoute = CoachRespuestasRouteImport.update({
-  id: '/coach/respuestas',
-  path: '/coach/respuestas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoachSemaforoRoute = CoachSemaforoRouteImport.update({
-  id: '/coach/semaforo',
-  path: '/coach/semaforo',
+const CoachVotacionRoute = CoachVotacionRouteImport.update({
+  id: '/coach/votacion',
+  path: '/coach/votacion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachUsuariosRoute = CoachUsuariosRouteImport.update({
@@ -211,9 +91,129 @@ const CoachUsuariosRoute = CoachUsuariosRouteImport.update({
   path: '/coach/usuarios',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CoachVotacionRoute = CoachVotacionRouteImport.update({
-  id: '/coach/votacion',
-  path: '/coach/votacion',
+const CoachSemaforoRoute = CoachSemaforoRouteImport.update({
+  id: '/coach/semaforo',
+  path: '/coach/semaforo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachRespuestasRoute = CoachRespuestasRouteImport.update({
+  id: '/coach/respuestas',
+  path: '/coach/respuestas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachRecuperacionRoute = CoachRecuperacionRouteImport.update({
+  id: '/coach/recuperacion',
+  path: '/coach/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachPlanificacionRoute = CoachPlanificacionRouteImport.update({
+  id: '/coach/planificacion',
+  path: '/coach/planificacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachPartidosRoute = CoachPartidosRouteImport.update({
+  id: '/coach/partidos',
+  path: '/coach/partidos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachNotificacionesRoute = CoachNotificacionesRouteImport.update({
+  id: '/coach/notificaciones',
+  path: '/coach/notificaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachJugadoresRoute = CoachJugadoresRouteImport.update({
+  id: '/coach/jugadores',
+  path: '/coach/jugadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachGymRoute = CoachGymRouteImport.update({
+  id: '/coach/gym',
+  path: '/coach/gym',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachFisioRoute = CoachFisioRouteImport.update({
+  id: '/coach/fisio',
+  path: '/coach/fisio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachEvaluacionesRoute = CoachEvaluacionesRouteImport.update({
+  id: '/coach/evaluaciones',
+  path: '/coach/evaluaciones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachDisponibilidadRoute = CoachDisponibilidadRouteImport.update({
+  id: '/coach/disponibilidad',
+  path: '/coach/disponibilidad',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachCuestionariosRoute = CoachCuestionariosRouteImport.update({
+  id: '/coach/cuestionarios',
+  path: '/coach/cuestionarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachCoachesRoute = CoachCoachesRouteImport.update({
+  id: '/coach/coaches',
+  path: '/coach/coaches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachCalendarioRoute = CoachCalendarioRouteImport.update({
+  id: '/coach/calendario',
+  path: '/coach/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachBibliotecaRoute = CoachBibliotecaRouteImport.update({
+  id: '/coach/biblioteca',
+  path: '/coach/biblioteca',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaWellnessRoute = AtletaWellnessRouteImport.update({
+  id: '/atleta/wellness',
+  path: '/atleta/wellness',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaVotacionRoute = AtletaVotacionRouteImport.update({
+  id: '/atleta/votacion',
+  path: '/atleta/votacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaRpeRoute = AtletaRpeRouteImport.update({
+  id: '/atleta/rpe',
+  path: '/atleta/rpe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaRecuperacionRoute = AtletaRecuperacionRouteImport.update({
+  id: '/atleta/recuperacion',
+  path: '/atleta/recuperacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaPerfilRoute = AtletaPerfilRouteImport.update({
+  id: '/atleta/perfil',
+  path: '/atleta/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaOnboardingRoute = AtletaOnboardingRouteImport.update({
+  id: '/atleta/onboarding',
+  path: '/atleta/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaGymRoute = AtletaGymRouteImport.update({
+  id: '/atleta/gym',
+  path: '/atleta/gym',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaFisioRoute = AtletaFisioRouteImport.update({
+  id: '/atleta/fisio',
+  path: '/atleta/fisio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaCalendarioRoute = AtletaCalendarioRouteImport.update({
+  id: '/atleta/calendario',
+  path: '/atleta/calendario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaBibliotecaRoute = AtletaBibliotecaRouteImport.update({
+  id: '/atleta/biblioteca',
+  path: '/atleta/biblioteca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachAtletaIdRoute = CoachAtletaIdRouteImport.update({
@@ -501,25 +501,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recuperar': {
-      id: '/recuperar'
-      path: '/recuperar'
-      fullPath: '/recuperar'
-      preLoaderRoute: typeof RecuperarRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/registro': {
@@ -529,88 +515,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegistroRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/recuperar': {
+      id: '/recuperar'
+      path: '/recuperar'
+      fullPath: '/recuperar'
+      preLoaderRoute: typeof RecuperarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/atleta/': {
-      id: '/atleta/'
-      path: '/atleta'
-      fullPath: '/atleta/'
-      preLoaderRoute: typeof AtletaIndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/atleta/biblioteca': {
-      id: '/atleta/biblioteca'
-      path: '/atleta/biblioteca'
-      fullPath: '/atleta/biblioteca'
-      preLoaderRoute: typeof AtletaBibliotecaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/calendario': {
-      id: '/atleta/calendario'
-      path: '/atleta/calendario'
-      fullPath: '/atleta/calendario'
-      preLoaderRoute: typeof AtletaCalendarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/fisio': {
-      id: '/atleta/fisio'
-      path: '/atleta/fisio'
-      fullPath: '/atleta/fisio'
-      preLoaderRoute: typeof AtletaFisioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/gym': {
-      id: '/atleta/gym'
-      path: '/atleta/gym'
-      fullPath: '/atleta/gym'
-      preLoaderRoute: typeof AtletaGymRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/onboarding': {
-      id: '/atleta/onboarding'
-      path: '/atleta/onboarding'
-      fullPath: '/atleta/onboarding'
-      preLoaderRoute: typeof AtletaOnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/perfil': {
-      id: '/atleta/perfil'
-      path: '/atleta/perfil'
-      fullPath: '/atleta/perfil'
-      preLoaderRoute: typeof AtletaPerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/recuperacion': {
-      id: '/atleta/recuperacion'
-      path: '/atleta/recuperacion'
-      fullPath: '/atleta/recuperacion'
-      preLoaderRoute: typeof AtletaRecuperacionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/rpe': {
-      id: '/atleta/rpe'
-      path: '/atleta/rpe'
-      fullPath: '/atleta/rpe'
-      preLoaderRoute: typeof AtletaRpeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/votacion': {
-      id: '/atleta/votacion'
-      path: '/atleta/votacion'
-      fullPath: '/atleta/votacion'
-      preLoaderRoute: typeof AtletaVotacionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/atleta/wellness': {
-      id: '/atleta/wellness'
-      path: '/atleta/wellness'
-      fullPath: '/atleta/wellness'
-      preLoaderRoute: typeof AtletaWellnessRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/': {
@@ -620,109 +543,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoachIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coach/biblioteca': {
-      id: '/coach/biblioteca'
-      path: '/coach/biblioteca'
-      fullPath: '/coach/biblioteca'
-      preLoaderRoute: typeof CoachBibliotecaRouteImport
+    '/atleta/': {
+      id: '/atleta/'
+      path: '/atleta'
+      fullPath: '/atleta/'
+      preLoaderRoute: typeof AtletaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coach/calendario': {
-      id: '/coach/calendario'
-      path: '/coach/calendario'
-      fullPath: '/coach/calendario'
-      preLoaderRoute: typeof CoachCalendarioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/coaches': {
-      id: '/coach/coaches'
-      path: '/coach/coaches'
-      fullPath: '/coach/coaches'
-      preLoaderRoute: typeof CoachCoachesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/cuestionarios': {
-      id: '/coach/cuestionarios'
-      path: '/coach/cuestionarios'
-      fullPath: '/coach/cuestionarios'
-      preLoaderRoute: typeof CoachCuestionariosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/disponibilidad': {
-      id: '/coach/disponibilidad'
-      path: '/coach/disponibilidad'
-      fullPath: '/coach/disponibilidad'
-      preLoaderRoute: typeof CoachDisponibilidadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/evaluaciones': {
-      id: '/coach/evaluaciones'
-      path: '/coach/evaluaciones'
-      fullPath: '/coach/evaluaciones'
-      preLoaderRoute: typeof CoachEvaluacionesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/fisio': {
-      id: '/coach/fisio'
-      path: '/coach/fisio'
-      fullPath: '/coach/fisio'
-      preLoaderRoute: typeof CoachFisioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/gym': {
-      id: '/coach/gym'
-      path: '/coach/gym'
-      fullPath: '/coach/gym'
-      preLoaderRoute: typeof CoachGymRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/jugadores': {
-      id: '/coach/jugadores'
-      path: '/coach/jugadores'
-      fullPath: '/coach/jugadores'
-      preLoaderRoute: typeof CoachJugadoresRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/notificaciones': {
-      id: '/coach/notificaciones'
-      path: '/coach/notificaciones'
-      fullPath: '/coach/notificaciones'
-      preLoaderRoute: typeof CoachNotificacionesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/partidos': {
-      id: '/coach/partidos'
-      path: '/coach/partidos'
-      fullPath: '/coach/partidos'
-      preLoaderRoute: typeof CoachPartidosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/planificacion': {
-      id: '/coach/planificacion'
-      path: '/coach/planificacion'
-      fullPath: '/coach/planificacion'
-      preLoaderRoute: typeof CoachPlanificacionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/recuperacion': {
-      id: '/coach/recuperacion'
-      path: '/coach/recuperacion'
-      fullPath: '/coach/recuperacion'
-      preLoaderRoute: typeof CoachRecuperacionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/respuestas': {
-      id: '/coach/respuestas'
-      path: '/coach/respuestas'
-      fullPath: '/coach/respuestas'
-      preLoaderRoute: typeof CoachRespuestasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/coach/semaforo': {
-      id: '/coach/semaforo'
-      path: '/coach/semaforo'
-      fullPath: '/coach/semaforo'
-      preLoaderRoute: typeof CoachSemaforoRouteImport
+    '/coach/votacion': {
+      id: '/coach/votacion'
+      path: '/coach/votacion'
+      fullPath: '/coach/votacion'
+      preLoaderRoute: typeof CoachVotacionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/usuarios': {
@@ -732,11 +564,179 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoachUsuariosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coach/votacion': {
-      id: '/coach/votacion'
-      path: '/coach/votacion'
-      fullPath: '/coach/votacion'
-      preLoaderRoute: typeof CoachVotacionRouteImport
+    '/coach/semaforo': {
+      id: '/coach/semaforo'
+      path: '/coach/semaforo'
+      fullPath: '/coach/semaforo'
+      preLoaderRoute: typeof CoachSemaforoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/respuestas': {
+      id: '/coach/respuestas'
+      path: '/coach/respuestas'
+      fullPath: '/coach/respuestas'
+      preLoaderRoute: typeof CoachRespuestasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/recuperacion': {
+      id: '/coach/recuperacion'
+      path: '/coach/recuperacion'
+      fullPath: '/coach/recuperacion'
+      preLoaderRoute: typeof CoachRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/planificacion': {
+      id: '/coach/planificacion'
+      path: '/coach/planificacion'
+      fullPath: '/coach/planificacion'
+      preLoaderRoute: typeof CoachPlanificacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/partidos': {
+      id: '/coach/partidos'
+      path: '/coach/partidos'
+      fullPath: '/coach/partidos'
+      preLoaderRoute: typeof CoachPartidosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/notificaciones': {
+      id: '/coach/notificaciones'
+      path: '/coach/notificaciones'
+      fullPath: '/coach/notificaciones'
+      preLoaderRoute: typeof CoachNotificacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/jugadores': {
+      id: '/coach/jugadores'
+      path: '/coach/jugadores'
+      fullPath: '/coach/jugadores'
+      preLoaderRoute: typeof CoachJugadoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/gym': {
+      id: '/coach/gym'
+      path: '/coach/gym'
+      fullPath: '/coach/gym'
+      preLoaderRoute: typeof CoachGymRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/fisio': {
+      id: '/coach/fisio'
+      path: '/coach/fisio'
+      fullPath: '/coach/fisio'
+      preLoaderRoute: typeof CoachFisioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/evaluaciones': {
+      id: '/coach/evaluaciones'
+      path: '/coach/evaluaciones'
+      fullPath: '/coach/evaluaciones'
+      preLoaderRoute: typeof CoachEvaluacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/disponibilidad': {
+      id: '/coach/disponibilidad'
+      path: '/coach/disponibilidad'
+      fullPath: '/coach/disponibilidad'
+      preLoaderRoute: typeof CoachDisponibilidadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/cuestionarios': {
+      id: '/coach/cuestionarios'
+      path: '/coach/cuestionarios'
+      fullPath: '/coach/cuestionarios'
+      preLoaderRoute: typeof CoachCuestionariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/coaches': {
+      id: '/coach/coaches'
+      path: '/coach/coaches'
+      fullPath: '/coach/coaches'
+      preLoaderRoute: typeof CoachCoachesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/calendario': {
+      id: '/coach/calendario'
+      path: '/coach/calendario'
+      fullPath: '/coach/calendario'
+      preLoaderRoute: typeof CoachCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/biblioteca': {
+      id: '/coach/biblioteca'
+      path: '/coach/biblioteca'
+      fullPath: '/coach/biblioteca'
+      preLoaderRoute: typeof CoachBibliotecaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/wellness': {
+      id: '/atleta/wellness'
+      path: '/atleta/wellness'
+      fullPath: '/atleta/wellness'
+      preLoaderRoute: typeof AtletaWellnessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/votacion': {
+      id: '/atleta/votacion'
+      path: '/atleta/votacion'
+      fullPath: '/atleta/votacion'
+      preLoaderRoute: typeof AtletaVotacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/rpe': {
+      id: '/atleta/rpe'
+      path: '/atleta/rpe'
+      fullPath: '/atleta/rpe'
+      preLoaderRoute: typeof AtletaRpeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/recuperacion': {
+      id: '/atleta/recuperacion'
+      path: '/atleta/recuperacion'
+      fullPath: '/atleta/recuperacion'
+      preLoaderRoute: typeof AtletaRecuperacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/perfil': {
+      id: '/atleta/perfil'
+      path: '/atleta/perfil'
+      fullPath: '/atleta/perfil'
+      preLoaderRoute: typeof AtletaPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/onboarding': {
+      id: '/atleta/onboarding'
+      path: '/atleta/onboarding'
+      fullPath: '/atleta/onboarding'
+      preLoaderRoute: typeof AtletaOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/gym': {
+      id: '/atleta/gym'
+      path: '/atleta/gym'
+      fullPath: '/atleta/gym'
+      preLoaderRoute: typeof AtletaGymRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/fisio': {
+      id: '/atleta/fisio'
+      path: '/atleta/fisio'
+      fullPath: '/atleta/fisio'
+      preLoaderRoute: typeof AtletaFisioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/calendario': {
+      id: '/atleta/calendario'
+      path: '/atleta/calendario'
+      fullPath: '/atleta/calendario'
+      preLoaderRoute: typeof AtletaCalendarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/biblioteca': {
+      id: '/atleta/biblioteca'
+      path: '/atleta/biblioteca'
+      fullPath: '/atleta/biblioteca'
+      preLoaderRoute: typeof AtletaBibliotecaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach/atleta/$id': {
