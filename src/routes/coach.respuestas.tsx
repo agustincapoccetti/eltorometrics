@@ -45,6 +45,31 @@ function Page() {
   const [rows, setRows] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
+  const [detail, setDetail] = useState<{ athlete: any; entry: any } | null>(null);
+  const [detailItems, setDetailItems] = useState<any[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [strategies, setStrategies] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase.from("recovery_strategies").select("id, name, description, points, icon");
+      const map: Record<string, any> = {};
+      (s ?? []).forEach((x: any) => { map[x.id] = x; });
+      setStrategies(map);
+    })();
+  }, []);
+
+  const openDetail = async (athlete: any, entry: any) => {
+    setDetail({ athlete, entry });
+    setDetailItems([]);
+    setDetailLoading(true);
+    const { data } = await supabase
+      .from("recovery_entry_items")
+      .select("strategy_id, points")
+      .eq("entry_id", entry.id);
+    setDetailItems(data ?? []);
+    setDetailLoading(false);
+  };
 
   useEffect(() => {
     (async () => {
