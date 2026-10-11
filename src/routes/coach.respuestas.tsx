@@ -101,7 +101,7 @@ function Page() {
         (data ?? []).forEach((r: any) => { map[r.user_id] = r; });
       } else {
         const { data } = await supabase.from("recovery_entries")
-          .select("user_id, total_score, max_score, notes")
+          .select("id, user_id, total_score, max_score, notes")
           .in("user_id", ids).eq("entry_date", date);
         (data ?? []).forEach((r: any) => { map[r.user_id] = r; });
       }
