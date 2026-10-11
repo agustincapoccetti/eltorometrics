@@ -149,7 +149,7 @@ function Page() {
                   {kind === "wellness" && <th className="text-left px-2 py-2 font-semibold uppercase tracking-wider">Dolor</th>}
                   {kind === "rpe" && <th className="px-2 py-2 font-semibold uppercase tracking-wider">RPE</th>}
                   {kind === "rpe" && <th className="text-left px-2 py-2 font-semibold uppercase tracking-wider">Sesión</th>}
-                  {kind === "recuperacion" && <th className="px-2 py-2 font-semibold uppercase tracking-wider">Puntaje</th>}
+                  {kind === "recuperacion" && <th className="px-2 py-2 font-semibold uppercase tracking-wider">Puntos</th>}
                   {kind === "recuperacion" && <th className="text-left px-2 py-2 font-semibold uppercase tracking-wider">Notas</th>}
                 </tr>
               </thead>
