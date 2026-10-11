@@ -149,7 +149,7 @@ function Page() {
                   {kind === "wellness" && <th className="text-left px-2 py-2 font-semibold uppercase tracking-wider">Dolor</th>}
                   {kind === "rpe" && <th className="px-2 py-2 font-semibold uppercase tracking-wider">RPE</th>}
                   {kind === "rpe" && <th className="text-left px-2 py-2 font-semibold uppercase tracking-wider">Sesión</th>}
-                  {kind === "recuperacion" && <th className="px-2 py-2 font-semibold uppercase tracking-wider">Puntaje</th>}
+                  {kind === "recuperacion" && <th className="px-2 py-2 font-semibold uppercase tracking-wider">Puntos</th>}
                   {kind === "recuperacion" && <th className="text-left px-2 py-2 font-semibold uppercase tracking-wider">Notas</th>}
                 </tr>
               </thead>
@@ -189,8 +189,13 @@ function Page() {
                         </>
                       ) : (
                         <>
-                          <td className="px-2 py-2 text-center font-display">
-                            {r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}%
+                          <td className="px-2 py-2 text-center">
+                            <span className="font-display text-sm">
+                              {r.total_score} / {r.max_score || 0} pts
+                            </span>
+                            <span className="ml-1 text-[10px] text-muted-foreground">
+                              ({r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}%)
+                            </span>
                           </td>
                           <td className="px-2 py-2">{r.notes || "—"}</td>
                         </>
