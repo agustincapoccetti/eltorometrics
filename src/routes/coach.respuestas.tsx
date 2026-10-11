@@ -216,12 +216,19 @@ function Page() {
                       ) : (
                         <>
                           <td className="px-2 py-2 text-center">
-                            <span className="font-display text-sm">
-                              {r.total_score} / {r.max_score || 0} pts
-                            </span>
-                            <span className="ml-1 text-[10px] text-muted-foreground">
-                              ({r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}%)
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => openDetail(a, r)}
+                              className="inline-flex flex-col items-center justify-center min-w-16 px-2 py-1 border border-border hover:bg-primary hover:text-primary-foreground transition"
+                              title="Ver estrategias marcadas"
+                            >
+                              <span className="font-display text-sm underline underline-offset-2">
+                                {r.total_score} / {r.max_score || 0} pts
+                              </span>
+                              <span className="text-[10px] opacity-70">
+                                ({r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}%)
+                              </span>
+                            </button>
                           </td>
                           <td className="px-2 py-2">{r.notes || "—"}</td>
                         </>
