@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RugbyLoader } from "@/components/RugbyLoader";
 import { POSITIONS } from "@/lib/positions";
 import { rpeColor, wellnessColor } from "@/lib/score-colors";
@@ -44,6 +45,31 @@ function Page() {
   const [rows, setRows] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
+  const [detail, setDetail] = useState<{ athlete: any; entry: any } | null>(null);
+  const [detailItems, setDetailItems] = useState<any[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [strategies, setStrategies] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    (async () => {
+      const { data: s } = await supabase.from("recovery_strategies").select("id, name, description, points, icon");
+      const map: Record<string, any> = {};
+      (s ?? []).forEach((x: any) => { map[x.id] = x; });
+      setStrategies(map);
+    })();
+  }, []);
+
+  const openDetail = async (athlete: any, entry: any) => {
+    setDetail({ athlete, entry });
+    setDetailItems([]);
+    setDetailLoading(true);
+    const { data } = await supabase
+      .from("recovery_entry_items")
+      .select("strategy_id, points")
+      .eq("entry_id", entry.id);
+    setDetailItems(data ?? []);
+    setDetailLoading(false);
+  };
 
   useEffect(() => {
     (async () => {
@@ -75,7 +101,7 @@ function Page() {
         (data ?? []).forEach((r: any) => { map[r.user_id] = r; });
       } else {
         const { data } = await supabase.from("recovery_entries")
-          .select("user_id, total_score, max_score, notes")
+          .select("id, user_id, total_score, max_score, notes")
           .in("user_id", ids).eq("entry_date", date);
         (data ?? []).forEach((r: any) => { map[r.user_id] = r; });
       }
@@ -190,12 +216,19 @@ function Page() {
                       ) : (
                         <>
                           <td className="px-2 py-2 text-center">
-                            <span className="font-display text-sm">
-                              {r.total_score} / {r.max_score || 0} pts
-                            </span>
-                            <span className="ml-1 text-[10px] text-muted-foreground">
-                              ({r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}%)
-                            </span>
+                            <button
+                              type="button"
+                              onClick={() => openDetail(a, r)}
+                              className="inline-flex flex-col items-center justify-center min-w-16 px-2 py-1 border border-border hover:bg-primary hover:text-primary-foreground transition"
+                              title="Ver estrategias marcadas"
+                            >
+                              <span className="font-display text-sm underline underline-offset-2">
+                                {r.total_score} / {r.max_score || 0} pts
+                              </span>
+                              <span className="text-[10px] opacity-70">
+                                ({r.max_score ? Math.round((r.total_score / r.max_score) * 100) : 0}%)
+                              </span>
+                            </button>
                           </td>
                           <td className="px-2 py-2">{r.notes || "—"}</td>
                         </>
@@ -208,6 +241,43 @@ function Page() {
           </div>
         </>
       )}
+
+      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {detail ? `${(detail.athlete.last_name ? detail.athlete.last_name + ", " : "") + detail.athlete.full_name}` : ""}
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground">
+              Estrategias de recuperación marcadas el {detail?.entry ? isoDate(new Date(detail.entry.entry_date + "T00:00:00")) : date}
+              {detail ? ` · ${detail.entry.total_score} / ${detail.entry.max_score || 0} pts` : ""}
+            </p>
+          </DialogHeader>
+          {detailLoading ? (
+            <div className="py-8 flex justify-center"><RugbyLoader /></div>
+          ) : detailItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No hay estrategias registradas en esta respuesta.</p>
+          ) : (
+            <ul className="divide-y divide-border border border-border">
+              {detailItems
+                .map((it) => ({ it, s: strategies[it.strategy_id] }))
+                .sort((x, y) => (y.s?.points ?? 0) - (x.s?.points ?? 0))
+                .map(({ it, s }) => (
+                  <li key={it.strategy_id} className="flex items-start gap-3 px-3 py-2">
+                    <span className="text-xl leading-none w-8 text-center flex-shrink-0" aria-hidden>{s?.icon ?? "✅"}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium">{s?.name ?? "Estrategia"}</p>
+                        <span className="text-xs font-display">+{it.points}</span>
+                      </div>
+                      {s?.description && <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>}
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </Shell>
   );
 }
