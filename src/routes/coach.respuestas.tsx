@@ -241,6 +241,43 @@ function Page() {
           </div>
         </>
       )}
+
+      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {detail ? `${(detail.athlete.last_name ? detail.athlete.last_name + ", " : "") + detail.athlete.full_name}` : ""}
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground">
+              Estrategias de recuperación marcadas el {detail?.entry ? isoDate(new Date(detail.entry.entry_date + "T00:00:00")) : date}
+              {detail ? ` · ${detail.entry.total_score} / ${detail.entry.max_score || 0} pts` : ""}
+            </p>
+          </DialogHeader>
+          {detailLoading ? (
+            <div className="py-8 flex justify-center"><RugbyLoader /></div>
+          ) : detailItems.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No hay estrategias registradas en esta respuesta.</p>
+          ) : (
+            <ul className="divide-y divide-border border border-border">
+              {detailItems
+                .map((it) => ({ it, s: strategies[it.strategy_id] }))
+                .sort((x, y) => (y.s?.points ?? 0) - (x.s?.points ?? 0))
+                .map(({ it, s }) => (
+                  <li key={it.strategy_id} className="flex items-start gap-3 px-3 py-2">
+                    <span className="text-xl leading-none w-8 text-center flex-shrink-0" aria-hidden>{s?.icon ?? "✅"}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-sm font-medium">{s?.name ?? "Estrategia"}</p>
+                        <span className="text-xs font-display">+{it.points}</span>
+                      </div>
+                      {s?.description && <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>}
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          )}
+        </DialogContent>
+      </Dialog>
     </Shell>
   );
 }
