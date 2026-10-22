@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792681050101,
+      "tag": "0000_extend_polls_custom_surveys",
+      "breakpoints": true
+    }
+  ]
+}

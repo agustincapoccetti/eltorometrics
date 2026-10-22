@@ -61,6 +61,7 @@ export type Database = {
           id: string
           multi: boolean
           options: string[]
+          questions: Json
           title: string
           updated_at: string
         }
@@ -74,6 +75,7 @@ export type Database = {
           id?: string
           multi?: boolean
           options?: string[]
+          questions?: Json
           title: string
           updated_at?: string
         }
@@ -87,6 +89,7 @@ export type Database = {
           id?: string
           multi?: boolean
           options?: string[]
+          questions?: Json
           title?: string
           updated_at?: string
         }
@@ -94,6 +97,7 @@ export type Database = {
       }
       availability_responses: {
         Row: {
+          answers: Json
           comment: string | null
           created_at: string
           id: string
@@ -103,6 +107,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          answers?: Json
           comment?: string | null
           created_at?: string
           id?: string
@@ -112,6 +117,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          answers?: Json
           comment?: string | null
           created_at?: string
           id?: string
