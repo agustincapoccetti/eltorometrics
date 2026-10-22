@@ -1,6 +1,7 @@
 # Roadmap
 
-- [ ] Encuesta personalizable en Planificación: varias preguntas, respuestas múltiples, exportación y gráficos; conservar encuestas anteriores
+- [x] Encuesta personalizable en Planificación: varias preguntas, respuestas múltiples, exportación y gráficos; conservar encuestas anteriores
+- [ ] Verificar creación, respuesta y exportación de Encuesta con una cuenta conectada — permiso para la prueba rechazado
 
 - [x] Carpetas (subcategorías) en la biblioteca — coach crea/edita/borra, filtro por carpeta
 - [x] Carpetas visibles también en la vista de atleta
