@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from 'bun:test';
 import { csvCell, getAnswers, getQuestions, summarizeQuestion, validateAnswers, validateQuestions, type SurveyQuestion, type SurveyResponse } from './surveys';
 
