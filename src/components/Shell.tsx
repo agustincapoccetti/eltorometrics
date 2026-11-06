@@ -37,7 +37,7 @@ const ATLETA_NAV: NavItem[] = [
 
 // Rutas agrupadas dentro de cada ítem del dock (pestañas internas)
 const ATLETA_GROUPS: Record<string, string[]> = {
-  "/atleta/wellness": ["/atleta/wellness", "/atleta/rpe", "/atleta/recuperacion"],
+  "/atleta/wellness": ["/atleta/wellness", "/atleta/rpe", "/atleta/recuperacion", "/atleta/votacion"],
   "/atleta/gym": ["/atleta/gym", "/atleta/fisio", "/atleta/biblioteca"],
   "/atleta/perfil": ["/atleta/perfil", "/atleta/calendario"],
 };
@@ -46,16 +46,17 @@ const ATLETA_GROUPS: Record<string, string[]> = {
 const COACH_NAV: NavItem[] = [
   { to: "/coach", label: "Panel", icon: LayoutDashboard },
   { to: "/coach/jugadores", label: "Plantel", icon: Users },
-  { to: "/coach/gym", label: "Planific.", icon: ClipboardList },
+  { to: "/coach/planificacion", label: "Planificar", icon: ClipboardList },
   { to: "/coach/fisio", label: "Fisio", icon: Stethoscope },
   { to: "/coach/notificaciones", label: "Avisos", icon: BellRing },
 ];
 
 // Rutas agrupadas dentro de cada ítem del dock (pestañas internas)
 const COACH_GROUPS: Record<string, string[]> = {
+  "/coach/planificacion": ["/coach/gym", "/coach/calendario", "/coach/planificacion", "/coach/partidos", "/coach/evaluaciones", "/coach/disponibilidad"],
   "/coach": ["/coach", "/coach/semaforo"],
-  "/coach/jugadores": ["/coach/jugadores", "/coach/cuestionarios", "/coach/atleta"],
-  "/coach/gym": ["/coach/gym", "/coach/calendario", "/coach/planificacion", "/coach/partidos", "/coach/evaluaciones"],
+  "/coach/jugadores": ["/coach/jugadores", "/coach/cuestionarios", "/coach/respuestas", "/coach/votacion", "/coach/atleta"],
+  "/coach/gym": ["/coach/gym", "/coach/calendario", "/coach/planificacion", "/coach/partidos", "/coach/evaluaciones", "/coach/disponibilidad"],
   "/coach/fisio": ["/coach/fisio", "/coach/recuperacion"],
 };
 

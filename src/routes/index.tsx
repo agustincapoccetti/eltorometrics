@@ -4,7 +4,19 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 
-export const Route = createFileRoute("/")({ component: Landing });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "El Toro Rugby Performance · Rendimiento del plantel" },
+      { name: "description", content: "Monitoreo de RPE, bienestar, carga y recuperación para El Toro Rugby Club Calvià." },
+      { property: "og:title", content: "El Toro Rugby Performance" },
+      { property: "og:description", content: "Monitoreo de RPE, bienestar, carga y recuperación para El Toro Rugby Club Calvià." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: Landing,
+});
 
 function Landing() {
   const { user, role, loading } = useAuth();
@@ -36,6 +48,10 @@ function Landing() {
           <p className="mt-6 text-base text-muted-foreground max-w-xl mx-auto">
             Plataforma oficial de El Toro Rugby Club Calvià: monitoreo de RPE, bienestar, carga de entrenamiento y recuperación. Datos claros para atletas y preparadores físicos.
           </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link to="/login"><Button size="lg" className="w-full sm:w-48">Entrar</Button></Link>
+            <Link to="/registro"><Button size="lg" variant="outline" className="w-full sm:w-48">Crear cuenta</Button></Link>
+          </div>
         </div>
       </section>
 

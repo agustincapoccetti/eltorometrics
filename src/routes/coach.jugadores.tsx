@@ -482,9 +482,8 @@ function CoachPlayers() {
                     {p.position ?? "—"} · Sem {s.week} · Mes {s.month} · Año {s.year} · {matchMinutes[p.id] ?? 0}'
                   </p>
                 </div>
-                <div className="flex flex-col items-center gap-0.5">
-                  <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="h-5 w-5 data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
-                  {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}{s.selfToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Jugador</span>}
+                <div className="flex flex-col items-center">
+                  <AttendanceMark s={s} onToggle={(v) => togglePresent(p.id, v)} />
                 </div>
               </div>
             );
@@ -494,7 +493,7 @@ function CoachPlayers() {
 
       {/* Desktop table */}
       <div className="hidden sm:block border border-border bg-background overflow-x-auto">
-        <div className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_60px] gap-2 px-3 py-2 border-b border-border bg-secondary text-[10px] uppercase tracking-wider font-medium min-w-[720px]">
+        <div className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_96px] gap-2 px-3 py-2 border-b border-border bg-secondary text-[10px] uppercase tracking-wider font-medium min-w-[720px]">
           <div></div>
           <div><SortBtn k="name">Jugador</SortBtn></div>
           <div><SortBtn k="position">Puesto</SortBtn></div>
@@ -508,7 +507,7 @@ function CoachPlayers() {
         {sorted.map((p: any) => {
           const s = stats[p.id] ?? { week: 0, month: 0, year: 0, today: false, autoToday: false };
           return (
-            <div key={p.id} className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_60px] gap-2 px-3 py-2 border-b border-border last:border-b-0 items-center text-xs min-w-[720px]">
+            <div key={p.id} className="grid grid-cols-[36px_1.6fr_0.7fr_0.6fr_0.6fr_0.6fr_0.7fr_96px] gap-2 px-3 py-2 border-b border-border last:border-b-0 items-center text-xs min-w-[720px]">
               <div className="w-8 h-8 border border-border bg-secondary overflow-hidden">
                 {p.photo_url && <img src={p.photo_url} alt="" className="w-full h-full object-cover" />}
               </div>
@@ -521,15 +520,24 @@ function CoachPlayers() {
               <div className="text-center font-medium">{s.year}</div>
               <div className="text-center">{matchMinutes[p.id] ?? 0}'</div>
               <div className="flex flex-col items-center justify-center gap-0.5">
-                <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
-                {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}{s.selfToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Jugador</span>}
+                <AttendanceMark s={s} onToggle={(v) => togglePresent(p.id, v)} />
               </div>
             </div>
           );
         })}
       </div>
 
-      <p className="text-[11px] text-muted-foreground mt-3">El presentismo se marca con el checkbox de la columna "Hoy" para la fecha seleccionada. Si el jugador ya respondió el RPE de ese día, su presente se marca automáticamente y queda bloqueado (etiqueta "RPE"). Los conteos por semana, mes y año se actualizan al instante.</p>
+      <p className="text-[11px] text-muted-foreground mt-3">El presentismo se marca con el checkbox de la columna "Hoy" para la fecha seleccionada. Debajo de cada casilla se indica el origen: «Presente · RPE» (automático y bloqueado), «Respuesta del jugador» o «Marcado por entrenador». Los conteos por semana, mes y año se actualizan al instante.</p>
     </Shell>
+  );
+}
+
+function AttendanceMark({ s, onToggle }: { s: { today: boolean; autoToday: boolean; selfToday?: boolean }; onToggle: (v: boolean) => void }) {
+  const label = !s.today ? null : s.autoToday ? "Presente · RPE" : s.selfToday ? "Respuesta del jugador" : "Marcado por entrenador";
+  return (
+    <label className={"flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[44px] px-1 py-1 rounded-md " + (s.autoToday ? "cursor-not-allowed" : "cursor-pointer hover:bg-accent")}>
+      <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => onToggle(!!v)} aria-label="Presente" className="h-6 w-6 data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
+      {label && <span className="text-[8px] leading-tight uppercase tracking-wider text-muted-foreground text-center max-w-[90px]">{label}</span>}
+    </label>
   );
 }
