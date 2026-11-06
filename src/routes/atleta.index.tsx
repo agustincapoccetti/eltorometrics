@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Activity, Heart, Dumbbell, Stethoscope, CheckCircle2, BookOpen, Calendar as CalendarIcon, ArrowRight, ChevronDown } from "lucide-react";
-import { isoDate } from "@/lib/week-utils";
+import { isoDate, withinHoursAfter } from "@/lib/week-utils";
 import { fmtDateLong, fmtRelative, fmtTime } from "@/lib/format-date";
 import { typeLabel, typeIcon } from "@/lib/appointment-types";
 import { AttendanceRace } from "@/components/AttendanceRace";
@@ -62,7 +62,8 @@ function AthleteToday() {
 
       const { data: w } = await supabase
         .from("wellness_entries").select("id").eq("user_id", user.id).eq("entry_date", today).maybeSingle();
-      setWellnessDone(!!w);
+      // Bienestar solo se pide el lunes (ventana de 24 h)
+      setWellnessDone(!!w || new Date().getDay() !== 1);
 
       // Última sesión de calendario ya pasada (hoy incluido) sin RPE cargado
       const { data: evs } = await supabase
@@ -83,7 +84,7 @@ function AthleteToday() {
         .sort((a: any, b: any) => b.event_date.localeCompare(a.event_date));
 
       let pending: any = null;
-      for (const ev of candidates) {
+      for (const ev of candidates.filter((c: any) => withinHoursAfter(c.event_date, 48))) {
         const { count } = await supabase
           .from("rpe_entries").select("id", { count: "exact", head: true })
           .eq("user_id", user.id).eq("session_date", ev.event_date);
@@ -198,6 +199,22 @@ function AthleteToday() {
         </div>
       </div>
 
+      <div className="space-y-4 mb-6">
+        {pendingCards.slice(0, 3).map(({ key, ...c }) => (
+          <TodayCard key={key} {...c} />
+        ))}
+
+        {nothingPending && (
+          <div className="border-2 border-black p-5 flex items-center gap-3">
+            <CheckCircle2 className="h-8 w-8 shrink-0" />
+            <div>
+              <h2 className="text-xl leading-tight">Todo al día</h2>
+              <p className="text-sm text-muted-foreground">No tienes nada pendiente por hoy. Buen trabajo.</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {user && (
         <div className="mb-6">
           <AvailabilityCard userId={user.id} />
@@ -209,22 +226,6 @@ function AthleteToday() {
           <AthleteRings userId={user.id} />
         </div>
       )}
-
-      <div className="space-y-4">
-        {pendingCards.slice(0, 3).map(({ key, ...c }) => (
-          <TodayCard key={key} {...c} />
-        ))}
-
-        {nothingPending && (
-          <div className="border-2 border-black p-8 text-center">
-            <CheckCircle2 className="h-10 w-10 mx-auto mb-3" />
-            <h2 className="text-2xl mb-1">Todo al día</h2>
-            <p className="text-sm text-muted-foreground">
-              No tienes nada pendiente por hoy. Buen trabajo.
-            </p>
-          </div>
-        )}
-      </div>
 
       {user && (
         <div className="mt-6">

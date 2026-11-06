@@ -56,7 +56,6 @@ const COACH_GROUPS: Record<string, string[]> = {
   "/coach/planificacion": ["/coach/gym", "/coach/calendario", "/coach/planificacion", "/coach/partidos", "/coach/evaluaciones", "/coach/disponibilidad"],
   "/coach": ["/coach", "/coach/semaforo"],
   "/coach/jugadores": ["/coach/jugadores", "/coach/cuestionarios", "/coach/respuestas", "/coach/votacion", "/coach/atleta"],
-  "/coach/gym": ["/coach/gym", "/coach/calendario", "/coach/planificacion", "/coach/partidos", "/coach/evaluaciones", "/coach/disponibilidad"],
   "/coach/fisio": ["/coach/fisio", "/coach/recuperacion"],
 };
 
