@@ -87,16 +87,22 @@ function AttendanceExport({ athletes }: { athletes: any[] }) {
       toast.error("No hay jugadores para ese filtro");
       return null;
     }
-    const { data, error } = await supabase
-      .from("attendance")
-      .select("user_id, attendance_date, present, source")
-      .gte("attendance_date", from)
-      .lte("attendance_date", to);
-    if (error) {
-      toast.error(error.message);
-      return null;
+    const rows: any[] = [];
+    for (let off = 0; ; off += 1000) {
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("id, user_id, attendance_date, present, source")
+        .gte("attendance_date", from)
+        .lte("attendance_date", to)
+        .order("attendance_date").order("id")
+        .range(off, off + 999);
+      if (error) {
+        toast.error(error.message);
+        return null;
+      }
+      rows.push(...(data ?? []));
+      if (!data || data.length < 1000) break;
     }
-    const rows = data ?? [];
 
     // Meses presentes en el rango
     const months: string[] = [];
@@ -329,8 +335,17 @@ function CoachPlayers() {
     setAthletes((profs ?? []).sort((a, b) => lastNameOf(a).localeCompare(lastNameOf(b))));
 
     const yearStart = isoDate(startOfYear());
-    const { data: atts } = await supabase.from("attendance").select("*").gte("attendance_date", yearStart);
-    setAttendance(atts ?? []);
+    const atts: any[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data: page } = await supabase.from("attendance")
+        .select("id, user_id, attendance_date, present, source")
+        .gte("attendance_date", yearStart)
+        .order("attendance_date").order("id")
+        .range(from, from + 999);
+      atts.push(...(page ?? []));
+      if (!page || page.length < 1000) break;
+    }
+    setAttendance(atts);
 
     const { data: mps } = await supabase.from("match_participations").select("user_id, minutes_played");
     const m: Record<string, number> = {};
