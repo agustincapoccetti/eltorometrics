@@ -25,9 +25,9 @@ export const PLANTEL_TABS: SubTab[] = [
 
 
 export const PLANIFICACION_TABS: SubTab[] = [
-  { to: "/coach/gym", label: "Gym" },
+  { to: "/coach/planificacion", label: "Semana" },
   { to: "/coach/calendario", label: "Agenda" },
-  { to: "/coach/planificacion", label: "Planific." },
+  { to: "/coach/gym", label: "Gym" },
   { to: "/coach/partidos", label: "Partidos" },
   { to: "/coach/evaluaciones", label: "Evaluaciones" },
   { to: "/coach/disponibilidad", label: "Encuesta" },

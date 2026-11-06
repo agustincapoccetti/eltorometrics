@@ -25,7 +25,7 @@ export function SurveyQuestionEditor({ questions, onChange }: { questions: Surve
       {q.type !== 'text' && <div className="space-y-2">
         {q.options.map((option, j) => <div key={j} className="flex flex-wrap items-center gap-2">
           <Input className="flex-1 min-w-40" aria-label={`Pregunta ${i + 1}, opción ${j + 1}`} value={option} placeholder={`Opción ${j + 1}`} onChange={e => update(i, { options: q.options.map((o, k) => k === j ? e.target.value : o), improvementOptions: q.improvementOptions.map(o => o === option ? e.target.value : o) })} />
-          <Label className="flex items-center gap-1 text-xs"><Checkbox checked={q.improvementOptions.includes(option) && !!option} disabled={!option.trim()} onCheckedChange={checked => update(i, { improvementOptions: checked ? [...q.improvementOptions, option] : q.improvementOptions.filter(o => o !== option) })} />Indica mejora</Label>
+          <Label className="flex items-center gap-1 text-xs"><Checkbox checked={q.improvementOptions.includes(option) && !!option} disabled={!option.trim()} onCheckedChange={checked => update(i, { improvementOptions: checked ? [...q.improvementOptions, option] : q.improvementOptions.filter(o => o !== option) })} />Punto a trabajar</Label>
           <Button variant="ghost" size="icon" title="Eliminar opción" aria-label={`Eliminar opción ${j + 1} de pregunta ${i + 1}`} onClick={() => update(i, { options: q.options.filter((_, k) => k !== j), improvementOptions: q.improvementOptions.filter(o => o !== option) })}><Trash2 className="size-4" /></Button>
         </div>)}
         <Button variant="outline" size="sm" onClick={() => update(i, { options: [...q.options, ''] })}><Plus className="size-4 mr-2" />Agregar opción</Button>

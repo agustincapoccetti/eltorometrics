@@ -463,7 +463,35 @@ function CoachDash() {
         {loading ? (
           <p className="text-sm text-muted-foreground">Cargando...</p>
         ) : (
-          <div ref={tableRef} className="border border-border overflow-x-auto bg-background">
+          <>
+          <div className="sm:hidden border border-border divide-y divide-border">
+            {visibleRows.length === 0 && <p className="p-6 text-sm text-muted-foreground">Sin atletas para este filtro.</p>}
+            {visibleRows.map((r) => {
+              const ac = acwrColor(r.acwr);
+              const fc = fatigueColor(r.avgFatigue);
+              return (
+                <Link key={r.id} to="/coach/atleta/$id" params={{ id: r.id }} className="block p-3 hover:bg-accent">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-9 h-9 shrink-0 border border-border bg-secondary overflow-hidden">
+                      {r.photo_url ? <img src={r.photo_url} alt={r.full_name} className="w-full h-full object-cover" /> : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{r.full_name}{r.last_name ? ` ${r.last_name}` : ""}</p>
+                      {r.position && <p className="text-[10px] text-muted-foreground">{r.position}</p>}
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="border border-border py-1.5"><p className="text-[9px] uppercase tracking-wider text-muted-foreground">Carga</p><p className="text-sm font-semibold">{r.weeklyLoad} <span className="text-[10px] font-normal text-muted-foreground">UA</span></p></div>
+                    <div className="border border-border py-1.5"><p className="text-[9px] uppercase tracking-wider text-muted-foreground">ACWR</p><span className={`inline-block px-1.5 text-xs font-medium ${ac.bg} ${ac.text}`}>{r.acwr ?? "—"}</span></div>
+                    <div className="border border-border py-1.5"><p className="text-[9px] uppercase tracking-wider text-muted-foreground">Fatiga</p><span className={`inline-block px-1.5 text-xs ${fc}`}>{r.avgFatigue ?? "—"}</span></div>
+                  </div>
+                  <p className="mt-1.5 text-[10px] text-muted-foreground">Bienestar {r.wellnessThisWeek} · RPE {r.rpeThisWeek} esta semana</p>
+                </Link>
+              );
+            })}
+          </div>
+          <div ref={tableRef} className="hidden sm:block border border-border overflow-x-auto bg-background">
             <div className="grid grid-cols-[36px_1.6fr_0.7fr_0.7fr_0.9fr_0.9fr_0.9fr_24px] gap-2 px-3 py-2 border-b border-border text-[10px] uppercase tracking-wider font-medium bg-secondary min-w-[760px]">
               <div></div>
               <div>Atleta</div>
@@ -547,6 +575,7 @@ function CoachDash() {
               );
             })}
           </div>
+          </>
         )}
         <p className="mt-2 text-[11px] text-muted-foreground">
           UA = unidades de carga (suma RPE en el período). ACWR = aguda ÷ crónica 28d. Óptimo
@@ -578,14 +607,15 @@ function CoachDash() {
           {byPosition.length === 0 ? (
             <p className="text-sm text-muted-foreground p-6">Sin datos suficientes.</p>
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
+            <div className="grid gap-6 lg:grid-cols-2">
+            <div>
+            <p className="text-[11px] uppercase tracking-wider font-semibold mb-1">Carga (UA)</p>
+            <ResponsiveContainer width="100%" height={260}>
               <BarChart data={byPosition} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
                 <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
                 <XAxis dataKey="position" stroke="#000" fontSize={11} />
                 <YAxis stroke="#000" fontSize={11} />
-                <Tooltip
-                  contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }}
-                />
+                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="cargaSemanal" name="Carga semanal (UA)">
                   {byPosition.map((p, i) => (
@@ -597,6 +627,17 @@ function CoachDash() {
                     <Cell key={i} fill={loadColor(p.cargaCronica)} fillOpacity={0.55} />
                   ))}
                 </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            </div>
+            <div>
+            <p className="text-[11px] uppercase tracking-wider font-semibold mb-1">Fatiga media (1–5)</p>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={byPosition} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                <CartesianGrid stroke="#eee" strokeDasharray="3 3" />
+                <XAxis dataKey="position" stroke="#000" fontSize={11} />
+                <YAxis stroke="#000" fontSize={11} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
+                <Tooltip contentStyle={{ background: "#fff", border: "1px solid #000", borderRadius: 0 }} />
                 <Bar dataKey="fatiga" name="Fatiga μ (1–5)">
                   {byPosition.map((p, i) => (
                     <Cell key={i} fill={fatigueBarColor(p.fatiga)} />
@@ -604,6 +645,8 @@ function CoachDash() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            </div>
+            </div>
           )}
           <div className="flex flex-wrap gap-3 mt-3 text-[10px] uppercase tracking-wider">
             <LegendDot color="#10b981" label="Bajo / seguro" />
