@@ -15,6 +15,7 @@ import { Route as RecuperarRouteImport } from './routes/recuperar'
 import { Route as RegistroRouteImport } from './routes/registro'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AtletaIndexRouteImport } from './routes/atleta.index'
+import { Route as AtletaAsistenciaRouteImport } from './routes/atleta.asistencia'
 import { Route as AtletaBibliotecaRouteImport } from './routes/atleta.biblioteca'
 import { Route as AtletaCalendarioRouteImport } from './routes/atleta.calendario'
 import { Route as AtletaFisioRouteImport } from './routes/atleta.fisio'
@@ -74,6 +75,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AtletaIndexRoute = AtletaIndexRouteImport.update({
   id: '/atleta/',
   path: '/atleta/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtletaAsistenciaRoute = AtletaAsistenciaRouteImport.update({
+  id: '/atleta/asistencia',
+  path: '/atleta/asistencia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AtletaBibliotecaRoute = AtletaBibliotecaRouteImport.update({
@@ -234,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/atleta/asistencia': typeof AtletaAsistenciaRoute
   '/atleta/biblioteca': typeof AtletaBibliotecaRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/atleta/asistencia': typeof AtletaAsistenciaRoute
   '/atleta/biblioteca': typeof AtletaBibliotecaRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/recuperar': typeof RecuperarRoute
   '/registro': typeof RegistroRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/atleta/asistencia': typeof AtletaAsistenciaRoute
   '/atleta/biblioteca': typeof AtletaBibliotecaRoute
   '/atleta/calendario': typeof AtletaCalendarioRoute
   '/atleta/fisio': typeof AtletaFisioRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/recuperar'
     | '/registro'
     | '/reset-password'
+    | '/atleta/asistencia'
     | '/atleta/biblioteca'
     | '/atleta/calendario'
     | '/atleta/fisio'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/recuperar'
     | '/registro'
     | '/reset-password'
+    | '/atleta/asistencia'
     | '/atleta/biblioteca'
     | '/atleta/calendario'
     | '/atleta/fisio'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '/recuperar'
     | '/registro'
     | '/reset-password'
+    | '/atleta/asistencia'
     | '/atleta/biblioteca'
     | '/atleta/calendario'
     | '/atleta/fisio'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   RecuperarRoute: typeof RecuperarRoute
   RegistroRoute: typeof RegistroRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  AtletaAsistenciaRoute: typeof AtletaAsistenciaRoute
   AtletaBibliotecaRoute: typeof AtletaBibliotecaRoute
   AtletaCalendarioRoute: typeof AtletaCalendarioRoute
   AtletaFisioRoute: typeof AtletaFisioRoute
@@ -541,6 +554,13 @@ declare module '@tanstack/react-router' {
       path: '/atleta'
       fullPath: '/atleta/'
       preLoaderRoute: typeof AtletaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atleta/asistencia': {
+      id: '/atleta/asistencia'
+      path: '/atleta/asistencia'
+      fullPath: '/atleta/asistencia'
+      preLoaderRoute: typeof AtletaAsistenciaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/atleta/biblioteca': {
@@ -762,6 +782,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecuperarRoute: RecuperarRoute,
   RegistroRoute: RegistroRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  AtletaAsistenciaRoute: AtletaAsistenciaRoute,
   AtletaBibliotecaRoute: AtletaBibliotecaRoute,
   AtletaCalendarioRoute: AtletaCalendarioRoute,
   AtletaFisioRoute: AtletaFisioRoute,

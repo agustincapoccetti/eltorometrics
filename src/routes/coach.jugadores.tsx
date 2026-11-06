@@ -371,12 +371,13 @@ function CoachPlayers() {
   const yStart = isoDate(startOfYear());
 
   const stats = useMemo(() => {
-    const map: Record<string, { week: number; month: number; year: number; today: boolean; autoToday: boolean }> = {};
+    const map: Record<string, { week: number; month: number; year: number; today: boolean; autoToday: boolean; selfToday?: boolean }> = {};
     attendance.forEach((a) => {
       const e = (map[a.user_id] ??= { week: 0, month: 0, year: 0, today: false, autoToday: false });
       if (a.attendance_date === selectedDate) {
         e.today = !!a.present;
         e.autoToday = a.source === "rpe" && !!a.present;
+        e.selfToday = a.source === "self" && !!a.present;
       }
       if (!a.present) return;
       if (a.attendance_date >= yStart) e.year++;
@@ -483,7 +484,7 @@ function CoachPlayers() {
                 </div>
                 <div className="flex flex-col items-center gap-0.5">
                   <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="h-5 w-5 data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
-                  {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}
+                  {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}{s.selfToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Jugador</span>}
                 </div>
               </div>
             );
@@ -521,7 +522,7 @@ function CoachPlayers() {
               <div className="text-center">{matchMinutes[p.id] ?? 0}'</div>
               <div className="flex flex-col items-center justify-center gap-0.5">
                 <Checkbox checked={s.today} disabled={s.autoToday} onCheckedChange={(v) => togglePresent(p.id, !!v)} className="data-[disabled]:opacity-100 data-[disabled]:bg-muted" />
-                {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}
+                {s.autoToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">RPE</span>}{s.selfToday && <span className="text-[8px] uppercase tracking-wider text-muted-foreground">Jugador</span>}
               </div>
             </div>
           );
