@@ -20,16 +20,21 @@ export function PanelSummary() {
   const [wellnessOpen, setWellnessOpen] = useState(false);
   const [physioReq, setPhysioReq] = useState<any[]>([]);
   const [coachReq, setCoachReq] = useState<any[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    setStatus("loading");
     (async () => {
+     try {
       const today = isoDate(new Date());
       const monday = weekDays()[0];
       const weekStart = isoDate(startOfWeek());
       const weekEnd = isoDate(endOfWeek());
       const chronicStart = (() => { const d = new Date(); d.setDate(d.getDate() - 27); return isoDate(d); })();
 
-      const { data: roles } = await supabase.from("user_roles").select("user_id").eq("role", "atleta");
+      const { data: roles, error: rolesError } = await supabase.from("user_roles").select("user_id").eq("role", "atleta");
+      if (rolesError) throw rolesError;
       const ids = (roles ?? []).map((r) => r.user_id);
 
       const [{ data: apps }, { data: capps }] = await Promise.all([
@@ -39,14 +44,15 @@ export function PanelSummary() {
       setPhysioReq(apps ?? []);
       setCoachReq(capps ?? []);
 
-      if (!ids.length) { setTotal(0); return; }
+      if (!ids.length) { setTotal(0); setStatus("ready"); return; }
 
-      const [{ data: profiles }, { data: rpe }, { data: wellness }, { data: events }] = await Promise.all([
+      const [{ data: profiles, error: pErr }, { data: rpe, error: rErr }, { data: wellness, error: wErr }, { data: events, error: eErr }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, last_name").in("id", ids),
         supabase.from("rpe_entries").select("user_id, session_date, rpe_score").in("user_id", ids).gte("session_date", chronicStart),
         supabase.from("wellness_entries").select("user_id, entry_date").in("user_id", ids).eq("entry_date", monday),
         supabase.from("calendar_events").select("name, event_date, type").eq("type", "training").lte("event_date", today).order("event_date", { ascending: false }).limit(5),
       ]);
+      if (pErr || rErr || wErr || eErr) throw pErr || rErr || wErr || eErr;
 
       const nameOf = (p: any) => `${p.full_name ?? ""}${p.last_name ? " " + p.last_name : ""}`.trim() || "Sin nombre";
       const list: Athlete[] = (profiles ?? []).map((p: any) => ({ id: p.id, name: nameOf(p) }))
@@ -86,8 +92,12 @@ export function PanelSummary() {
           };
         })
       );
+      setStatus("ready");
+     } catch {
+      setStatus("error");
+     }
     })();
-  }, []);
+  }, [reloadKey]);
 
 
   const pct = (missing: number) => (total ? Math.round(((total - missing) / total) * 100) : 0);
@@ -95,6 +105,19 @@ export function PanelSummary() {
   return (
     <>
     <ComplianceRings />
+    {status === "error" && (
+      <div className="mb-4 border-2 border-foreground p-4 flex flex-wrap items-center justify-between gap-3" role="alert">
+        <p className="text-sm">No se pudo conectar para cargar el resumen. Revisa tu conexión.</p>
+        <button type="button" onClick={() => setReloadKey((k) => k + 1)} className="text-xs uppercase tracking-wider font-semibold border border-foreground px-3 py-1.5 hover:bg-foreground hover:text-background">Reintentar</button>
+      </div>
+    )}
+    {status === "loading" ? (
+      <section className="grid gap-3 md:grid-cols-3 mb-10" aria-busy="true">
+        {["Riesgo esta semana", "Compliance", "Pendientes"].map((t) => (
+          <Card key={t} title={t} subtitle="Cargando…"><div className="h-12 bg-muted animate-pulse" /></Card>
+        ))}
+      </section>
+    ) : status === "error" ? null : (
     <section className="grid gap-3 md:grid-cols-3 mb-10">
       <Card title="Riesgo esta semana" subtitle={`${risk.length} en zona de riesgo (ACWR)`}>
         {risk.length === 0 ? (
