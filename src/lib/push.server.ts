@@ -6,6 +6,7 @@ export interface PushPayload {
   body?: string | null;
   link?: string | null;
   tag?: string;
+  actions?: Array<{ action: string; title: string; link: string }>;
 }
 
 function vapid() {
@@ -42,6 +43,7 @@ export async function sendPushToUsers(userIds: string[], payload: PushPayload) {
       body: payload.body ?? "",
       link: payload.link ?? "/",
       ...(payload.tag ? { tag: payload.tag } : {}),
+      ...(payload.actions ? { actions: payload.actions } : {}),
     },
     options: { ttl: 60 * 60 * 12 },
   } as const;

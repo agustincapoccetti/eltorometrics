@@ -11,7 +11,8 @@ self.addEventListener("push", (event) => {
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     tag: payload.tag || undefined,
-    data: { link: payload.link || "/" },
+    data: { link: payload.link || "/", actions: payload.actions || [] },
+    actions: (payload.actions || []).map((a) => ({ action: a.action, title: a.title })),
     vibrate: [100, 50, 100],
   };
   event.waitUntil(self.registration.showNotification(title, options));
@@ -19,7 +20,9 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const link = event.notification.data?.link || "/";
+  const acts = event.notification.data?.actions || [];
+  const hit = event.action && acts.find((a) => a.action === event.action);
+  const link = (hit && hit.link) || event.notification.data?.link || "/";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       for (const c of clients) {

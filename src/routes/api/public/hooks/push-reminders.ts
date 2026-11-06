@@ -123,6 +123,43 @@ async function run() {
     results.push({ id: s.id, sent: res.sent });
   }
 
+  // "¿Viniste a entrenar hoy?" al terminar el entrenamiento del día
+  const { data: trainings } = await supabaseAdmin
+    .from("calendar_events")
+    .select("event_time, duration_minutes")
+    .eq("type", "training")
+    .eq("event_date", dateKey);
+  if (trainings?.length) {
+    const ends = trainings.map((t) =>
+      t.event_time ? timeToMinutes(t.event_time as unknown as string) + (t.duration_minutes ?? 90) : 21 * 60 + 30,
+    );
+    if (minutes >= Math.min(...ends)) {
+      const { data: claimed } = await supabaseAdmin
+        .from("attendance_prompts")
+        .upsert({ event_date: dateKey }, { onConflict: "event_date", ignoreDuplicates: true })
+        .select("event_date");
+      if (claimed?.length) {
+        const allIds = await userIdsByRole("atleta");
+        const { data: att } = await supabaseAdmin
+          .from("attendance").select("user_id").eq("attendance_date", dateKey).in("user_id", allIds);
+        const done = new Set((att ?? []).map((a) => a.user_id));
+        const ids = allIds.filter((id) => !done.has(id));
+        const link = `/atleta/asistencia?d=${dateKey}`;
+        const res = await sendPushToUsers(ids, {
+          title: "¿Viniste a entrenar hoy?",
+          body: "Toca SÍ o NO para sumar en el presentismo.",
+          link,
+          tag: `asistencia-${dateKey}`,
+          actions: [
+            { action: "si", title: "SÍ", link: `${link}&r=si` },
+            { action: "no", title: "NO", link: `${link}&r=no` },
+          ],
+        });
+        results.push({ id: "asistencia", sent: res.sent });
+      }
+    }
+  }
+
   return results;
 }
 
