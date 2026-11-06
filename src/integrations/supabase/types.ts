@@ -50,6 +50,21 @@ export type Database = {
         }
         Relationships: []
       }
+      attendance_prompts: {
+        Row: {
+          event_date: string
+          sent_at: string
+        }
+        Insert: {
+          event_date: string
+          sent_at?: string
+        }
+        Update: {
+          event_date?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       availability_polls: {
         Row: {
           active: boolean
@@ -1210,6 +1225,10 @@ export type Database = {
       }
       is_admin: { Args: { _uid: string }; Returns: boolean }
       reserve_physio_slot: { Args: { _slot_id: string }; Returns: string }
+      self_report_attendance: {
+        Args: { _date: string; _present: boolean }
+        Returns: string
+      }
       weekly_vote_winners: {
         Args: { _week_start?: string }
         Returns: {

@@ -8,6 +8,13 @@
       "when": 1792681050101,
       "tag": "0000_extend_polls_custom_surveys",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793959039425,
+      "tag": "0001_attendance_self_report",
+      "breakpoints": true
     }
   ]
 }
