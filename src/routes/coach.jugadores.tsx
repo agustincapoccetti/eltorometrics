@@ -87,16 +87,22 @@ function AttendanceExport({ athletes }: { athletes: any[] }) {
       toast.error("No hay jugadores para ese filtro");
       return null;
     }
-    const { data, error } = await supabase
-      .from("attendance")
-      .select("user_id, attendance_date, present, source")
-      .gte("attendance_date", from)
-      .lte("attendance_date", to);
-    if (error) {
-      toast.error(error.message);
-      return null;
+    const rows: any[] = [];
+    for (let off = 0; ; off += 1000) {
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("id, user_id, attendance_date, present, source")
+        .gte("attendance_date", from)
+        .lte("attendance_date", to)
+        .order("attendance_date").order("id")
+        .range(off, off + 999);
+      if (error) {
+        toast.error(error.message);
+        return null;
+      }
+      rows.push(...(data ?? []));
+      if (!data || data.length < 1000) break;
     }
-    const rows = data ?? [];
 
     // Meses presentes en el rango
     const months: string[] = [];
