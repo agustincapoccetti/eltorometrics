@@ -206,6 +206,7 @@ export function PanelSummary() {
         )}
       </Card>
     </section>
+    )}
     </>
   );
 }
