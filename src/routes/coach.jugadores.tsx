@@ -398,9 +398,9 @@ function CoachPlayers() {
       if (error) { toast.error(error.message); return; }
       setAttendance((cur) => cur.map((a) => a.id === existing.id ? { ...a, present, source: "manual" } : a));
     } else {
-      const { data, error } = await supabase.from("attendance").insert({ user_id: uid, attendance_date: selectedDate, present, source: "manual", created_by: user!.id }).select().single();
-      if (error) { toast.error(error.message); return; }
-      setAttendance((cur) => [...cur, data]);
+      const { data, error } = await supabase.from("attendance").upsert({ user_id: uid, attendance_date: selectedDate, present, source: "manual", created_by: user!.id }, { onConflict: "user_id,attendance_date" }).select().single();
+      if (error) { toast.error("No se pudo guardar el presente. Intenta de nuevo."); return; }
+      setAttendance((cur) => [...cur.filter((a) => !(a.user_id === uid && a.attendance_date === selectedDate)), data]);
     }
   }
 
