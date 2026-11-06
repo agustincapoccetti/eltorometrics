@@ -329,8 +329,17 @@ function CoachPlayers() {
     setAthletes((profs ?? []).sort((a, b) => lastNameOf(a).localeCompare(lastNameOf(b))));
 
     const yearStart = isoDate(startOfYear());
-    const { data: atts } = await supabase.from("attendance").select("*").gte("attendance_date", yearStart);
-    setAttendance(atts ?? []);
+    const atts: any[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data: page } = await supabase.from("attendance")
+        .select("id, user_id, attendance_date, present, source")
+        .gte("attendance_date", yearStart)
+        .order("attendance_date").order("id")
+        .range(from, from + 999);
+      atts.push(...(page ?? []));
+      if (!page || page.length < 1000) break;
+    }
+    setAttendance(atts);
 
     const { data: mps } = await supabase.from("match_participations").select("user_id, minutes_played");
     const m: Record<string, number> = {};
