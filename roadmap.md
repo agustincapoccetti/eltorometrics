@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Mejorar cargas de Gym: selector semanal, ejercicio reutilizable, referencia anterior, edición e historial; pruebas de agrupación y referencia correctas
+- [ ] Verificar guardado y edición de Gym con una cuenta de jugador conectada — no hay sesión disponible para la prueba
+
 - [x] Encuesta personalizable en Planificación: varias preguntas, respuestas múltiples, exportación y gráficos; conservar encuestas anteriores
 - [ ] Verificar creación, respuesta y exportación de Encuesta con una cuenta conectada — permiso para la prueba rechazado
 
