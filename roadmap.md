@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Mejorar cargas de Gym: selector semanal, ejercicio reutilizable, referencia anterior, edición e historial; verificar guardado
+
 - [x] Encuesta personalizable en Planificación: varias preguntas, respuestas múltiples, exportación y gráficos; conservar encuestas anteriores
 - [ ] Verificar creación, respuesta y exportación de Encuesta con una cuenta conectada — permiso para la prueba rechazado
 
